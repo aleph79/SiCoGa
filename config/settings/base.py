@@ -26,7 +26,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # third-party
     "simple_history",
-    # local apps (registered as Tasks add them)
+    # local apps
+    "apps.core",
 ]
 
 MIDDLEWARE = [
