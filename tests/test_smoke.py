@@ -1,4 +1,5 @@
 """Smoke tests for project bootstrap."""
+
 import django
 
 

@@ -1,4 +1,5 @@
 """Base settings for SiCoGa. Inherited by dev and prod."""
+
 from pathlib import Path
 
 import environ
