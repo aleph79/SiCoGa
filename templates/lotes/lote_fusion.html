@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Fusionar lote en {{ destino.folio }}{% endblock %}
+{% block content %}
+<div class="ph">
+  <div><div class="ptitle">Fusionar otro lote en {{ destino.folio }}</div><div class="psub">Las cabezas del origen se sumarán aquí; el lote origen quedará inactivo.</div></div>
+</div>
+
+<div class="card" style="margin-bottom:14px;">
+  <div class="ct">📋 Lote destino</div>
+  <div class="g3">
+    <div><strong>Folio:</strong> {{ destino.folio }}</div>
+    <div><strong>Corral:</strong> {{ destino.corral.clave }}</div>
+    <div><strong>Cabezas actuales:</strong> {{ destino.cabezas_iniciales }}</div>
+    <div><strong>Tipo:</strong> {{ destino.tipo_ganado.nombre }}</div>
+    <div><strong>Origen:</strong> {{ destino.tipo_origen.nombre|default:"—" }}</div>
+    <div><strong>Fecha inicio:</strong> {{ destino.fecha_inicio|date:"Y-m-d" }}</div>
+  </div>
+</div>
+
+<div class="card" style="max-width:560px;">
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <div style="margin-bottom:12px;">
+        <label class="klbl">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}<div class="ai err">{{ field.errors|join:", " }}</div>{% endif %}
+        {% if field.help_text %}<div class="psub">{{ field.help_text }}</div>{% endif %}
+      </div>
+    {% endfor %}
+    <button type="submit" class="btn bp">Fusionar</button>
+    <a href="{% url 'lotes:lote_detail' destino.pk %}" class="btn bo">Cancelar</a>
+  </form>
+</div>
+{% endblock %}

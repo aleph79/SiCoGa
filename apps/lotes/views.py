@@ -8,7 +8,7 @@ from django.views.generic import CreateView, DetailView, ListView, UpdateView, V
 
 from apps.core.mixins import CatalogoMixin
 
-from .forms import LoteForm
+from .forms import LoteForm, LoteFusionForm
 from .models import Lote
 
 
@@ -115,3 +115,28 @@ class PreviewProyeccionView(LoginRequiredMixin, View):
             fecha_inicio=_date(request.POST.get("fecha_inicio")),
         )
         return render(request, "lotes/_proyeccion_preview.html", {"lote": lote})
+
+
+class LoteFusionView(CatalogoMixin, View):
+    permission_required = "lotes.add_lotefusion"
+
+    def get(self, request, pk):
+        destino = get_object_or_404(Lote, pk=pk, activo=True)
+        form = LoteFusionForm(destino=destino)
+        return render(request, "lotes/lote_fusion.html", {"destino": destino, "form": form})
+
+    def post(self, request, pk):
+        from .services import fusionar
+
+        destino = get_object_or_404(Lote, pk=pk, activo=True)
+        form = LoteFusionForm(request.POST, destino=destino)
+        if not form.is_valid():
+            return render(request, "lotes/lote_fusion.html", {"destino": destino, "form": form})
+        fusionar(
+            destino=destino,
+            origen=form.cleaned_data["lote_origen"],
+            fecha_fusion=form.cleaned_data["fecha_fusion"],
+            notas=form.cleaned_data["notas"],
+        )
+        messages.success(request, f"Lote {destino.folio} actualizado por fusión.")
+        return redirect("lotes:lote_detail", pk=destino.pk)

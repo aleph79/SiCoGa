@@ -3,7 +3,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 
-from .models import Lote
+from .models import Lote, LoteFusion  # noqa: F401
 
 
 class LoteForm(forms.ModelForm):
@@ -56,3 +56,27 @@ class LoteForm(forms.ModelForm):
                 }
             )
         return cd
+
+
+class LoteFusionForm(forms.Form):
+    lote_origen = forms.ModelChoiceField(
+        queryset=Lote.objects.none(),
+        label="Lote a fusionar (origen)",
+        help_text="Sus cabezas se moverán a este lote y el origen quedará inactivo.",
+    )
+    fecha_fusion = forms.DateField(
+        widget=forms.DateInput(attrs={"class": "input", "type": "date"}),
+        label="Fecha de fusión",
+    )
+    notas = forms.CharField(
+        widget=forms.Textarea(attrs={"class": "input", "rows": 3}),
+        required=False,
+        label="Notas",
+    )
+
+    def __init__(self, *args, destino=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if destino:
+            self.fields["lote_origen"].queryset = Lote.objects.filter(activo=True).exclude(
+                pk=destino.pk
+            )

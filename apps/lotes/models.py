@@ -6,7 +6,7 @@ from django.db import models
 from simple_history.models import HistoricalRecords
 
 from apps.catalogos.models import Corral, Proveedor, TipoGanado, TipoOrigen
-from apps.core.models import AuditableModel
+from apps.core.models import AuditableModel, TimeStampedModel
 
 
 class Lote(AuditableModel):
@@ -170,3 +170,29 @@ class Lote(AuditableModel):
         if not self.programa or not self.fecha_proyectada_venta:
             return None
         return self.fecha_proyectada_venta - timedelta(days=self.programa.dias_zilpaterol)
+
+
+class LoteFusion(TimeStampedModel):
+    """Una fila por cada vez que un lote 'origen' se fusiona en un lote 'destino'."""
+
+    lote_destino = models.ForeignKey(
+        Lote, on_delete=models.PROTECT, related_name="fusiones_recibidas"
+    )
+    lote_origen = models.ForeignKey(Lote, on_delete=models.PROTECT, related_name="fusiones_dadas")
+    cabezas_movidas = models.PositiveIntegerField()
+    fecha_fusion = models.DateField()
+    notas = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name = "Fusión de lote"
+        verbose_name_plural = "Fusiones de lote"
+        ordering = ["-fecha_fusion", "-created_at"]
+        constraints = [
+            models.CheckConstraint(
+                condition=~models.Q(lote_destino=models.F("lote_origen")),
+                name="fusion_destino_distinto_de_origen",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.lote_origen.folio} → {self.lote_destino.folio} ({self.cabezas_movidas} cab.)"

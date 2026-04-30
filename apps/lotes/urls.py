@@ -15,4 +15,5 @@ urlpatterns = [
     path("<int:pk>/", views.LoteDetailView.as_view(), name="lote_detail"),
     path("<int:pk>/editar/", views.LoteUpdateView.as_view(), name="lote_update"),
     path("<int:pk>/eliminar/", views.LoteDeleteView.as_view(), name="lote_delete"),
+    path("<int:pk>/fusionar/", views.LoteFusionView.as_view(), name="lote_fusionar"),
 ]
