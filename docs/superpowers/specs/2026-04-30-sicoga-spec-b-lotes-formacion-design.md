@@ -1,7 +1,7 @@
 # SiCoGa — Spec B: Lotes y Formación (Diseño)
 
 **Fecha:** 2026-04-30
-**Estado:** 🚧 **DRAFT v2 — incluye operación de Fusión por feedback Chamizal · pendiente de OK final del cliente**
+**Estado:** ✅ **ENTREGADO 2026-04-30** — 20 tasks completados, 132 tests, cobertura 95.40% en `apps.lotes`. Pendiente smoke manual con Chamizal.
 **Cliente:** Chamizal Camperos
 **Proveedor:** SIWEB (Soluciones Informáticas Web S.A. de C.V.)
 **Repositorio:** https://github.com/aleph79/SiCoGa

@@ -69,6 +69,7 @@ open htmlcov/index.html
 - `apps/core/` — modelos abstractos y mixins compartidos.
 - `apps/accounts/` — autenticación, usuarios, perfil, roles.
 - `apps/catalogos/` — catálogos del sistema (Tipos, Corral, Proveedor, Programa de Reimplantes).
+- `apps/lotes/` — Lotes (entrada y formación) y operación de Fusión.
 - `templates/` — templates Django (`base.html`, `partials/`, por app).
 - `static/` — CSS y JS.
 - `docs/` — propuesta, levantamiento de requerimientos, dummy HTML, Excels base.
