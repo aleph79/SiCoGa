@@ -13,6 +13,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("apps.accounts.urls", namespace="accounts")),
     path("catalogos/", include("apps.catalogos.urls", namespace="catalogos")),
+    path("lotes/", include("apps.lotes.urls", namespace="lotes")),
     path("", HomeView.as_view(), name="dashboard-home-stub"),
 ]
 
