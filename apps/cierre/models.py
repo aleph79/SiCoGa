@@ -173,3 +173,30 @@ class Medicacion(AuditableModel):
         if cu is None:
             return None
         return cu * Decimal(self.cabezas)
+
+
+class CostoHotelComponente(AuditableModel):
+    """Componente del costo hotel (agua, mano de obra, depreciación, admin, etc.).
+
+    El costo hotel se calcula por día-animal. Cada componente puede estar
+    habilitado/deshabilitado para evitar duplicar costos que ya están en otra
+    cuenta (alimentación, medicación). El total/d-a es la suma de los habilitados.
+    """
+
+    nombre = models.CharField(max_length=80, unique=True)
+    costo_dia_animal = models.DecimalField(max_digits=8, decimal_places=2)
+    habilitado = models.BooleanField(
+        default=True,
+        help_text="Desmarcar si este componente ya se contabiliza en otra cuenta.",
+    )
+    notas = models.TextField(blank=True)
+
+    history = HistoricalRecords()
+
+    class Meta:
+        verbose_name = "Componente costo hotel"
+        verbose_name_plural = "Componentes costo hotel"
+        ordering = ["nombre"]
+
+    def __str__(self):
+        return f"{self.nombre} (${self.costo_dia_animal}/d-a)"

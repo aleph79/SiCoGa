@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Costo Hotel · Configuración{% endblock %}
+{% block content %}
+<div class="ph">
+  <div><div class="ptitle">Costo Hotel — Configuración</div><div class="psub">Componentes por día-animal · desmarca los que ya estén en otra cuenta para evitar duplicidad</div></div>
+  <div class="bg">
+    {% if perms.cierre.add_costohotelcomponente %}<a href="{% url 'cierre:registrar_costo_hotel' %}" class="btn bp">+ Componente</a>{% endif %}
+  </div>
+</div>
+<div class="card">
+  <table class="tbl">
+    <thead><tr><th>Componente</th><th>Costo/d-a</th><th>Habilitado</th><th>Notas</th><th></th></tr></thead>
+    <tbody>
+      {% for c in componentes %}
+        <tr>
+          <td>{{ c.nombre }}</td>
+          <td class="mn">${{ c.costo_dia_animal }}</td>
+          <td>{% if c.habilitado %}<span class="pill pg">Sí</span>{% else %}<span class="pill pr">No</span>{% endif %}</td>
+          <td>{{ c.notas|default:"—"|truncatechars:60 }}</td>
+          <td>{% if perms.cierre.change_costohotelcomponente %}<a href="{% url 'cierre:editar_costo_hotel' c.pk %}" class="btn bo bsm">Editar</a>{% endif %}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5" style="color:var(--txd);text-align:center;">Sin componentes definidos.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div style="margin-top:14px;padding:12px;background:var(--s3);border:1px solid var(--gnd);border-radius:8px;">
+    <strong>Total habilitado: ${{ total_dia_animal|floatformat:2 }} / día-animal</strong>
+  </div>
+</div>
+{% endblock %}

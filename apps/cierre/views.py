@@ -193,3 +193,62 @@ class RegistrarMedicacionView(CatalogoMixin, CreateView):
         response = super().form_valid(form)
         messages.success(self.request, f"Medicación registrada: {self.object}")
         return response
+
+
+from django.views.generic import DetailView  # noqa: E402
+
+from .forms import CostoHotelComponenteForm  # noqa: E402
+from .models import CostoHotelComponente  # noqa: E402
+
+
+class CostoHotelConfigView(CatalogoMixin, ListView):
+    """Lista de componentes del costo hotel + total habilitado."""
+
+    template_name = "cierre/costo_hotel_config.html"
+    permission_required = "cierre.view_costohotelcomponente"
+    context_object_name = "componentes"
+
+    def get_queryset(self):
+        return CostoHotelComponente.objects.filter(activo=True).order_by("nombre")
+
+    def get_context_data(self, **kwargs):
+        from decimal import Decimal
+
+        ctx = super().get_context_data(**kwargs)
+        habilitados = self.get_queryset().filter(habilitado=True)
+        ctx["total_dia_animal"] = sum(
+            (c.costo_dia_animal for c in habilitados), start=Decimal("0")
+        )
+        return ctx
+
+
+class RegistrarCostoHotelComponenteView(CatalogoMixin, CreateView):
+    model = CostoHotelComponente
+    form_class = CostoHotelComponenteForm
+    template_name = "cierre/registrar_costo_hotel.html"
+    permission_required = "cierre.add_costohotelcomponente"
+    success_url = reverse_lazy("cierre:costo_hotel_config")
+
+
+class EditarCostoHotelComponenteView(CatalogoMixin, UpdateView):
+    model = CostoHotelComponente
+    form_class = CostoHotelComponenteForm
+    template_name = "cierre/registrar_costo_hotel.html"
+    permission_required = "cierre.change_costohotelcomponente"
+    success_url = reverse_lazy("cierre:costo_hotel_config")
+
+
+class CostoHotelLoteView(CatalogoMixin, DetailView):
+    """Vista por lote con el cálculo completo de días-animal y costo hotel."""
+
+    model = Lote
+    template_name = "cierre/costo_hotel_lote.html"
+    permission_required = "lotes.view_lote"
+    context_object_name = "obj"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["componentes"] = CostoHotelComponente.objects.filter(activo=True).order_by(
+            "nombre"
+        )
+        return ctx

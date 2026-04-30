@@ -34,4 +34,24 @@ urlpatterns = [
         views.RegistrarMedicacionView.as_view(),
         name="registrar_medicacion",
     ),
+    path(
+        "costo-hotel/",
+        views.CostoHotelConfigView.as_view(),
+        name="costo_hotel_config",
+    ),
+    path(
+        "costo-hotel/nuevo/",
+        views.RegistrarCostoHotelComponenteView.as_view(),
+        name="registrar_costo_hotel",
+    ),
+    path(
+        "costo-hotel/<int:pk>/editar/",
+        views.EditarCostoHotelComponenteView.as_view(),
+        name="editar_costo_hotel",
+    ),
+    path(
+        "lotes/<int:pk>/costo-hotel/",
+        views.CostoHotelLoteView.as_view(),
+        name="costo_hotel_lote",
+    ),
 ]

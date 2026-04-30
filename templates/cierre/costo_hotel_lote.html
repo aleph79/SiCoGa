@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Costo Hotel · {{ obj.folio }}{% endblock %}
+{% block content %}
+<div class="ph">
+  <div><div class="ptitle">Costo Hotel · {{ obj.folio }}</div><div class="psub">Costos indirectos por día-animal neto</div></div>
+  <div class="bg">
+    <a href="{% url 'lotes:lote_detail' obj.pk %}" class="btn bo">Volver al lote</a>
+    <a href="{% url 'cierre:costo_hotel_config' %}" class="btn bo">Configurar componentes</a>
+  </div>
+</div>
+
+<div class="g2">
+  <div class="card">
+    <div class="ct">🏨 Cálculo de días-animal — {{ obj.folio }}</div>
+    <div class="srow"><span class="sk">Fecha inicio</span><span class="sv mn">{{ obj.fecha_inicio|date:"Y-m-d" }}</span></div>
+    <div class="srow"><span class="sk">Fecha cierre</span><span class="sv mn">{{ obj.fecha_cierre|date:"Y-m-d" }}</span></div>
+    <div class="srow"><span class="sk">Días calendario</span><span class="sv mn">{{ obj.dias_calendario }}</span></div>
+    <div class="srow"><span class="sk">Cabezas iniciales</span><span class="sv mn">{{ obj.cabezas_iniciales }}</span></div>
+    <div class="srow"><span class="sk">Días animal base</span><span class="sv mn">{{ obj.dias_animal_base }}</span></div>
+    <div class="srow"><span class="sk">Descuento por muertes ({{ obj.cabezas_muertas }} cab)</span><span class="sv mn" style="color:var(--rd)">−{{ obj.dias_animal_descuento_muertes }} d-a</span></div>
+    <div class="srow"><span class="sk"><b>Días animal netos</b></span><span class="sv mn" style="color:var(--gn)"><b>{{ obj.dias_animal_netos }}</b></span></div>
+
+    <div class="stitle">Costo hotel</div>
+    <div class="srow"><span class="sk">Costo por día-animal (componentes habilitados)</span><span class="sv mn">${{ obj.costo_hotel_dia_animal|floatformat:2 }}</span></div>
+    <div class="srow"><span class="sk"><b>Total costo hotel</b></span><span class="sv mn" style="color:var(--am)"><b>${{ obj.costo_hotel_total|floatformat:2 }}</b></span></div>
+  </div>
+  <div class="card">
+    <div class="ct">⚙️ Componentes incluidos</div>
+    <table class="tbl">
+      <thead><tr><th>Componente</th><th>Costo/d-a</th><th>Estado</th></tr></thead>
+      <tbody>
+        {% for c in componentes %}
+          <tr>
+            <td>{{ c.nombre }}</td>
+            <td class="mn">${{ c.costo_dia_animal }}</td>
+            <td>{% if c.habilitado %}<span class="pill pg">Habilitado</span>{% else %}<span class="pill pr">Deshabilitado</span>{% endif %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div style="margin-top:10px;padding:10px;background:var(--amd);border:1px solid var(--am);border-radius:6px;font-size:12px;color:var(--am)">
+      ⚠️ Desmarcar componentes que ya estén en otra cuenta (alimentación, medicación) para evitar duplicidad.
+    </div>
+  </div>
+</div>
+{% endblock %}

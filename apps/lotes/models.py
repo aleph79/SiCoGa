@@ -346,6 +346,64 @@ class Lote(AuditableModel):
         except Exception:
             return Decimal("0")
 
+    # ----- Costo Hotel (Spec E.4) -----
+
+    @property
+    def fecha_cierre(self):
+        """Fecha de cierre del lote (última venta) o hoy si sigue activo."""
+        from datetime import date
+
+        try:
+            ultima = self.ventas.filter(activo=True).order_by("-fecha").first()
+        except Exception:
+            ultima = None
+        return ultima.fecha if ultima else date.today()
+
+    @property
+    def dias_calendario(self):
+        return (self.fecha_cierre - self.fecha_inicio).days + 1
+
+    @property
+    def dias_animal_base(self):
+        """días_calendario × cabezas iniciales."""
+        return self.dias_calendario * self.cabezas_iniciales
+
+    @property
+    def dias_animal_descuento_muertes(self):
+        """Cada muerte resta los días que faltaban del animal hasta el cierre."""
+        try:
+            qs = self.muertes.filter(activo=True)
+        except Exception:
+            return 0
+        descuento = 0
+        for m in qs:
+            dias_restantes = (self.fecha_cierre - m.fecha).days
+            if dias_restantes > 0:
+                descuento += dias_restantes
+        return descuento
+
+    @property
+    def dias_animal_netos(self):
+        return self.dias_animal_base - self.dias_animal_descuento_muertes
+
+    @property
+    def costo_hotel_dia_animal(self):
+        """Suma de costo/d-a de los componentes habilitados."""
+        from decimal import Decimal
+
+        from apps.cierre.models import CostoHotelComponente
+
+        total = CostoHotelComponente.objects.filter(
+            activo=True, habilitado=True
+        ).aggregate(s=models.Sum("costo_dia_animal"))["s"]
+        return total or Decimal("0")
+
+    @property
+    def costo_hotel_total(self):
+        from decimal import Decimal
+
+        return Decimal(self.dias_animal_netos) * self.costo_hotel_dia_animal
+
     @property
     def etapa(self):
         """Recepción → F1 → Transición → F3 → Zilpaterol → Post-Zilpaterol."""

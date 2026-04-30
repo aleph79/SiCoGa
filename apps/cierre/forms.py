@@ -113,3 +113,17 @@ class MedicacionForm(forms.ModelForm):
             "arete": forms.TextInput(attrs={"class": "input"}),
             "notas": forms.Textarea(attrs={"class": "input", "rows": 2}),
         }
+
+
+from .models import CostoHotelComponente  # noqa: E402
+
+
+class CostoHotelComponenteForm(forms.ModelForm):
+    class Meta:
+        model = CostoHotelComponente
+        fields = ["nombre", "costo_dia_animal", "habilitado", "notas", "activo"]
+        widgets = {
+            "nombre": forms.TextInput(attrs={"class": "input"}),
+            "costo_dia_animal": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
+            "notas": forms.Textarea(attrs={"class": "input", "rows": 2}),
+        }

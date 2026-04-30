@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Editar{% else %}Nuevo{% endif %} componente Costo Hotel{% endblock %}
+{% block content %}
+<div class="ph"><div><div class="ptitle">{% if object %}Editar{% else %}Nuevo{% endif %} componente</div></div></div>
+<div class="card" style="max-width:560px;">
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <div style="margin-bottom:12px;">
+        <label class="klbl">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}<div class="ai err">{{ field.errors|join:", " }}</div>{% endif %}
+        {% if field.help_text %}<div class="psub">{{ field.help_text }}</div>{% endif %}
+      </div>
+    {% endfor %}
+    <button type="submit" class="btn bp">Guardar</button>
+    <a href="{% url 'cierre:costo_hotel_config' %}" class="btn bo">Cancelar</a>
+  </form>
+</div>
+{% endblock %}
