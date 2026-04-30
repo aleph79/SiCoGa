@@ -169,7 +169,13 @@ DATABASE_URL=mysql://sicoga_app:LA_PASSWORD_QUE_ASIGNASTE@127.0.0.1:3306/sicoga_
 ADMIN_EMAIL=zgalindo@siwebmx.com
 ```
 
-> **Importante:** SiCoGa usa `DATABASE_URL` como una sola variable (no `DB_NAME` / `DB_USER` / `DB_PASSWORD` separados como ContaAI). Si la contraseña tiene caracteres especiales (`@`, `:`, `/`), URL-encodéalos.
+> **Importante:** SiCoGa usa `DATABASE_URL` como una sola variable (no `DB_NAME` / `DB_USER` / `DB_PASSWORD` separados como ContaAI). Si la contraseña tiene caracteres especiales (`@`, `:`, `/`, `,`, `?`, `#`, `&`, espacios, etc.), URL-encodéalos. Mapeo común: `,` → `%2C`, `@` → `%40`, `:` → `%3A`, `/` → `%2F`, `#` → `%23`, ` ` → `%20`.
+>
+> Encoder rápido (te imprime la versión escapada lista para pegar):
+>
+> ```bash
+> python3 -c "from urllib.parse import quote; print(quote(input('Contraseña: '), safe=''))"
+> ```
 
 ---
 
