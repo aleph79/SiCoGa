@@ -1,4 +1,4 @@
-"""Global pytest fixtures."""
+"""Project-root pytest fixtures (cover both `tests/` and `apps/*/tests/`)."""
 
 import pytest
 

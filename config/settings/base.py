@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "simple_history",
     # local apps
     "apps.core",
+    "apps.accounts",
 ]
 
 MIDDLEWARE = [
@@ -94,3 +95,5 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "dashboard:home"
 LOGOUT_REDIRECT_URL = "accounts:login"
+
+AUTH_USER_MODEL = "accounts.User"
