@@ -330,6 +330,12 @@ Contenido del `.htaccess`:
 
 ```apache
 # SiCoGa Django proxy a Gunicorn (puerto 8022)
+
+# Apaga la búsqueda de index.html/index.php en el docroot.
+# Sin esto, Apache intenta servir un archivo índice antes del rewrite y
+# devuelve 403 (o listing) en la raíz `/`.
+DirectoryIndex disabled
+
 RewriteEngine On
 
 # Pasar el esquema HTTPS al backend (requerido por SECURE_PROXY_SSL_HEADER en prod.py)
