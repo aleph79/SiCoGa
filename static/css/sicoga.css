@@ -172,3 +172,8 @@ select option{background:var(--s2);}
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:3px;}
+
+/* AUTH SHELL — login / password reset sin sidebar */
+.auth-shell{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.auth-shell .ph{margin-bottom:0;}
+.auth-shell .card{width:100%;max-width:380px;}
