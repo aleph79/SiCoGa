@@ -84,3 +84,39 @@ class Lote(AuditableModel):
                     f"Ya existe un lote activo en el corral '{self.corral.clave}'."
                 )
         super().save(*args, **kwargs)
+
+    # ----- Resolución del programa aplicable -----
+
+    @property
+    def programa(self):
+        from apps.catalogos.models import ProgramaReimplante
+
+        return ProgramaReimplante.resolver(
+            self.tipo_ganado, self.tipo_origen, self.peso_inicial_promedio
+        )
+
+    @property
+    def gdp_efectiva(self):
+        if self.gdp_esperada is not None:
+            return self.gdp_esperada
+        return self.programa.gdp_esperada if self.programa else None
+
+    @property
+    def peso_objetivo_efectivo(self):
+        if self.peso_salida_objetivo is not None:
+            return self.peso_salida_objetivo
+        return self.programa.peso_objetivo_salida if self.programa else None
+
+    @property
+    def kg_por_hacer(self):
+        if self.peso_objetivo_efectivo is None:
+            return None
+        return self.peso_objetivo_efectivo - self.peso_inicial_promedio
+
+    @property
+    def dias_engorda_proyectados(self):
+        gdp = self.gdp_efectiva
+        kg = self.kg_por_hacer
+        if not gdp or kg is None or gdp <= 0:
+            return None
+        return int(kg / gdp)
