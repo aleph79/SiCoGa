@@ -322,41 +322,52 @@ nginx -t && /scripts/restartsrv_nginx
 Identifica el docroot de `sicoga.com` (normalmente `/home/sicoga/public_html/` si es el dominio principal de la cuenta cPanel; si es addon o subdominio, revísalo en WHM → List Accounts):
 
 ```bash
-DOCROOT=/home/sicoga/public_html
-nano $DOCROOT/.htaccess
-```
-
-Contenido del `.htaccess`:
-
-```apache
-# SiCoGa Django proxy a Gunicorn (puerto 8022)
-
-# Apaga la búsqueda de index.html/index.php en el docroot.
-# Sin esto, Apache intenta servir un archivo índice antes del rewrite y
-# devuelve 403 (o listing) en la raíz `/`.
+cat > /home/sicoga/public_html/.htaccess <<'EOF'
 DirectoryIndex disabled
-
+Options -Indexes
 RewriteEngine On
-
-# Pasar el esquema HTTPS al backend (requerido por SECURE_PROXY_SSL_HEADER en prod.py)
 RequestHeader set X-Forwarded-Proto "https"
+RewriteRule ^ http://127.0.0.1:8022%{REQUEST_URI} [P,L]
+EOF
 
-# Proxy de todo a Gunicorn
-RewriteRule ^(.*)$ http://127.0.0.1:8022/$1 [P,L]
-```
-
-Permisos:
-
-```bash
 chown sicoga:sicoga /home/sicoga/public_html/.htaccess
 chmod 644 /home/sicoga/public_html/.htaccess
 ```
 
+Por línea:
+- `DirectoryIndex disabled` + `Options -Indexes` → matan el listado de directorio que Apache intenta servir cuando el docroot está vacío.
+- `RewriteRule ^ ... %{REQUEST_URI}` con `^` (en lugar de `^(.*)$`) y `%{REQUEST_URI}` es más robusto: captura `/` además de cualquier subpath.
+- `X-Forwarded-Proto "https"` es **crítico**: sin él, Django no detecta HTTPS y el `SECURE_SSL_REDIRECT=True` de `prod.py` causa loop infinito de redirección.
+
 Sin reinicio de Apache — `.htaccess` se relee en cada request.
+
+### 8.3 Vhost include para evitar X-Forwarded-Host duplicado
+
+`mod_proxy_http` añade su propio `X-Forwarded-Host` y `X-Forwarded-For` al request, **acumulando** sobre los que ya envió nginx. Eso produce headers como `X-Forwarded-Host: sicoga.com, sicoga.com` que Django rechaza con `DisallowedHost` (400). La directiva `ProxyAddHeaders Off` apaga ese auto-add de Apache, pero **no funciona en `.htaccess`** — hay que ponerla en el vhost. Los includes de cPanel sobreviven a regeneraciones:
+
+```bash
+mkdir -p /etc/apache2/conf.d/userdata/ssl/2_4/sicoga/sicoga.com
+mkdir -p /etc/apache2/conf.d/userdata/std/2_4/sicoga/sicoga.com
+
+echo "ProxyAddHeaders Off" > /etc/apache2/conf.d/userdata/ssl/2_4/sicoga/sicoga.com/proxy_headers.conf
+echo "ProxyAddHeaders Off" > /etc/apache2/conf.d/userdata/std/2_4/sicoga/sicoga.com/proxy_headers.conf
+
+/scripts/ensure_vhost_includes --user=sicoga
+/scripts/restartsrv_httpd
+```
 
 > Requisitos en Apache (cPanel los trae habilitados por default): `mod_rewrite`, `mod_proxy`, `mod_proxy_http`, `mod_headers`. Verifica con `apachectl -M | grep -E 'rewrite|proxy|headers'` si dudas.
 
-> El header `X-Forwarded-Proto` es **crítico**: sin él, Django no detecta HTTPS y el `SECURE_SSL_REDIRECT=True` de `prod.py` causa loop infinito de redirección.
+### 8.4 Verificar que la cadena de proxy funciona
+
+```bash
+curl -kI https://sicoga.com/
+curl -kI https://sicoga.com/accounts/login/
+```
+
+Esperado:
+- `/` → `HTTP/2 302` con `Location: /accounts/login/?next=/` (es `LoginRequiredMixin` haciendo su trabajo).
+- `/accounts/login/` → `HTTP/2 200` y un `set-cookie: csrftoken=...`
 
 ---
 
