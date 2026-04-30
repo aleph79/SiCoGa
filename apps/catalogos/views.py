@@ -7,8 +7,15 @@ from django.views.generic import CreateView, DetailView, ListView, UpdateView, V
 
 from apps.core.mixins import CatalogoMixin
 
-from .forms import CorralForm, ProveedorForm, TipoCorralForm, TipoGanadoForm, TipoOrigenForm
-from .models import Corral, Proveedor, TipoCorral, TipoGanado, TipoOrigen
+from .forms import (
+    CorralForm,
+    ProgramaReimplanteForm,
+    ProveedorForm,
+    TipoCorralForm,
+    TipoGanadoForm,
+    TipoOrigenForm,
+)
+from .models import Corral, ProgramaReimplante, Proveedor, TipoCorral, TipoGanado, TipoOrigen
 
 
 # ----- TipoCorral -----
@@ -289,3 +296,77 @@ class CorralDeleteView(CatalogoMixin, View):
         obj.save()
         messages.success(request, f"'{obj}' marcado como inactivo.")
         return redirect("catalogos:corral_list")
+
+
+# ----- ProgramaReimplante -----
+class ProgramaReimplanteListView(CatalogoMixin, ListView):
+    model = ProgramaReimplante
+    template_name = "catalogos/programareimplante_list.html"
+    permission_required = "catalogos.view_programareimplante"
+    context_object_name = "objetos"
+    paginate_by = 50
+
+    def get_queryset(self):
+        qs = super().get_queryset().select_related("tipo_ganado", "tipo_origen")
+        if self.request.GET.get("ver") != "todos":
+            qs = qs.filter(activo=True)
+        if tg := self.request.GET.get("tipo_ganado"):
+            qs = qs.filter(tipo_ganado_id=tg)
+        if to := self.request.GET.get("tipo_origen"):
+            if to == "null":
+                qs = qs.filter(tipo_origen__isnull=True)
+            else:
+                qs = qs.filter(tipo_origen_id=to)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["tipos_ganado"] = TipoGanado.objects.filter(activo=True)
+        ctx["tipos_origen"] = TipoOrigen.objects.filter(activo=True)
+        ctx["filtros"] = {
+            "tipo_ganado": self.request.GET.get("tipo_ganado", ""),
+            "tipo_origen": self.request.GET.get("tipo_origen", ""),
+        }
+        return ctx
+
+
+class ProgramaReimplanteCreateView(CatalogoMixin, CreateView):
+    model = ProgramaReimplante
+    form_class = ProgramaReimplanteForm
+    template_name = "catalogos/programareimplante_form.html"
+    permission_required = "catalogos.add_programareimplante"
+    success_url = reverse_lazy("catalogos:programareimplante_list")
+
+
+class ProgramaReimplanteUpdateView(CatalogoMixin, UpdateView):
+    model = ProgramaReimplante
+    form_class = ProgramaReimplanteForm
+    template_name = "catalogos/programareimplante_form.html"
+    permission_required = "catalogos.change_programareimplante"
+    success_url = reverse_lazy("catalogos:programareimplante_list")
+
+
+class ProgramaReimplanteDetailView(CatalogoMixin, DetailView):
+    model = ProgramaReimplante
+    template_name = "catalogos/programareimplante_detail.html"
+    permission_required = "catalogos.view_programareimplante"
+    context_object_name = "obj"
+
+
+class ProgramaReimplanteDeleteView(CatalogoMixin, View):
+    permission_required = "catalogos.delete_programareimplante"
+
+    def get(self, request, pk):
+        obj = get_object_or_404(ProgramaReimplante, pk=pk)
+        return render(
+            request,
+            "catalogos/programareimplante_confirm_delete.html",
+            {"object": obj, "cancel_url": reverse_lazy("catalogos:programareimplante_list")},
+        )
+
+    def post(self, request, pk):
+        obj = get_object_or_404(ProgramaReimplante, pk=pk)
+        obj.activo = False
+        obj.save()
+        messages.success(request, f"'{obj}' marcado como inactivo.")
+        return redirect("catalogos:programareimplante_list")

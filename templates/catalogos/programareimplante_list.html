@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Programa de Reimplantes{% endblock %}
+{% block content %}
+<div class="ph">
+  <div><div class="ptitle">Programa de Reimplantes</div><div class="psub">Motor de cálculo del sistema</div></div>
+  <div class="bg">
+    {% if perms.catalogos.add_programareimplante %}<a href="{% url 'catalogos:programareimplante_create' %}" class="btn bp">+ Nuevo</a>{% endif %}
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:14px;">
+  <form method="get" hx-get="{% url 'catalogos:programareimplante_list' %}" hx-target="#tabla-programa" hx-trigger="change">
+    <div class="bg">
+      <select name="tipo_ganado" class="input" style="padding:7px;">
+        <option value="">Todos los tipos</option>
+        {% for t in tipos_ganado %}<option value="{{ t.pk }}" {% if filtros.tipo_ganado == t.pk|stringformat:'s' %}selected{% endif %}>{{ t.nombre }}</option>{% endfor %}
+      </select>
+      <select name="tipo_origen" class="input" style="padding:7px;">
+        <option value="">Cualquier origen</option>
+        <option value="null" {% if filtros.tipo_origen == 'null' %}selected{% endif %}>Sin origen (vacas)</option>
+        {% for t in tipos_origen %}<option value="{{ t.pk }}" {% if filtros.tipo_origen == t.pk|stringformat:'s' %}selected{% endif %}>{{ t.nombre }}</option>{% endfor %}
+      </select>
+    </div>
+  </form>
+</div>
+
+<div class="card" id="tabla-programa">
+  <table class="tbl">
+    <thead><tr>
+      <th>Tipo</th><th>Origen</th><th>Rango (kg)</th><th>GDP</th>
+      <th>P. salida</th><th>Días</th><th>Estado</th><th></th>
+    </tr></thead>
+    <tbody>
+      {% for o in objetos %}
+        <tr>
+          <td>{{ o.tipo_ganado.nombre }}</td>
+          <td>{{ o.tipo_origen.nombre|default:"—" }}</td>
+          <td class="mn">{{ o.peso_min }} – {{ o.peso_max }}</td>
+          <td class="mn">{{ o.gdp_esperada }}</td>
+          <td class="mn">{{ o.peso_objetivo_salida }}</td>
+          <td class="mn">{{ o.dias_estancia }}</td>
+          <td><span class="pill {% if o.activo %}pg{% else %}pr{% endif %}">{% if o.activo %}Activo{% else %}Inactivo{% endif %}</span></td>
+          <td>
+            {% if perms.catalogos.change_programareimplante %}<a href="{% url 'catalogos:programareimplante_update' o.pk %}" class="btn bo bsm">Editar</a>{% endif %}
+            {% if perms.catalogos.delete_programareimplante and o.activo %}<a href="{% url 'catalogos:programareimplante_delete' o.pk %}" class="btn bo bsm">Eliminar</a>{% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="8" style="color:var(--txd);text-align:center;">Sin registros con esos filtros.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "partials/_pagination.html" %}
+{% endblock %}

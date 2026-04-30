@@ -4,7 +4,7 @@ from django.contrib import admin
 
 from simple_history.admin import SimpleHistoryAdmin
 
-from .models import Corral, Proveedor, TipoCorral, TipoGanado, TipoOrigen
+from .models import Corral, ProgramaReimplante, Proveedor, TipoCorral, TipoGanado, TipoOrigen
 
 
 @admin.register(TipoCorral)
@@ -40,3 +40,18 @@ class CorralAdmin(SimpleHistoryAdmin):
     list_display = ("clave", "nombre", "tipo_corral", "capacidad_maxima", "activo")
     list_filter = ("activo", "tipo_corral")
     search_fields = ("clave", "nombre")
+
+
+@admin.register(ProgramaReimplante)
+class ProgramaReimplanteAdmin(SimpleHistoryAdmin):
+    list_display = (
+        "tipo_ganado",
+        "tipo_origen",
+        "peso_min",
+        "peso_max",
+        "gdp_esperada",
+        "peso_objetivo_salida",
+        "activo",
+    )
+    list_filter = ("tipo_ganado", "tipo_origen", "activo")
+    search_fields = ("implante_inicial", "reimplante_1")

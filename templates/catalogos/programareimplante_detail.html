@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="ph"><div class="ptitle">{{ obj }}</div></div>
+<div class="card">
+  <div class="g3">
+    <div><strong>GDP esperada:</strong> {{ obj.gdp_esperada }}</div>
+    <div><strong>Peso objetivo:</strong> {{ obj.peso_objetivo_salida }}</div>
+    <div><strong>Días estancia:</strong> {{ obj.dias_estancia }}</div>
+    <div><strong>Implante inicial:</strong> {{ obj.implante_inicial|default:"—" }}</div>
+    <div><strong>1er reimplante:</strong> {{ obj.reimplante_1|default:"—" }}</div>
+    <div><strong>2do reimplante:</strong> {{ obj.reimplante_2|default:"—" }}</div>
+    <div><strong>Días F1:</strong> {{ obj.dias_f1 }}</div>
+    <div><strong>Días transición:</strong> {{ obj.dias_transicion }}</div>
+    <div><strong>Días Zilpaterol:</strong> {{ obj.dias_zilpaterol }}</div>
+  </div>
+  <div style="margin-top:14px;">
+    <a href="{% url 'catalogos:programareimplante_update' obj.pk %}" class="btn bp">Editar</a>
+    <a href="{% url 'catalogos:programareimplante_list' %}" class="btn bo">Volver</a>
+  </div>
+</div>
+{% endblock %}

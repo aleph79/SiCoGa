@@ -107,4 +107,30 @@ urlpatterns = [
         views.CorralDeleteView.as_view(),
         name="corral_delete",
     ),
+    # ProgramaReimplante
+    path(
+        "programa-reimplantes/",
+        views.ProgramaReimplanteListView.as_view(),
+        name="programareimplante_list",
+    ),
+    path(
+        "programa-reimplantes/nuevo/",
+        views.ProgramaReimplanteCreateView.as_view(),
+        name="programareimplante_create",
+    ),
+    path(
+        "programa-reimplantes/<int:pk>/",
+        views.ProgramaReimplanteDetailView.as_view(),
+        name="programareimplante_detail",
+    ),
+    path(
+        "programa-reimplantes/<int:pk>/editar/",
+        views.ProgramaReimplanteUpdateView.as_view(),
+        name="programareimplante_update",
+    ),
+    path(
+        "programa-reimplantes/<int:pk>/eliminar/",
+        views.ProgramaReimplanteDeleteView.as_view(),
+        name="programareimplante_delete",
+    ),
 ]
