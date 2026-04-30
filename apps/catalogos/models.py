@@ -97,6 +97,22 @@ class Corral(AuditableModel):
         return self.capacidad_maxima - self.ocupacion_actual
 
 
+class Implante(AuditableModel):
+    """Catálogo de implantes que se aplican a los lotes (Revalor-G, Component TE-200, etc.)."""
+
+    nombre = models.CharField(max_length=60, unique=True)
+    notas = models.TextField(blank=True)
+    history = HistoricalRecords()
+
+    class Meta:
+        verbose_name = "Implante"
+        verbose_name_plural = "Implantes"
+        ordering = ["nombre"]
+
+    def __str__(self):
+        return self.nombre
+
+
 class ProgramaReimplante(AuditableModel):
     """Motor de cálculo: una fila por (TipoGanado × TipoOrigen × rango de peso)."""
 

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Reimplantes{% endblock %}
+{% block content %}
+<div class="ph">
+  <div><div class="ptitle">Reimplantes</div><div class="psub">Pendientes y aplicados · semana {{ semana_actual }}</div></div>
+  <div class="bg">
+    {% if perms.operacion.add_reimplante %}<a href="{% url 'operacion:registrar_reimplante' %}" class="btn bp">+ Registrar reimplante</a>{% endif %}
+  </div>
+</div>
+
+<div class="kg k4">
+  <div class="kpi r"><div class="klbl">Pendientes esta semana</div><div class="kval">{{ kpis.pendientes_esta_sem }}</div></div>
+  <div class="kpi a"><div class="klbl">Próxima semana</div><div class="kval">{{ kpis.pendientes_proxima }}</div></div>
+  <div class="kpi g"><div class="klbl">Completados (año)</div><div class="kval">{{ kpis.completados_anio }}</div></div>
+  <div class="kpi b"><div class="klbl">Lotes en programa</div><div class="kval">{{ kpis.lotes_en_programa }}</div></div>
+</div>
+
+<div class="card" style="margin-bottom:14px;">
+  <div class="ct">💉 Reimplantes pendientes (próximas 4 semanas)</div>
+  <table class="tbl">
+    <thead><tr>
+      <th>Sem.</th><th>Corral</th><th>Lote</th><th>Tipo</th><th>Cab.</th>
+      <th>Reimpl. #</th><th>F. Proyectada</th><th>Estatus</th><th></th>
+    </tr></thead>
+    <tbody>
+      {% for p in pendientes %}
+        <tr>
+          <td class="mn">Sem {{ p.semana }}</td>
+          <td>{{ p.lote.corral.clave }}</td>
+          <td><a href="{% url 'lotes:lote_detail' p.lote.pk %}">{{ p.lote.folio }}</a></td>
+          <td>{{ p.lote.tipo_ganado.nombre }}</td>
+          <td class="mn">{{ p.lote.cabezas_iniciales }}</td>
+          <td class="mn">{{ p.numero }}{% if p.numero == 1 %}er{% else %}{% if p.numero == 2 %}do{% else %}er{% endif %}{% endif %}</td>
+          <td class="mn">{{ p.fecha_proyectada|date:"Y-m-d" }}</td>
+          <td>
+            {% if p.vencido %}<span class="pill pr">Vencido</span>
+            {% elif p.semana == semana_actual %}<span class="pill pa">Esta sem.</span>
+            {% else %}<span class="pill pb">Próximo</span>{% endif %}
+          </td>
+          <td>
+            {% if perms.operacion.add_reimplante %}
+              <a href="{% url 'operacion:registrar_reimplante' %}?lote={{ p.lote.pk }}&numero={{ p.numero }}" class="btn bp bsm">Registrar</a>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="9" style="color:var(--txd);text-align:center;">Sin reimplantes pendientes en las próximas semanas.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <div class="ct">📋 Historial reciente</div>
+  <table class="tbl">
+    <thead><tr>
+      <th>Fecha</th><th>Lote</th><th>Corral</th><th>Reimpl. #</th>
+      <th>Implante</th><th>Cabezas</th><th>Peso</th>
+    </tr></thead>
+    <tbody>
+      {% for r in historial %}
+        <tr>
+          <td class="mn">{{ r.fecha_aplicada|date:"Y-m-d" }}</td>
+          <td><a href="{% url 'lotes:lote_detail' r.lote.pk %}">{{ r.lote.folio }}</a></td>
+          <td>{{ r.lote.corral.clave }}</td>
+          <td>{{ r.get_numero_display }}</td>
+          <td>{{ r.implante.nombre }}</td>
+          <td class="mn">{{ r.cabezas_aplicadas }}</td>
+          <td class="mn">{{ r.peso_aplicado|default:"—" }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="7" style="color:var(--txd);text-align:center;">Aún no hay reimplantes registrados.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

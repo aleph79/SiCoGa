@@ -1,7 +1,8 @@
 # SiCoGa — Spec D: Submódulos Operativos (Diseño)
 
 **Fecha:** 2026-04-30
-**Estado:** 🚧 **DRAFT — pendiente de validación con Chamizal**
+**Estado:**
+- 🚧 **DRAFT** general; sub-spec D.1 (Reimplantes) ✅ **ENTREGADO 2026-04-30** — 158 tests, cobertura 87.25% en `apps.operacion`. D.2-D.4 pendientes de priorizar con Chamizal.
 **Cliente:** Chamizal Camperos
 **Spec previo:** [C — Disponibilidad](./2026-04-30-sicoga-spec-c-disponibilidad-design.md) ✅ entregado
 
