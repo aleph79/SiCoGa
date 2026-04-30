@@ -4,8 +4,9 @@
 **Estado:**
 - 🚧 **DRAFT** general
 - ✅ **E.1 Muertes y Ventas — ENTREGADO 2026-04-30**
-- ✅ **E.2 Compra / Recepción — ENTREGADO 2026-04-30** (199 tests · campos en Lote + properties merma_transito, costo_por_cabeza, costo_por_kilo)
-- ⏸ E.3 (Alimentación/Medicación), E.4 (Costo Hotel), E.5 (Cierre consolidado) pendientes
+- ✅ **E.2 Compra / Recepción — ENTREGADO 2026-04-30**
+- ✅ **E.3 Alimentación y Medicación — ENTREGADO 2026-04-30** (208 tests · catálogos Formula y Medicamento + modelos Alimentacion y Medicacion con cálculo de costos)
+- ⏸ E.4 (Costo Hotel), E.5 (Cierre consolidado) pendientes
 **Cliente:** Chamizal Camperos
 **Spec previo:** [D — Submódulos Operativos](./2026-04-30-sicoga-spec-d-submodulos-operativos-design.md) ✅ entregado
 

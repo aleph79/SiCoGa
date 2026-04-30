@@ -116,3 +116,80 @@ class CompraLoteView(CatalogoMixin, UpdateView):
         response = super().form_valid(form)
         messages.success(self.request, f"Compra/recepción guardada para {self.object.folio}")
         return response
+
+
+from .forms import AlimentacionForm, MedicacionForm  # noqa: E402
+from .models import Alimentacion, Medicacion  # noqa: E402
+
+
+class AlimentacionListView(CatalogoMixin, ListView):
+    template_name = "cierre/alimentaciones_list.html"
+    permission_required = "cierre.view_alimentacion"
+    context_object_name = "alimentaciones"
+    paginate_by = 50
+
+    def get_queryset(self):
+        return (
+            Alimentacion.objects.filter(activo=True)
+            .select_related("lote", "lote__corral", "formula")
+            .order_by("-fecha_inicio", "-created_at")
+        )
+
+
+class RegistrarAlimentacionView(CatalogoMixin, CreateView):
+    model = Alimentacion
+    form_class = AlimentacionForm
+    template_name = "cierre/registrar_alimentacion.html"
+    permission_required = "cierre.add_alimentacion"
+    success_url = reverse_lazy("cierre:alimentaciones")
+
+    def get_initial(self):
+        initial = super().get_initial()
+        lote_pk = self.request.GET.get("lote")
+        if lote_pk:
+            initial["lote"] = lote_pk
+        return initial
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, f"Alimentación registrada: {self.object}")
+        return response
+
+
+class MedicacionListView(CatalogoMixin, ListView):
+    template_name = "cierre/medicaciones_list.html"
+    permission_required = "cierre.view_medicacion"
+    context_object_name = "medicaciones"
+    paginate_by = 50
+
+    def get_queryset(self):
+        return (
+            Medicacion.objects.filter(activo=True)
+            .select_related("lote", "lote__corral", "medicamento")
+            .order_by("-fecha", "-created_at")
+        )
+
+
+class RegistrarMedicacionView(CatalogoMixin, CreateView):
+    model = Medicacion
+    form_class = MedicacionForm
+    template_name = "cierre/registrar_medicacion.html"
+    permission_required = "cierre.add_medicacion"
+    success_url = reverse_lazy("cierre:medicaciones")
+
+    def get_initial(self):
+        initial = super().get_initial()
+        lote_pk = self.request.GET.get("lote")
+        if lote_pk:
+            initial["lote"] = lote_pk
+            try:
+                lote = Lote.objects.get(pk=lote_pk, activo=True)
+                initial["cabezas"] = lote.cabezas_actuales or lote.cabezas_iniciales
+            except Lote.DoesNotExist:
+                pass
+        return initial
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, f"Medicación registrada: {self.object}")
+        return response

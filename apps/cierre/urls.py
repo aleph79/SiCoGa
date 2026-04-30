@@ -22,4 +22,16 @@ urlpatterns = [
         views.CompraLoteView.as_view(),
         name="compra_lote",
     ),
+    path("alimentaciones/", views.AlimentacionListView.as_view(), name="alimentaciones"),
+    path(
+        "alimentaciones/registrar/",
+        views.RegistrarAlimentacionView.as_view(),
+        name="registrar_alimentacion",
+    ),
+    path("medicaciones/", views.MedicacionListView.as_view(), name="medicaciones"),
+    path(
+        "medicaciones/registrar/",
+        views.RegistrarMedicacionView.as_view(),
+        name="registrar_medicacion",
+    ),
 ]

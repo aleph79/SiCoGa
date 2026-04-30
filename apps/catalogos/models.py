@@ -113,6 +113,60 @@ class Implante(AuditableModel):
         return self.nombre
 
 
+class Formula(AuditableModel):
+    """Catálogo de fórmulas alimenticias (F1, Transición, F3, F3+Zilpaterol, etc.)."""
+
+    nombre = models.CharField(max_length=60, unique=True)
+    costo_kg = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="Costo por kg ($)",
+    )
+    notas = models.TextField(blank=True)
+    history = HistoricalRecords()
+
+    class Meta:
+        verbose_name = "Fórmula"
+        verbose_name_plural = "Fórmulas"
+        ordering = ["nombre"]
+
+    def __str__(self):
+        return self.nombre
+
+
+class Medicamento(AuditableModel):
+    """Catálogo de medicamentos (Draxxin, Baytril, Ivermectina, vitaminas, etc.)."""
+
+    UNIDADES = [
+        ("ml/cab", "ml por cabeza"),
+        ("ml/kg", "ml por kg de peso"),
+        ("dosis", "dosis fija"),
+    ]
+
+    nombre = models.CharField(max_length=80, unique=True)
+    principio_activo = models.CharField(max_length=120, blank=True)
+    unidad_dosis = models.CharField(max_length=10, choices=UNIDADES, default="ml/cab")
+    costo_unitario = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Costo por unidad (ml, dosis, etc.).",
+    )
+    notas = models.TextField(blank=True)
+    history = HistoricalRecords()
+
+    class Meta:
+        verbose_name = "Medicamento"
+        verbose_name_plural = "Medicamentos"
+        ordering = ["nombre"]
+
+    def __str__(self):
+        return self.nombre
+
+
 class ProgramaReimplante(AuditableModel):
     """Motor de cálculo: una fila por (TipoGanado × TipoOrigen × rango de peso)."""
 

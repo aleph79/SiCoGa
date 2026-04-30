@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Medicación{% endblock %}
+{% block content %}
+<div class="ph">
+  <div><div class="ptitle">Medicación</div><div class="psub">Recepción / metafilaxia + hospital</div></div>
+  <div class="bg">
+    {% if perms.cierre.add_medicacion %}<a href="{% url 'cierre:registrar_medicacion' %}" class="btn bp">+ Registrar</a>{% endif %}
+  </div>
+</div>
+<div class="card">
+  <table class="tbl">
+    <thead><tr>
+      <th>Fecha</th><th>Lote</th><th>Tipo</th><th>Medicamento</th>
+      <th>Cabezas</th><th>Dosis</th><th>Costo/un</th><th>Costo total</th><th>Arete</th>
+    </tr></thead>
+    <tbody>
+      {% for m in medicaciones %}
+        <tr>
+          <td class="mn">{{ m.fecha|date:"Y-m-d" }}</td>
+          <td><a href="{% url 'lotes:lote_detail' m.lote.pk %}">{{ m.lote.folio }}</a></td>
+          <td><span class="pill {% if m.tipo == 'hospital' %}pr{% else %}pb{% endif %}">{{ m.get_tipo_display }}</span></td>
+          <td>{{ m.medicamento.nombre }}</td>
+          <td class="mn">{{ m.cabezas }}</td>
+          <td class="mn">{{ m.dosis_descripcion|default:"—" }}</td>
+          <td class="mn">${{ m.costo_unitario_efectivo|default:"—"|floatformat:2 }}</td>
+          <td class="mn" style="color:var(--am);font-weight:600;">${{ m.costo_total|default:"—"|floatformat:2 }}</td>
+          <td class="mn">{{ m.arete|default:"—" }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="9" style="color:var(--txd);text-align:center;">Aún no hay registros de medicación.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "partials/_pagination.html" %}
+{% endblock %}

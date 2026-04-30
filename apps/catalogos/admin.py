@@ -6,7 +6,9 @@ from simple_history.admin import SimpleHistoryAdmin
 
 from .models import (
     Corral,
+    Formula,
     Implante,
+    Medicamento,
     ProgramaReimplante,
     Proveedor,
     TipoCorral,
@@ -70,3 +72,17 @@ class ProgramaReimplanteAdmin(SimpleHistoryAdmin):
     )
     list_filter = ("tipo_ganado", "tipo_origen", "activo")
     search_fields = ("implante_inicial", "reimplante_1")
+
+
+@admin.register(Formula)
+class FormulaAdmin(SimpleHistoryAdmin):
+    list_display = ("nombre", "costo_kg", "activo")
+    list_filter = ("activo",)
+    search_fields = ("nombre",)
+
+
+@admin.register(Medicamento)
+class MedicamentoAdmin(SimpleHistoryAdmin):
+    list_display = ("nombre", "principio_activo", "unidad_dosis", "costo_unitario", "activo")
+    list_filter = ("activo", "unidad_dosis")
+    search_fields = ("nombre", "principio_activo")

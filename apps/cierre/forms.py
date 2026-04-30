@@ -63,3 +63,53 @@ class CompraLoteForm(forms.ModelForm):
             "kilos_recibo": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
             "costo_compra": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
         }
+
+
+from .models import Alimentacion, Medicacion  # noqa: E402
+
+
+class AlimentacionForm(forms.ModelForm):
+    class Meta:
+        model = Alimentacion
+        fields = [
+            "lote",
+            "formula",
+            "fecha_inicio",
+            "fecha_fin",
+            "kg_consumidos",
+            "costo_kg",
+            "notas",
+            "activo",
+        ]
+        widgets = {
+            "fecha_inicio": forms.DateInput(attrs={"class": "input", "type": "date"}),
+            "fecha_fin": forms.DateInput(attrs={"class": "input", "type": "date"}),
+            "kg_consumidos": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
+            "costo_kg": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
+            "notas": forms.Textarea(attrs={"class": "input", "rows": 2}),
+        }
+
+
+class MedicacionForm(forms.ModelForm):
+    class Meta:
+        model = Medicacion
+        fields = [
+            "lote",
+            "medicamento",
+            "tipo",
+            "fecha",
+            "cabezas",
+            "dosis_descripcion",
+            "costo_unitario",
+            "arete",
+            "notas",
+            "activo",
+        ]
+        widgets = {
+            "fecha": forms.DateInput(attrs={"class": "input", "type": "date"}),
+            "cabezas": forms.NumberInput(attrs={"class": "input", "min": 1}),
+            "dosis_descripcion": forms.TextInput(attrs={"class": "input"}),
+            "costo_unitario": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
+            "arete": forms.TextInput(attrs={"class": "input"}),
+            "notas": forms.Textarea(attrs={"class": "input", "rows": 2}),
+        }
