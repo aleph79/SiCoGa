@@ -17,7 +17,7 @@
 | Framework | Django 5.1 |
 | Base de datos | MySQL Community Edition (gestionada por cPanel) |
 | Gestor de procesos | systemd (`sicoga.service`) |
-| Puerto interno Gunicorn | **8030** (ContaAI ya usa 8020, no chocan) |
+| Puerto interno Gunicorn | **8022** (ContaAI ya usa 8020, no chocan) |
 | Firewall | CSF (instalado por cPanel) |
 | SSL | AutoSSL de cPanel sobre `sicoga.com` |
 
@@ -209,12 +209,12 @@ cd /home/sicoga/sicoga
 source /home/sicoga/venv_sicoga/bin/activate
 
 gunicorn \
-    --bind 127.0.0.1:8030 \
+    --bind 127.0.0.1:8022 \
     --workers 3 \
     config.wsgi:application
 ```
 
-Si aparece `Listening at: http://127.0.0.1:8030`, todo está bien. `Ctrl+C` para detener.
+Si aparece `Listening at: http://127.0.0.1:8022`, todo está bien. `Ctrl+C` para detener.
 
 ---
 
@@ -241,7 +241,7 @@ WorkingDirectory=/home/sicoga/sicoga
 Environment="PATH=/home/sicoga/venv_sicoga/bin"
 EnvironmentFile=/home/sicoga/sicoga/.env
 ExecStart=/home/sicoga/venv_sicoga/bin/gunicorn \
-    --bind 127.0.0.1:8030 \
+    --bind 127.0.0.1:8022 \
     --workers 3 \
     --timeout 120 \
     --access-logfile /home/sicoga/logs/gunicorn-access.log \
@@ -309,7 +309,7 @@ Busca el bloque `location /` dentro del primer `server {}` (el de `sicoga.com`) 
 
 ```nginx
 location / {
-    proxy_pass http://127.0.0.1:8030;
+    proxy_pass http://127.0.0.1:8022;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -341,7 +341,7 @@ chmod -R 755 /home/sicoga/sicoga
 systemctl status sicoga
 
 # Prueba directa al gunicorn
-curl http://127.0.0.1:8030
+curl http://127.0.0.1:8022
 
 # Prueba con dominio
 curl -I https://sicoga.com
@@ -401,7 +401,7 @@ systemctl restart sicoga
 **502 Bad Gateway:**
 ```bash
 systemctl status sicoga
-curl http://127.0.0.1:8030
+curl http://127.0.0.1:8022
 journalctl -u sicoga -n 50
 tail -f /home/sicoga/logs/gunicorn-error.log
 ```
@@ -465,10 +465,10 @@ systemctl enable sicoga       # si dice "disabled"
 
 | Servicio | Puerto | Exposición |
 |---|---|---|
-| SiCoGa (Gunicorn/Django) | **8030** | Solo localhost |
+| SiCoGa (Gunicorn/Django) | **8022** | Solo localhost |
 | ContaAI (Gunicorn/Django) | 8020 | Solo localhost |
 | MySQL | 3306 | Solo localhost |
 | nginx HTTP | 80 | Público → redirige a HTTPS |
-| nginx HTTPS | 443 | Público → proxy a 8030 |
+| nginx HTTPS | 443 | Público → proxy a 8022 |
 | cPanel | 2083 | Existente |
 | WHM | 2087 | Existente |
