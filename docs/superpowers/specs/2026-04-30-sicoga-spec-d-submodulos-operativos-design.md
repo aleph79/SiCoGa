@@ -1,12 +1,13 @@
 # SiCoGa — Spec D: Submódulos Operativos (Diseño)
 
 **Fecha:** 2026-04-30
-**Estado:**
-- 🚧 **DRAFT** general
-- ✅ **D.1 Reimplantes — ENTREGADO 2026-04-30**
-- ✅ **D.2 Transiciones y Zilpaterol — ENTREGADO 2026-04-30**
-- ✅ **D.3 Pesajes — ENTREGADO 2026-04-30** (175 tests · `Lote.peso_actual_proyectado` ahora usa el último pesaje real como base)
-- ⏸ D.4 (Reportes) pendiente
+**Estado:** ✅ **ENTREGADO 2026-04-30 — Spec D completo (4 sub-specs)**
+- D.1 Reimplantes
+- D.2 Transiciones y Zilpaterol
+- D.3 Pesajes (con corrección automática de peso proyectado)
+- D.4 Reportes (Inventario, Proyección Anual, Salidas Semanales)
+
+182 tests, cobertura ≥85% en `apps.operacion`.
 **Cliente:** Chamizal Camperos
 **Spec previo:** [C — Disponibilidad](./2026-04-30-sicoga-spec-c-disponibilidad-design.md) ✅ entregado
 
