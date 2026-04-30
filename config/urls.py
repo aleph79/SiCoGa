@@ -5,7 +5,12 @@ from django.views.generic import TemplateView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", TemplateView.as_view(template_name="dashboard/home.html"), name="dashboard-home-stub"),
+    path("accounts/", include("apps.accounts.urls", namespace="accounts")),
+    path(
+        "",
+        TemplateView.as_view(template_name="dashboard/home.html"),
+        name="dashboard-home-stub",
+    ),
 ]
 
 if settings.DEBUG:
