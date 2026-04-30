@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Proyección Anual {{ anio }}{% endblock %}
+{% block content %}
+<div class="ph">
+  <div><div class="ptitle">Proyección Anual {{ anio }}</div><div class="psub">Vista semana a semana · detección de huecos</div></div>
+  <div class="bg">
+    <form method="get" style="display:inline;">
+      <select name="anio" onchange="this.form.submit()" class="input" style="padding:7px 10px;">
+        {% for a in anios_disponibles %}
+          <option value="{{ a }}" {% if a == anio %}selected{% endif %}>{{ a }}</option>
+        {% endfor %}
+      </select>
+    </form>
+  </div>
+</div>
+
+<div class="kg k4">
+  <div class="kpi g"><div class="klbl">Semanas con salida</div><div class="kval">{{ kpis.con_salida }}</div><div class="ksub">de 52 semanas</div></div>
+  <div class="kpi r"><div class="klbl">Semanas sin salida</div><div class="kval">{{ kpis.sin_salida }}</div><div class="ksub">requieren planeación</div></div>
+  <div class="kpi b"><div class="klbl">Cabezas proy. año</div><div class="kval">{{ kpis.cabezas_total }}</div></div>
+  <div class="kpi a"><div class="klbl">Prom. cab./semana</div><div class="kval">{{ kpis.promedio_semana }}</div></div>
+</div>
+
+<div class="card">
+  <table class="tbl">
+    <thead><tr>
+      <th>Semana</th><th>Fecha inicio</th><th>Corral / Lote</th><th>Tipo</th>
+      <th>Cabezas</th><th>Alerta</th>
+    </tr></thead>
+    <tbody>
+      {% for f in filas %}
+        {% if f.lotes %}
+          {% for lote in f.lotes %}
+            <tr>
+              {% if forloop.first %}<td class="mn" rowspan="{{ f.lotes|length }}">Sem {{ f.semana }}</td>{% endif %}
+              {% if forloop.first %}<td class="mn" rowspan="{{ f.lotes|length }}">{{ f.fecha_inicio|date:"Y-m-d"|default:"—" }}</td>{% endif %}
+              <td>{{ lote.corral.clave }} · <a href="{% url 'lotes:lote_detail' lote.pk %}">{{ lote.folio }}</a></td>
+              <td>{{ lote.tipo_ganado.nombre }}</td>
+              <td class="mn">{{ lote.cabezas_iniciales }}</td>
+              {% if forloop.first %}<td rowspan="{{ f.lotes|length }}"><span class="pill pg">OK</span></td>{% endif %}
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr style="color:var(--txd);">
+            <td class="mn">Sem {{ f.semana }}</td>
+            <td class="mn">{{ f.fecha_inicio|date:"Y-m-d"|default:"—" }}</td>
+            <td colspan="3" style="font-style:italic;">—</td>
+            <td><span class="pill pr">⚠ Sin salida</span></td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

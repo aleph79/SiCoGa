@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Inventario General{% endblock %}
+{% block content %}
+<div class="ph">
+  <div><div class="ptitle">Inventario General</div><div class="psub">Total Chamizal — corrales + potreros</div></div>
+</div>
+
+<div class="kg k4">
+  <div class="kpi g"><div class="klbl">Total corrales</div><div class="kval">{{ kpis.total_corrales_inv }}</div></div>
+  <div class="kpi b"><div class="klbl">Total potreros</div><div class="kval">{{ kpis.total_potreros_inv }}</div></div>
+  <div class="kpi a"><div class="klbl">Total Chamizal</div><div class="kval">{{ kpis.total_chamizal }}</div></div>
+  <div class="kpi p"><div class="klbl">Corrales ocupados</div><div class="kval">{{ kpis.ocupados }}/{{ kpis.total_corrales_count }}</div></div>
+</div>
+
+<div class="g2">
+  <div class="card">
+    <div class="ct">🐂 Inventario en corrales</div>
+    <table class="tbl">
+      <thead><tr><th>Corral</th><th>Lote</th><th>Tipo</th><th>Inv.</th><th>Peso prom.</th><th>Etapa</th></tr></thead>
+      <tbody>
+        {% for f in filas_corrales %}
+          <tr>
+            <td>{{ f.unidad.clave }}</td>
+            {% if f.lote %}
+              <td><a href="{% url 'lotes:lote_detail' f.lote.pk %}">{{ f.lote.folio }}</a></td>
+              <td>{{ f.lote.tipo_ganado.nombre }}</td>
+              <td class="mn">{{ f.lote.cabezas_iniciales }}</td>
+              <td class="mn">{{ f.lote.peso_actual_proyectado|default:"—"|floatformat:0 }} kg</td>
+              <td><span class="pill {% if f.lote.etapa == 'Zilpaterol' %}pp{% elif f.lote.etapa == 'Sin programa' %}pr{% else %}pg{% endif %}">{{ f.lote.etapa }}</span></td>
+            {% else %}
+              <td>—</td><td>—</td><td class="mn">0</td><td>—</td>
+              <td><span class="pill pb">Libre</span></td>
+            {% endif %}
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" style="color:var(--txd);text-align:center;">Sin corrales registrados.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <div class="ct">🌾 Inventario en potreros</div>
+    <table class="tbl">
+      <thead><tr><th>Potrero</th><th>Lote</th><th>Tipo</th><th>Inv.</th></tr></thead>
+      <tbody>
+        {% for f in filas_potreros %}
+          <tr>
+            <td>{{ f.unidad.clave }}</td>
+            {% if f.lote %}
+              <td><a href="{% url 'lotes:lote_detail' f.lote.pk %}">{{ f.lote.folio }}</a></td>
+              <td>{{ f.lote.tipo_ganado.nombre }}</td>
+              <td class="mn">{{ f.lote.cabezas_iniciales }}</td>
+            {% else %}
+              <td>—</td><td>—</td><td class="mn">0</td>
+            {% endif %}
+          </tr>
+        {% empty %}
+          <tr><td colspan="4" style="color:var(--txd);text-align:center;">Sin potreros registrados (puedes crearlos en /catalogos/corrales/ con TipoCorral=Potrero).</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

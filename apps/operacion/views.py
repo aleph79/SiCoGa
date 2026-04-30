@@ -308,3 +308,168 @@ class RegistrarPesajeView(CatalogoMixin, CreateView):
         response = super().form_valid(form)
         messages.success(self.request, f"Pesaje registrado: {self.object}")
         return response
+
+
+# ===== D.4 — Reportes operativos =====
+
+
+class InventarioGeneralView(CatalogoMixin, TemplateView):
+    template_name = "operacion/inventario_general.html"
+    permission_required = "lotes.view_lote"
+
+    def get_context_data(self, **kwargs):
+        from apps.catalogos.models import Corral
+
+        ctx = super().get_context_data(**kwargs)
+
+        # Separar corrales y potreros por TipoCorral.nombre
+        todos_corrales = Corral.objects.filter(activo=True).select_related("tipo_corral")
+        corrales = [c for c in todos_corrales if c.tipo_corral.nombre != "Potrero"]
+        potreros = [c for c in todos_corrales if c.tipo_corral.nombre == "Potrero"]
+
+        # Lotes activos por corral/potrero
+        lotes_activos = list(
+            Lote.objects.filter(activo=True).select_related("tipo_ganado", "corral")
+        )
+        lotes_por_corral = {l.corral_id: l for l in lotes_activos}
+
+        def _build_filas(unidades):
+            filas = []
+            for u in unidades:
+                lote = lotes_por_corral.get(u.id)
+                filas.append({"unidad": u, "lote": lote})
+            return filas
+
+        filas_corrales = _build_filas(corrales)
+        filas_potreros = _build_filas(potreros)
+
+        total_corrales_inv = sum(
+            f["lote"].cabezas_iniciales for f in filas_corrales if f["lote"]
+        )
+        total_potreros_inv = sum(
+            f["lote"].cabezas_iniciales for f in filas_potreros if f["lote"]
+        )
+        ocupados = sum(1 for f in filas_corrales if f["lote"])
+
+        ctx["filas_corrales"] = filas_corrales
+        ctx["filas_potreros"] = filas_potreros
+        ctx["kpis"] = {
+            "total_corrales_inv": total_corrales_inv,
+            "total_potreros_inv": total_potreros_inv,
+            "total_chamizal": total_corrales_inv + total_potreros_inv,
+            "ocupados": ocupados,
+            "total_corrales_count": len(corrales),
+        }
+        return ctx
+
+
+class ProyeccionAnualView(CatalogoMixin, TemplateView):
+    template_name = "operacion/proyeccion_anual.html"
+    permission_required = "lotes.view_lote"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        anio = int(self.request.GET.get("anio") or date.today().year)
+
+        # 1 fila por semana del año (1..52). Cada semana lista los lotes que salen ese
+        # año-semana proyectado. "Sin salida" si no hay lotes para esa semana.
+        salidas_por_semana = {sem: [] for sem in range(1, 53)}
+        for lote in (
+            Lote.objects.filter(activo=True)
+            .select_related("tipo_ganado", "corral")
+        ):
+            f_venta = lote.fecha_proyectada_venta
+            if f_venta and f_venta.year == anio:
+                sem = f_venta.isocalendar()[1]
+                if 1 <= sem <= 52:
+                    salidas_por_semana[sem].append(lote)
+
+        # Convertir a lista para template (semana, lotes, fecha_inicio_sem)
+        from datetime import datetime
+
+        filas = []
+        for sem in range(1, 53):
+            try:
+                fecha_lunes = datetime.fromisocalendar(anio, sem, 1).date()
+            except ValueError:
+                fecha_lunes = None
+            filas.append(
+                {
+                    "semana": sem,
+                    "fecha_inicio": fecha_lunes,
+                    "lotes": salidas_por_semana[sem],
+                    "cabezas": sum(l.cabezas_iniciales for l in salidas_por_semana[sem]),
+                }
+            )
+
+        semanas_con_salida = sum(1 for f in filas if f["lotes"])
+        cabezas_total = sum(f["cabezas"] for f in filas)
+        ctx["filas"] = filas
+        ctx["anio"] = anio
+        ctx["kpis"] = {
+            "con_salida": semanas_con_salida,
+            "sin_salida": 52 - semanas_con_salida,
+            "cabezas_total": cabezas_total,
+            "promedio_semana": cabezas_total // 52 if cabezas_total else 0,
+        }
+        # Selector de años: el actual y los próximos 2
+        anio_act = date.today().year
+        ctx["anios_disponibles"] = [anio_act - 1, anio_act, anio_act + 1, anio_act + 2]
+        return ctx
+
+
+class SalidasSemanalesView(CatalogoMixin, TemplateView):
+    template_name = "operacion/salidas_semanales.html"
+    permission_required = "lotes.view_lote"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        hoy = date.today()
+        sem_actual = hoy.isocalendar()[1]
+
+        # Próximas 8 semanas
+        from datetime import datetime, timedelta
+
+        filas = []
+        for offset in range(0, 8):
+            fecha_objetivo = hoy + timedelta(weeks=offset)
+            anio_obj, sem_obj, _ = fecha_objetivo.isocalendar()
+            try:
+                fecha_lunes = datetime.fromisocalendar(anio_obj, sem_obj, 1).date()
+            except ValueError:
+                fecha_lunes = None
+
+            lotes_sem = []
+            for lote in Lote.objects.filter(activo=True).select_related(
+                "tipo_ganado", "corral"
+            ):
+                f_venta = lote.fecha_proyectada_venta
+                if f_venta and f_venta.isocalendar()[:2] == (anio_obj, sem_obj):
+                    lotes_sem.append(lote)
+
+            filas.append(
+                {
+                    "anio": anio_obj,
+                    "semana": sem_obj,
+                    "fecha_inicio": fecha_lunes,
+                    "lotes": lotes_sem,
+                    "cabezas": sum(l.cabezas_iniciales for l in lotes_sem),
+                    "kilos": sum(
+                        (l.kilos_proyectados_venta or 0) for l in lotes_sem
+                    ),
+                    "es_actual": sem_obj == sem_actual,
+                }
+            )
+
+        sem_sin_salida = [f for f in filas if not f["lotes"]]
+        ctx["filas"] = filas
+        ctx["kpis"] = {
+            "esta_sem_cab": filas[0]["cabezas"] if filas else 0,
+            "esta_sem_kg": filas[0]["kilos"] if filas else 0,
+            "siguiente_cab": filas[1]["cabezas"] if len(filas) > 1 else 0,
+            "siguiente_kg": filas[1]["kilos"] if len(filas) > 1 else 0,
+            "sin_salida": len(sem_sin_salida),
+            "total_8sem": sum(f["cabezas"] for f in filas),
+        }
+        ctx["semana_actual"] = sem_actual
+        return ctx

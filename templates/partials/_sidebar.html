@@ -18,6 +18,15 @@
   <a class="ni {% if '/operacion/pesajes' in request.path %}active{% endif %}" href="/operacion/pesajes/">
     <span class="ico">⚖️</span> Pesajes
   </a>
+  <a class="ni {% if '/operacion/inventario' in request.path %}active{% endif %}" href="/operacion/inventario/">
+    <span class="ico">📦</span> Inventario General
+  </a>
+  <a class="ni {% if '/operacion/salidas-semanales' in request.path %}active{% endif %}" href="/operacion/salidas-semanales/">
+    <span class="ico">📈</span> Salidas semanales
+  </a>
+  <a class="ni {% if '/operacion/proyeccion-anual' in request.path %}active{% endif %}" href="/operacion/proyeccion-anual/">
+    <span class="ico">📅</span> Proyección anual
+  </a>
 
   <div class="ndiv"></div>
   <div class="nsec">Catálogos</div>
@@ -43,7 +52,7 @@
   <div class="ndiv"></div>
   <div class="nsec">Próximamente</div>
   <a class="ni" style="opacity:.4;cursor:not-allowed;"><span class="ico">▢</span> Cierre de Lotes <span class="nbg d">soon</span></a>
-  <a class="ni" style="opacity:.4;cursor:not-allowed;"><span class="ico">▢</span> Reportes <span class="nbg d">soon</span></a>
+  <a class="ni" style="opacity:.4;cursor:not-allowed;"><span class="ico">▢</span> Dashboard ejecutivo <span class="nbg d">soon</span></a>
 
   {% if user.is_staff %}
     <div class="ndiv"></div>

@@ -29,4 +29,7 @@ urlpatterns = [
         views.RegistrarPesajeView.as_view(),
         name="registrar_pesaje",
     ),
+    path("inventario/", views.InventarioGeneralView.as_view(), name="inventario"),
+    path("proyeccion-anual/", views.ProyeccionAnualView.as_view(), name="proyeccion_anual"),
+    path("salidas-semanales/", views.SalidasSemanalesView.as_view(), name="salidas_semanales"),
 ]

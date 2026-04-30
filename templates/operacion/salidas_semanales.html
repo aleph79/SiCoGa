@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Salidas por semana{% endblock %}
+{% block content %}
+<div class="ph">
+  <div><div class="ptitle">Salidas por Semana</div><div class="psub">Próximas 8 semanas · cabezas y kilos proyectados</div></div>
+</div>
+
+<div class="kg k4">
+  <div class="kpi a"><div class="klbl">Esta semana ({{ semana_actual }})</div><div class="kval">{{ kpis.esta_sem_cab }}</div><div class="ksub">{{ kpis.esta_sem_kg|floatformat:0 }} kg</div></div>
+  <div class="kpi b"><div class="klbl">Siguiente</div><div class="kval">{{ kpis.siguiente_cab }}</div><div class="ksub">{{ kpis.siguiente_kg|floatformat:0 }} kg</div></div>
+  <div class="kpi r"><div class="klbl">Semanas sin salida</div><div class="kval">{{ kpis.sin_salida }}</div><div class="ksub">de las próximas 8</div></div>
+  <div class="kpi g"><div class="klbl">Total proy. 8 sem.</div><div class="kval">{{ kpis.total_8sem }}</div></div>
+</div>
+
+<div class="card">
+  <table class="tbl">
+    <thead><tr>
+      <th>Semana</th><th>F. Inicio</th><th>Corral / Lote</th><th>Tipo</th>
+      <th>Cabezas</th><th>Kilos est.</th><th>Alerta</th>
+    </tr></thead>
+    <tbody>
+      {% for f in filas %}
+        {% if f.lotes %}
+          {% for lote in f.lotes %}
+            <tr>
+              {% if forloop.first %}<td class="mn" rowspan="{{ f.lotes|length }}">Sem {{ f.semana }}/{{ f.anio }}</td>{% endif %}
+              {% if forloop.first %}<td class="mn" rowspan="{{ f.lotes|length }}">{{ f.fecha_inicio|date:"Y-m-d"|default:"—" }}</td>{% endif %}
+              <td>{{ lote.corral.clave }} · <a href="{% url 'lotes:lote_detail' lote.pk %}">{{ lote.folio }}</a></td>
+              <td>{{ lote.tipo_ganado.nombre }}</td>
+              <td class="mn">{{ lote.cabezas_iniciales }}</td>
+              <td class="mn">{{ lote.kilos_proyectados_venta|default:"—"|floatformat:0 }}</td>
+              {% if forloop.first %}
+                <td rowspan="{{ f.lotes|length }}">
+                  {% if f.es_actual %}<span class="pill pa">Esta sem.</span>
+                  {% else %}<span class="pill pb">OK</span>{% endif %}
+                </td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr style="color:var(--txd);">
+            <td class="mn">Sem {{ f.semana }}/{{ f.anio }}</td>
+            <td class="mn">{{ f.fecha_inicio|date:"Y-m-d"|default:"—" }}</td>
+            <td colspan="4" style="font-style:italic;">—</td>
+            <td><span class="pill pr">⚠ Sin salida</span></td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
