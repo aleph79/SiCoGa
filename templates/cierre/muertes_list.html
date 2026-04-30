@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Muertes{% endblock %}
+{% block content %}
+<div class="ph">
+  <div><div class="ptitle">Muertes</div><div class="psub">Mortalidad por lote</div></div>
+  <div class="bg">
+    {% if perms.cierre.add_muerte %}<a href="{% url 'cierre:registrar_muerte' %}" class="btn bp">+ Registrar muerte</a>{% endif %}
+  </div>
+</div>
+<div class="card">
+  <table class="tbl">
+    <thead><tr><th>Fecha</th><th>Lote</th><th>Corral</th><th>Arete</th><th>Causa</th><th>Peso est.</th></tr></thead>
+    <tbody>
+      {% for m in muertes %}
+        <tr>
+          <td class="mn">{{ m.fecha|date:"Y-m-d" }}</td>
+          <td><a href="{% url 'lotes:lote_detail' m.lote.pk %}">{{ m.lote.folio }}</a></td>
+          <td>{{ m.lote.corral.clave }}</td>
+          <td class="mn">{{ m.arete|default:"—" }}</td>
+          <td>{{ m.causa|default:"—" }}</td>
+          <td class="mn">{{ m.peso_estimado|default:"—" }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6" style="color:var(--txd);text-align:center;">Aún no hay muertes registradas.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "partials/_pagination.html" %}
+{% endblock %}

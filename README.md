@@ -71,7 +71,8 @@ open htmlcov/index.html
 - `apps/catalogos/` — catálogos del sistema (Tipos, Corral, Proveedor, Programa de Reimplantes).
 - `apps/lotes/` — Lotes (entrada y formación) y operación de Fusión.
 - `apps/disponibilidad/` — pantalla operativa principal con KPIs, tabla por corral, filtros HTMX y export CSV.
-- `apps/operacion/` — eventos operativos durante la vida del lote (D.1: Reimplantes; D.2-D.4 pendientes).
+- `apps/operacion/` — eventos operativos durante la vida del lote (Reimplantes, Transiciones, Zilpaterol, Pesajes, Inventario, Proyección anual, Salidas semanales).
+- `apps/cierre/` — eventos de cierre del lote (E.1: Muertes y Ventas; E.2-E.5 pendientes).
 - `templates/` — templates Django (`base.html`, `partials/`, por app).
 - `static/` — CSS y JS.
 - `docs/` — propuesta, levantamiento de requerimientos, dummy HTML, Excels base.

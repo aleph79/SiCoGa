@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "apps.lotes",
     "apps.disponibilidad",
     "apps.operacion",
+    "apps.cierre",
 ]
 
 MIDDLEWARE = [

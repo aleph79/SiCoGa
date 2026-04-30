@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Ventas{% endblock %}
+{% block content %}
+<div class="ph">
+  <div><div class="ptitle">Ventas</div><div class="psub">Salidas reales · totales y parciales</div></div>
+  <div class="bg">
+    {% if perms.cierre.add_venta %}<a href="{% url 'cierre:registrar_venta' %}" class="btn bp">+ Registrar venta</a>{% endif %}
+  </div>
+</div>
+<div class="card">
+  <table class="tbl">
+    <thead><tr>
+      <th>Fecha</th><th>Lote</th><th>Cliente</th><th>Cabezas</th><th>Kilos</th>
+      <th>Precio/kg</th><th>Promedio</th><th>Ingreso total</th>
+    </tr></thead>
+    <tbody>
+      {% for v in ventas %}
+        <tr>
+          <td class="mn">{{ v.fecha|date:"Y-m-d" }}</td>
+          <td><a href="{% url 'lotes:lote_detail' v.lote.pk %}">{{ v.lote.folio }}</a></td>
+          <td>{{ v.cliente|default:"—" }}</td>
+          <td class="mn">{{ v.cabezas }}</td>
+          <td class="mn">{{ v.kilos|floatformat:0 }}</td>
+          <td class="mn">${{ v.precio_kg|floatformat:2 }}</td>
+          <td class="mn">{{ v.peso_promedio|floatformat:1 }} kg</td>
+          <td class="mn" style="color:var(--gn);font-weight:600;">${{ v.ingreso_total|floatformat:0 }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="8" style="color:var(--txd);text-align:center;">Aún no hay ventas registradas.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "partials/_pagination.html" %}
+{% endblock %}

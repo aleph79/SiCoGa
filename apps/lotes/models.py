@@ -215,6 +215,52 @@ class Lote(AuditableModel):
             return None
         return self.peso_inicial_promedio + (60 * self.gdp_efectiva)
 
+    # ----- Properties para Cierre (Spec E.1) -----
+
+    @property
+    def cabezas_muertas(self):
+        try:
+            return self.muertes.filter(activo=True).count()
+        except Exception:
+            return 0
+
+    @property
+    def cabezas_vendidas(self):
+        from django.db.models import Sum
+
+        try:
+            return (
+                self.ventas.filter(activo=True).aggregate(s=Sum("cabezas"))["s"] or 0
+            )
+        except Exception:
+            return 0
+
+    @property
+    def cabezas_actuales(self):
+        return self.cabezas_iniciales - self.cabezas_muertas - self.cabezas_vendidas
+
+    @property
+    def mortalidad_pct(self):
+        from decimal import Decimal
+
+        if not self.cabezas_iniciales:
+            return Decimal("0")
+        return (
+            Decimal(self.cabezas_muertas) / Decimal(self.cabezas_iniciales) * Decimal("100")
+        )
+
+    @property
+    def ingreso_total_ventas(self):
+        from decimal import Decimal
+
+        try:
+            return sum(
+                (v.ingreso_total for v in self.ventas.filter(activo=True)),
+                start=Decimal("0"),
+            )
+        except Exception:
+            return Decimal("0")
+
     @property
     def etapa(self):
         """Recepción → F1 → Transición → F3 → Zilpaterol → Post-Zilpaterol."""
