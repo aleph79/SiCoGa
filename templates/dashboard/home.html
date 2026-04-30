@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Bienvenido{% endblock %}
+{% block content %}
+<div class="ph">
+  <div>
+    <div class="ptitle">Bienvenido a SiCoGa</div>
+    <div class="psub">Sistema Integral de Gestión Ganadera</div>
+  </div>
+</div>
+<div class="card">
+  <p>Sistema en desarrollo. Por ahora puedes administrar los siguientes catálogos desde el menú lateral:</p>
+  <ul style="margin-top:10px;line-height:1.8;">
+    <li>Corrales · Tipos de Corral · Tipos de Ganado · Tipos de Origen</li>
+    <li>Proveedores</li>
+    <li>Programa de Reimplantes</li>
+  </ul>
+  <p style="margin-top:14px;color:var(--txd);font-size:12px;">
+    Los módulos de Disponibilidad, Cierre y Dashboard ejecutivo se habilitarán en entregables siguientes.
+  </p>
+</div>
+{% endblock %}
