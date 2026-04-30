@@ -1,7 +1,7 @@
 # SiCoGa — Spec B: Lotes y Formación (Diseño)
 
 **Fecha:** 2026-04-30
-**Estado:** 🚧 **DRAFT — pendiente de validación con Chamizal**
+**Estado:** 🚧 **DRAFT v2 — incluye operación de Fusión por feedback Chamizal · pendiente de OK final del cliente**
 **Cliente:** Chamizal Camperos
 **Proveedor:** SIWEB (Soluciones Informáticas Web S.A. de C.V.)
 **Repositorio:** https://github.com/aleph79/SiCoGa
@@ -24,7 +24,8 @@ Al cerrar este spec, el sistema permite:
 5. Capturista ya tiene permisos `add/change` operativos sobre `Lote`.
 
 Lo que **NO** entra en este spec (queda para B+):
-- Dispersión / fusión / movimiento entre corrales (Spec B fase 2 si el cliente lo pide, o Spec C).
+- Dispersión (dividir un lote en sublotes) — Spec C.
+- Movimientos generales entre corrales sin fusionar (transferir un lote de C03 a C07 manteniendo folio) — Spec C.
 - Pantalla principal de Disponibilidad con KPIs (Spec C).
 - Reimplantes, transiciones, Zilpaterol, salidas (Spec D).
 - Cierre del lote (Spec E).
@@ -44,7 +45,8 @@ Lo que **NO** entra en este spec (queda para B+):
 | 6 | Borrado | Lógico (`activo=False`). Spec E manejará el "cierre" formal con campos de salida. | Consistencia con Spec A |
 | 7 | Auditoría | `simple_history` desde el día 1, igual que Spec A. | Spec A decisión 10 |
 | 8 | Cálculos derivados | Properties de Python sobre el modelo, NO campos persistentes. Si cambia el `ProgramaReimplante`, los lotes existentes ven la nueva proyección sin migración de datos. | Limpieza |
-| 9 | Permisos Capturista | `view/add/change_lote` en este spec. Sin `delete` (sólo Admin/Gerente pueden borrar lógicamente). | Operación real |
+| 9 | Permisos Capturista | `view/add/change/add_fusion_lote` en este spec. Sin `delete` (sólo Admin/Gerente pueden borrar lógicamente). | Operación real |
+| 10 | **Fusión de lotes** | Operación atómica: lote A (origen) absorbe sus cabezas en lote B (destino); A queda inactivo y su corral libre; B queda con `cabezas_iniciales += origen.cabezas_iniciales`. Se registra en un modelo `LoteFusion` para auditoría. Constraint de "un solo lote activo por corral" sigue intacta — la fusión nunca crea un segundo lote en el destino. | Realidad operativa: a veces juntan animales de 2 corrales en uno y dejan **un solo folio** capturado. |
 
 ---
 
@@ -280,6 +282,51 @@ class Lote(AuditableModel):
 
 > **Nota sobre la constraint `lote_unico_activo_por_corral`**: implementa la decisión B4(a). Si el cliente prefiere B4(b), se quita esta línea y se ajusta el formulario.
 
+### `LoteFusion` — registro de fusiones
+
+```python
+class LoteFusion(TimeStampedModel):
+    """Una fila por cada vez que un lote 'origen' se fusiona en un lote 'destino'.
+
+    Operación atómica:
+      - destino.cabezas_iniciales += origen.cabezas_iniciales
+      - destino.observaciones se anota
+      - origen.activo = False
+      - origen.observaciones se anota
+      - se crea esta fila
+
+    No modifica peso_inicial_promedio del destino — el operador decidió cuál folio
+    conservar y por tanto cuál peso es el "oficial". Si necesitan promedio
+    ponderado en el futuro, se agrega como cálculo derivado.
+    """
+    lote_destino = models.ForeignKey(
+        Lote, on_delete=models.PROTECT, related_name="fusiones_recibidas"
+    )
+    lote_origen = models.ForeignKey(
+        Lote, on_delete=models.PROTECT, related_name="fusiones_dadas"
+    )
+    cabezas_movidas = models.PositiveIntegerField()
+    fecha_fusion = models.DateField()
+    notas = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-fecha_fusion", "-created_at"]
+        constraints = [
+            models.CheckConstraint(
+                check=~models.Q(lote_destino=models.F("lote_origen")),
+                name="fusion_destino_distinto_de_origen",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.lote_origen.folio} → {self.lote_destino.folio} ({self.cabezas_movidas} cab.)"
+```
+
+**Por qué un modelo separado y no sólo `Lote.fusionar()`:**
+- Trazabilidad: el cliente quiere poder reconstruir "de dónde salieron las 180 cabezas que tiene este corral hoy".
+- Reportes futuros: Spec D/E pueden necesitar listar todas las fusiones del año.
+- Auditoría más limpia que sólo confiar en `simple_history` del campo `cabezas_iniciales`.
+
 ### Ajuste del modelo `Corral` existente
 
 `Corral.ocupacion_actual` actualmente devuelve `0` (placeholder de Spec A). En este spec lo conectamos:
@@ -305,6 +352,7 @@ urlpatterns = [
     path("<int:pk>/", views.LoteDetailView.as_view(), name="lote_detail"),
     path("<int:pk>/editar/", views.LoteUpdateView.as_view(), name="lote_update"),
     path("<int:pk>/eliminar/", views.LoteDeleteView.as_view(), name="lote_delete"),
+    path("<int:pk>/fusionar/", views.LoteFusionView.as_view(), name="lote_fusionar"),
     # HTMX endpoint que devuelve el bloque de "proyección automática" para el form
     path("preview-proyeccion/", views.PreviewProyeccionView.as_view(), name="lote_preview"),
 ]
@@ -317,6 +365,47 @@ Montaje en `config/urls.py`: `path("lotes/", include("apps.lotes.urls", namespac
 Endpoint HTMX que recibe los campos clave del form (`tipo_ganado_id`, `tipo_origen_id`, `peso_inicial`, `fecha_inicio`, `cabezas_iniciales`, opcionalmente `peso_salida_objetivo`, `gdp_esperada`) y renderiza un partial (`_proyeccion_preview.html`) con las propiedades calculadas (días, fechas, kilos). El form de alta tiene `hx-post="..."`, `hx-trigger="change delay:300ms from:.proyeccion-input"`, `hx-target="#proyeccion-box"`.
 
 Esto da la UX del dummy v4 (proyección viva mientras el operador captura) sin guardar nada.
+
+### Vista `LoteFusionView`
+
+Form en `/lotes/<pk>/fusionar/` donde el operador:
+- Selecciona el **lote origen** (dropdown filtrado a lotes activos distintos al destino actual).
+- Captura `fecha_fusion` (default = hoy).
+- Captura `notas` (opcional).
+- (`cabezas_movidas` se llena automáticamente con el inventario completo del origen — fusión total, no parcial.)
+
+Submit ejecuta dentro de `transaction.atomic()`:
+
+```python
+@transaction.atomic
+def fusionar(destino, origen, fecha_fusion, notas, usuario):
+    cabezas = origen.cabezas_iniciales
+
+    LoteFusion.objects.create(
+        lote_destino=destino,
+        lote_origen=origen,
+        cabezas_movidas=cabezas,
+        fecha_fusion=fecha_fusion,
+        notas=notas,
+    )
+
+    destino.cabezas_iniciales += cabezas
+    destino.observaciones += (
+        f"\n[{fecha_fusion}] Fusión: +{cabezas} cab. del lote {origen.folio}."
+    )
+    destino.save()
+
+    origen.activo = False
+    origen.observaciones += (
+        f"\n[{fecha_fusion}] Fusionado a lote {destino.folio}."
+    )
+    origen.save()
+```
+
+Resultado:
+- `destino.cabezas_iniciales` aumenta.
+- `origen.activo = False` libera su corral (la constraint `lote_unico_activo_por_corral` se respeta porque el origen ya no es activo).
+- Trazabilidad queda en `LoteFusion`.
 
 ### Sidebar
 
@@ -362,7 +451,12 @@ Migración data `apps/lotes/migrations/0002_seed_lote_perms.py` que extiende los
 | 7 | Capturista crea/edita lote pero no puede eliminar. | Test permissions. |
 | 8 | Lote inactivo (`activo=False`) deja de ocupar el corral en `Corral.ocupacion_actual`. | Test property. |
 | 9 | Cambio de `gdp_esperada` queda registrado en `lote.history`. | Test simple_history. |
-| 10 | Cobertura ≥ 85% en `apps/lotes/`. | `pytest --cov=apps.lotes --cov-fail-under=85`. |
+| 10 | Fusionar lote A en lote B suma cabezas en B, marca A inactivo y libera el corral de A. | Test integration `test_lote_fusion_basica`. |
+| 11 | Fusión queda registrada en `LoteFusion` con destino/origen/cabezas/fecha. | Test `test_fusion_genera_registro`. |
+| 12 | No se puede fusionar un lote consigo mismo (DB constraint + form). | Test `test_fusion_self_rechazada`. |
+| 13 | No se puede fusionar un lote inactivo como origen. | Test `test_fusion_origen_debe_estar_activo`. |
+| 14 | Capturista puede fusionar; Solo Lectura no. | Test `test_fusion_permisos`. |
+| 15 | Cobertura ≥ 85% en `apps/lotes/`. | `pytest --cov=apps.lotes --cov-fail-under=85`. |
 
 ---
 
@@ -370,20 +464,21 @@ Migración data `apps/lotes/migrations/0002_seed_lote_perms.py` que extiende los
 
 (El plan detallado con tasks TDD se genera **después** de validar el diseño.)
 
-Estimado: **15–20 tasks** divididos en ~4 fases:
+Estimado: **18–22 tasks** divididos en ~5 fases:
 
 1. **Foundation** (3 tasks): app `apps/lotes`, modelo `Lote`, migrations base.
 2. **Cálculos** (4 tasks): properties + tests numéricos contra el Excel.
 3. **CRUD UI** (6 tasks): form + vistas + templates + sidebar entry + HTMX preview.
-4. **Permisos + cierre** (3 tasks): migración de seed groups, tests E2E, smoke checklist.
+4. **Fusión** (4 tasks): modelo `LoteFusion`, función atómica `fusionar()`, vista + form, tests.
+5. **Permisos + cierre** (3 tasks): migración de seed groups (Capturista add/change/add_fusion), tests E2E, smoke checklist.
 
 ---
 
 ## Fuera del alcance
 
-- Movimientos entre corrales (transferencia de un lote de C03 a C07).
+- Movimientos entre corrales sin fusionar (transferir lote de C03 a C07 manteniendo folio).
 - Dispersión (dividir un lote en sublotes).
-- Fusión (combinar dos lotes en uno).
+- **Fusión parcial** (mover sólo N cabezas de A a B y dejar A activo). En este spec la fusión es total: A queda vacío e inactivo. Si Chamizal pide fusión parcial, lo movemos a Spec C como sub-feature.
 - Pesajes detallados (registrar 10 pesajes individuales y promediar).
 - Tracking de muertes / ventas parciales que ajusten `cabezas_actuales`.
 - Pantalla de Disponibilidad (Spec C).
