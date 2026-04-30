@@ -421,6 +421,14 @@ journalctl -u sicoga -n 100   # últimas 100 líneas
 
 ## Actualizaciones futuras
 
+Hay un script que hace todo de un solo paso (pull + pip + migrate + collectstatic + restart + smoke HTTP):
+
+```bash
+sudo bash /home/sicoga/sicoga/scripts/update.sh
+```
+
+Si prefieres correrlo manualmente, los pasos equivalentes:
+
 ```bash
 su - sicoga
 cd /home/sicoga/sicoga

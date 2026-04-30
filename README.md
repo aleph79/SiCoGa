@@ -41,6 +41,19 @@ Visitar `http://127.0.0.1:8000/`.
 1. Settings → Project → Python Interpreter → Add → Existing → `./venv/bin/python`.
 2. Settings → Languages & Frameworks → Django → Enable: project root, settings = `config/settings/dev.py`, manage.py = `manage.py`.
 
+## Comandos comunes (Makefile)
+
+```bash
+make help          # lista todos los comandos
+make install       # instala deps de dev + pre-commit
+make migrate       # aplica migraciones
+make run           # runserver en :8000
+make test          # pytest
+make test-cov      # pytest con reporte HTML en htmlcov/
+make lint          # black + isort + flake8 (autoformatea)
+make lint-check    # sólo verifica sin modificar
+```
+
 ## Tests
 
 ```bash
