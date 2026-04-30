@@ -114,3 +114,19 @@ def test_dos_lotes_misma_corral_si_uno_inactivo(fixtures):
         peso_inicial_promedio=Decimal("280.00"),
     )
     assert nuevo.pk
+
+
+def test_lote_history_records_changes(fixtures):
+    from apps.lotes.models import Lote
+
+    lote = Lote.objects.create(
+        folio="CH-HIST",
+        corral=fixtures["corral"],
+        tipo_ganado=fixtures["macho"],
+        cabezas_iniciales=100,
+        fecha_inicio=date(2026, 4, 30),
+        peso_inicial_promedio=Decimal("250.00"),
+    )
+    lote.cabezas_iniciales = 110
+    lote.save()
+    assert lote.history.count() == 2
