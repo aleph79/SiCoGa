@@ -1,7 +1,10 @@
 <aside>
-  <div class="nsec">Dashboard</div>
-  <a class="ni {% if request.resolver_match.url_name == 'dashboard-home-stub' %}active{% endif %}" href="/">
-    <span class="ico">▦</span> Inicio
+  <div class="nsec">Operación</div>
+  <a class="ni {% if 'disponibilidad' in request.path or request.resolver_match.url_name == 'dashboard-home-stub' %}active{% endif %}" href="/disponibilidad/">
+    <span class="ico">📊</span> Disponibilidad
+  </a>
+  <a class="ni {% if '/lotes/' in request.path %}active{% endif %}" href="/lotes/">
+    <span class="ico">🐂</span> Lotes
   </a>
 
   <div class="ndiv"></div>
@@ -26,14 +29,7 @@
   </a>
 
   <div class="ndiv"></div>
-  <div class="nsec">Operación</div>
-  <a class="ni {% if '/lotes/' in request.path %}active{% endif %}" href="/lotes/">
-    <span class="ico">🐂</span> Lotes
-  </a>
-
-  <div class="ndiv"></div>
   <div class="nsec">Próximamente</div>
-  <a class="ni" style="opacity:.4;cursor:not-allowed;"><span class="ico">▢</span> Disponibilidad <span class="nbg d">soon</span></a>
   <a class="ni" style="opacity:.4;cursor:not-allowed;"><span class="ico">▢</span> Cierre de Lotes <span class="nbg d">soon</span></a>
   <a class="ni" style="opacity:.4;cursor:not-allowed;"><span class="ico">▢</span> Reportes <span class="nbg d">soon</span></a>
 

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Disponibilidad{% endblock %}
+{% block content %}
+<div class="ph">
+  <div><div class="ptitle">Disponibilidad</div><div class="psub">Seguimiento por corral · semana {{ kpis.semana_actual }} de {% now "Y" %}</div></div>
+  <div class="bg">
+    {% if perms.lotes.add_lote %}<a href="{% url 'lotes:lote_create' %}" class="btn bp">+ Alta de lote</a>{% endif %}
+    <a href="{% url 'disponibilidad:export_csv' %}" class="btn bo">📥 Exportar CSV</a>
+  </div>
+</div>
+
+<div class="kg k4">
+  <div class="kpi g"><div class="klbl">Lotes activos</div><div class="kval">{{ kpis.lotes_activos }}</div></div>
+  <div class="kpi b"><div class="klbl">Inventario corrales</div><div class="kval">{{ kpis.inventario }}</div></div>
+  <div class="kpi a"><div class="klbl">Salen sem. {{ kpis.semana_actual }}</div><div class="kval">{{ kpis.salen_semana }}</div></div>
+  <div class="kpi p"><div class="klbl">Corrales libres</div><div class="kval">{{ kpis.corrales_libres }}</div></div>
+</div>
+
+<div class="card" style="margin-bottom:14px;">
+  <form method="get"
+        hx-get="{% url 'disponibilidad:home' %}"
+        hx-target="#tabla-disp"
+        hx-select="#tabla-disp"
+        hx-swap="outerHTML"
+        hx-trigger="change">
+    <div class="bg">
+      <select name="tipo_ganado" class="input" style="padding:7px;">
+        <option value="">Todos los tipos</option>
+        {% for t in tipos_ganado %}<option value="{{ t.pk }}" {% if filtros.tipo_ganado == t.pk|stringformat:'s' %}selected{% endif %}>{{ t.nombre }}</option>{% endfor %}
+      </select>
+      <select name="etapa" class="input" style="padding:7px;">
+        <option value="">Todas las etapas</option>
+        {% for e in etapas %}<option value="{{ e }}" {% if filtros.etapa == e %}selected{% endif %}>{{ e }}</option>{% endfor %}
+      </select>
+      <label style="font-size:12px;color:var(--txd);">
+        <input type="checkbox" name="ver_libres" value="1" {% if filtros.ver_libres %}checked{% endif %}>
+        Mostrar corrales libres
+      </label>
+    </div>
+  </form>
+</div>
+
+<div class="card" id="tabla-disp">
+  <div style="overflow-x:auto">
+  <table class="tbl">
+    <thead><tr>
+      <th>Corral</th><th>Lote</th><th>Tipo</th><th>Origen</th><th>Inv.</th>
+      <th>F. Inicio</th><th>Peso Ini.</th><th>D. Trans.</th><th>D. Eng. Proy.</th>
+      <th>Peso Act. Proy.</th><th>GDP</th><th>Peso Salida</th>
+      <th>F. 1er Reimp.</th><th>Etapa</th><th>Sem. Venta</th><th></th>
+    </tr></thead>
+    <tbody>
+      {% for f in filas %}
+        <tr>
+          <td>{{ f.corral.clave }}</td>
+          {% if f.lote %}
+            <td><a href="{% url 'lotes:lote_detail' f.lote.pk %}">{{ f.lote.folio }}</a></td>
+            <td>{{ f.lote.tipo_ganado.nombre }}</td>
+            <td>{{ f.lote.tipo_origen.nombre|default:"—" }}</td>
+            <td class="mn">{{ f.lote.cabezas_iniciales }}</td>
+            <td class="mn">{{ f.lote.fecha_inicio|date:"Y-m-d" }}</td>
+            <td class="mn">{{ f.lote.peso_inicial_promedio }}</td>
+            <td class="mn">{{ f.lote.dias_transcurridos }}</td>
+            <td class="mn">{{ f.lote.dias_engorda_proyectados|default:"—" }}</td>
+            <td class="mn">{{ f.lote.peso_actual_proyectado|default:"—"|floatformat:1 }}</td>
+            <td class="mn">{{ f.lote.gdp_efectiva|default:"—" }}</td>
+            <td class="mn">{{ f.lote.peso_objetivo_efectivo|default:"—" }}</td>
+            <td class="mn">{{ f.lote.fecha_reimplante_1|date:"Y-m-d"|default:"—" }}</td>
+            <td><span class="pill {% if f.lote.etapa == 'Zilpaterol' %}pp{% elif f.lote.etapa == 'Sin programa' %}pr{% else %}pg{% endif %}">{{ f.lote.etapa }}</span></td>
+            <td class="mn">{{ f.lote.semana_proyectada_venta|default:"—" }}</td>
+            <td><a href="{% url 'lotes:lote_detail' f.lote.pk %}" class="btn bo bsm">Ver</a></td>
+          {% else %}
+            <td colspan="14" style="color:var(--txd);font-style:italic;">Libre · capacidad {{ f.corral.capacidad_maxima }}</td>
+            <td>{% if perms.lotes.add_lote %}<a href="{% url 'lotes:lote_create' %}?corral={{ f.corral.pk }}" class="btn bp bsm">+ Alta</a>{% endif %}</td>
+          {% endif %}
+        </tr>
+      {% empty %}
+        <tr><td colspan="16" style="color:var(--txd);text-align:center;">Sin resultados con los filtros aplicados.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}

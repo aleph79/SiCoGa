@@ -1,7 +1,7 @@
 # SiCoGa — Spec C: Disponibilidad y Proyección (Diseño)
 
 **Fecha:** 2026-04-30
-**Estado:** 🚧 **DRAFT — pendiente de validación con Chamizal**
+**Estado:** ✅ **ENTREGADO 2026-04-30** — 150 tests, cobertura 96.30% en `apps.disponibilidad`. Pendiente smoke manual con Chamizal.
 **Cliente:** Chamizal Camperos
 **Spec previo:** [B — Lotes y Formación](./2026-04-30-sicoga-spec-b-lotes-formacion-design.md) ✅ entregado 2026-04-30
 

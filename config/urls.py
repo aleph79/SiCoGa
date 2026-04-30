@@ -2,11 +2,13 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import include, path
-from django.views.generic import TemplateView
+from django.views.generic import RedirectView
 
 
-class HomeView(LoginRequiredMixin, TemplateView):
-    template_name = "dashboard/home.html"
+class HomeView(LoginRequiredMixin, RedirectView):
+    """`/` redirige a la pantalla operativa principal (Disponibilidad, Spec C)."""
+
+    url = "/disponibilidad/"
 
 
 urlpatterns = [
@@ -14,6 +16,7 @@ urlpatterns = [
     path("accounts/", include("apps.accounts.urls", namespace="accounts")),
     path("catalogos/", include("apps.catalogos.urls", namespace="catalogos")),
     path("lotes/", include("apps.lotes.urls", namespace="lotes")),
+    path("disponibilidad/", include("apps.disponibilidad.urls", namespace="disponibilidad")),
     path("", HomeView.as_view(), name="dashboard-home-stub"),
 ]
 

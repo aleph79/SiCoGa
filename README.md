@@ -70,6 +70,7 @@ open htmlcov/index.html
 - `apps/accounts/` — autenticación, usuarios, perfil, roles.
 - `apps/catalogos/` — catálogos del sistema (Tipos, Corral, Proveedor, Programa de Reimplantes).
 - `apps/lotes/` — Lotes (entrada y formación) y operación de Fusión.
+- `apps/disponibilidad/` — pantalla operativa principal con KPIs, tabla por corral, filtros HTMX y export CSV.
 - `templates/` — templates Django (`base.html`, `partials/`, por app).
 - `static/` — CSS y JS.
 - `docs/` — propuesta, levantamiento de requerimientos, dummy HTML, Excels base.
