@@ -2,6 +2,13 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+from pathlib import Path
+
+import environ
+
+_env_file = Path(__file__).resolve().parent / ".env"
+if _env_file.exists():
+    environ.Env.read_env(_env_file)
 
 
 def main():
