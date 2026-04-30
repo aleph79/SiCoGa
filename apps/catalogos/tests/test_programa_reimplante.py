@@ -1,8 +1,14 @@
-"""Tests for ProgramaReimplante model: properties and resolver()."""
+"""Tests for ProgramaReimplante model: properties, resolver() and CRUD views."""
 
 from decimal import Decimal
 
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group, Permission
+from django.urls import reverse
+
 import pytest
+
+User = get_user_model()
 
 
 @pytest.fixture
@@ -125,3 +131,54 @@ def test_check_constraint_peso_max_gt_min(tipos):
             gdp_esperada=Decimal("1"),
             peso_objetivo_salida=Decimal("300"),
         )
+
+
+# ----- View permission tests -----
+
+
+@pytest.fixture
+def admin_user_27(db):
+    group, _ = Group.objects.get_or_create(name="Administrador")
+    group.permissions.set(Permission.objects.all())
+    u = User.objects.create_user(
+        username="admin27", email="admin27@x.com", password="p", is_staff=True
+    )
+    u.groups.add(group)
+    return u
+
+
+@pytest.fixture
+def lectura_user_27(db):
+    group, _ = Group.objects.get_or_create(name="Solo Lectura")
+    view_perms = Permission.objects.filter(codename__startswith="view_")
+    group.permissions.set(view_perms)
+    u = User.objects.create_user(username="lectura27", email="lectura27@x.com", password="p")
+    u.groups.add(group)
+    return u
+
+
+@pytest.mark.django_db(transaction=True)
+def test_admin_can_list_programa(client, admin_user_27):
+    client.force_login(admin_user_27)
+    assert client.get(reverse("catalogos:programareimplante_list")).status_code == 200
+
+
+@pytest.mark.django_db(transaction=True)
+def test_lectura_can_view_but_not_create(client, lectura_user_27):
+    client.force_login(lectura_user_27)
+    assert client.get(reverse("catalogos:programareimplante_list")).status_code == 200
+    assert client.get(reverse("catalogos:programareimplante_create")).status_code == 403
+
+
+@pytest.mark.django_db(transaction=True)
+def test_anonymous_redirected_to_login(client):
+    response = client.get(reverse("catalogos:programareimplante_list"))
+    assert response.status_code == 302
+
+
+@pytest.mark.django_db(transaction=True)
+def test_admin_soft_deletes_programa(client, admin_user_27, programa_machos):
+    client.force_login(admin_user_27)
+    client.post(reverse("catalogos:programareimplante_delete", args=[programa_machos.pk]))
+    programa_machos.refresh_from_db()
+    assert programa_machos.activo is False
