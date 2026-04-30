@@ -18,3 +18,16 @@ class TipoCorral(AuditableModel):
 
     def __str__(self):
         return self.nombre
+
+
+class TipoGanado(AuditableModel):
+    nombre = models.CharField(max_length=40, unique=True, verbose_name="Nombre")
+    history = HistoricalRecords()
+
+    class Meta:
+        verbose_name = "Tipo de ganado"
+        verbose_name_plural = "Tipos de ganado"
+        ordering = ["nombre"]
+
+    def __str__(self):
+        return self.nombre

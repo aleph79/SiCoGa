@@ -27,4 +27,26 @@ urlpatterns = [
         views.TipoCorralDeleteView.as_view(),
         name="tipocorral_delete",
     ),
+    # TipoGanado
+    path("tipos-ganado/", views.TipoGanadoListView.as_view(), name="tipoganado_list"),
+    path(
+        "tipos-ganado/nuevo/",
+        views.TipoGanadoCreateView.as_view(),
+        name="tipoganado_create",
+    ),
+    path(
+        "tipos-ganado/<int:pk>/",
+        views.TipoGanadoDetailView.as_view(),
+        name="tipoganado_detail",
+    ),
+    path(
+        "tipos-ganado/<int:pk>/editar/",
+        views.TipoGanadoUpdateView.as_view(),
+        name="tipoganado_update",
+    ),
+    path(
+        "tipos-ganado/<int:pk>/eliminar/",
+        views.TipoGanadoDeleteView.as_view(),
+        name="tipoganado_delete",
+    ),
 ]

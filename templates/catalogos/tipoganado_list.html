@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Tipos de Ganado{% endblock %}
+{% block content %}
+<div class="ph">
+  <div><div class="ptitle">Tipos de Ganado</div><div class="psub">Categorías de los tipos de ganado del rancho</div></div>
+  <div class="bg">
+    {% if perms.catalogos.add_tipoganado %}
+      <a href="{% url 'catalogos:tipoganado_create' %}" class="btn bp">+ Nuevo</a>
+    {% endif %}
+  </div>
+</div>
+<div class="card">
+  <table class="tbl">
+    <thead><tr><th>Nombre</th><th>Estado</th><th>Actualizado</th><th></th></tr></thead>
+    <tbody>
+      {% for o in objetos %}
+        <tr>
+          <td>{{ o.nombre }}</td>
+          <td><span class="pill {% if o.activo %}pg{% else %}pr{% endif %}">{% if o.activo %}Activo{% else %}Inactivo{% endif %}</span></td>
+          <td class="mn">{{ o.updated_at|date:"Y-m-d H:i" }}</td>
+          <td>
+            {% if perms.catalogos.change_tipoganado %}
+              <a href="{% url 'catalogos:tipoganado_update' o.pk %}" class="btn bo bsm">Editar</a>
+            {% endif %}
+            {% if perms.catalogos.delete_tipoganado and o.activo %}
+              <a href="{% url 'catalogos:tipoganado_delete' o.pk %}" class="btn bo bsm">Eliminar</a>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4" style="color:var(--txd);text-align:center;">Sin registros.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "partials/_pagination.html" %}
+{% endblock %}
