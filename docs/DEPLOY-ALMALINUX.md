@@ -59,7 +59,7 @@ Edita `.env`:
 ```ini
 DEBUG=False
 SECRET_KEY=<el token de arriba>
-ALLOWED_HOSTS=sicoga.tudominio.com
+ALLOWED_HOSTS=sicoga.com
 DJANGO_SETTINGS_MODULE=config.settings.prod
 DATABASE_URL=mysql://sicoga:CAMBIA-ESTA-CLAVE@127.0.0.1:3306/sicoga
 ADMIN_EMAIL=zgalindo@siwebmx.com
@@ -116,17 +116,17 @@ sudo systemctl status sicoga
 ```nginx
 server {
     listen 80;
-    server_name sicoga.tudominio.com;
+    server_name sicoga.com;
     return 301 https://$host$request_uri;
 }
 
 server {
     listen 443 ssl http2;
-    server_name sicoga.tudominio.com;
+    server_name sicoga.com;
 
     # Certbot llenará estos paths
-    ssl_certificate     /etc/letsencrypt/live/sicoga.tudominio.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/sicoga.tudominio.com/privkey.pem;
+    ssl_certificate     /etc/letsencrypt/live/sicoga.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/sicoga.com/privkey.pem;
 
     client_max_body_size 25M;
 
@@ -156,7 +156,7 @@ sudo systemctl reload nginx
 
 ```bash
 sudo dnf install -y certbot python3-certbot-nginx
-sudo certbot --nginx -d sicoga.tudominio.com
+sudo certbot --nginx -d sicoga.com
 ```
 
 ## 10. SELinux + firewall (si están activos)
@@ -171,7 +171,7 @@ sudo firewall-cmd --reload
 
 ## 11. Verificación final
 
-- `curl -I https://sicoga.tudominio.com` → `200 OK` (o redirect 301 si pegas HTTP).
+- `curl -I https://sicoga.com` → `200 OK` (o redirect 301 si pegas HTTP).
 - `journalctl -u sicoga -f` no muestra tracebacks.
 - Login con superuser → ves dashboard.
 - `/catalogos/programa-reimplantes/` muestra **49 filas** precargadas.
