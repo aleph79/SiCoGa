@@ -1,0 +1,13 @@
+<form method="post">
+  {% csrf_token %}
+  {% for field in form %}
+    <div style="margin-bottom:12px;">
+      <label class="klbl">{{ field.label }}</label>
+      {{ field }}
+      {% if field.errors %}<div class="ai err">{{ field.errors|join:", " }}</div>{% endif %}
+      {% if field.help_text %}<div class="psub">{{ field.help_text }}</div>{% endif %}
+    </div>
+  {% endfor %}
+  <button type="submit" class="btn bp">Guardar</button>
+  <a href="{{ cancel_url }}" class="btn bo">Cancelar</a>
+</form>

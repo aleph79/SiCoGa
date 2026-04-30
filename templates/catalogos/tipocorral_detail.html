@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}{{ obj.nombre }}{% endblock %}
+{% block content %}
+<div class="ph"><div><div class="ptitle">{{ obj.nombre }}</div><div class="psub">Tipo de corral</div></div></div>
+<div class="card">
+  <p><strong>Estado:</strong> {{ obj.activo|yesno:"Activo,Inactivo" }}</p>
+  <p><strong>Creado:</strong> {{ obj.created_at|date:"Y-m-d H:i" }}</p>
+  <p><strong>Actualizado:</strong> {{ obj.updated_at|date:"Y-m-d H:i" }}</p>
+  <a href="{% url 'catalogos:tipocorral_update' obj.pk %}" class="btn bp">Editar</a>
+  <a href="{% url 'catalogos:tipocorral_list' %}" class="btn bo">Volver</a>
+</div>
+{% endblock %}
