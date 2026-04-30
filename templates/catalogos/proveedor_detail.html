@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ obj.nombre }}{% endblock %}
+{% block content %}
+<div class="ph"><div><div class="ptitle">{{ obj.nombre }}</div><div class="psub">Proveedor</div></div></div>
+<div class="card">
+  <p><strong>RFC:</strong> {{ obj.rfc|default:"—" }}</p>
+  <p><strong>Teléfono:</strong> {{ obj.telefono|default:"—" }}</p>
+  <p><strong>Contacto:</strong> {{ obj.contacto|default:"—" }}</p>
+  <p><strong>Notas:</strong> {{ obj.notas|default:"—" }}</p>
+  <p><strong>Estado:</strong> {{ obj.activo|yesno:"Activo,Inactivo" }}</p>
+  <p><strong>Creado:</strong> {{ obj.created_at|date:"Y-m-d H:i" }}</p>
+  <p><strong>Actualizado:</strong> {{ obj.updated_at|date:"Y-m-d H:i" }}</p>
+  <a href="{% url 'catalogos:proveedor_update' obj.pk %}" class="btn bp">Editar</a>
+  <a href="{% url 'catalogos:proveedor_list' %}" class="btn bo">Volver</a>
+</div>
+{% endblock %}

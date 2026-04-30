@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Proveedores{% endblock %}
+{% block content %}
+<div class="ph">
+  <div><div class="ptitle">Proveedores</div><div class="psub">Quien provee el ganado al rancho</div></div>
+  <div class="bg">
+    {% if perms.catalogos.add_proveedor %}<a href="{% url 'catalogos:proveedor_create' %}" class="btn bp">+ Nuevo</a>{% endif %}
+  </div>
+</div>
+<div class="card">
+  <table class="tbl">
+    <thead><tr><th>Nombre</th><th>Contacto</th><th>Teléfono</th><th>Estado</th><th></th></tr></thead>
+    <tbody>
+      {% for o in objetos %}
+        <tr>
+          <td>{{ o.nombre }}</td>
+          <td>{{ o.contacto|default:"—" }}</td>
+          <td>{{ o.telefono|default:"—" }}</td>
+          <td><span class="pill {% if o.activo %}pg{% else %}pr{% endif %}">{% if o.activo %}Activo{% else %}Inactivo{% endif %}</span></td>
+          <td>
+            {% if perms.catalogos.change_proveedor %}<a href="{% url 'catalogos:proveedor_update' o.pk %}" class="btn bo bsm">Editar</a>{% endif %}
+            {% if perms.catalogos.delete_proveedor and o.activo %}<a href="{% url 'catalogos:proveedor_delete' o.pk %}" class="btn bo bsm">Eliminar</a>{% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5" style="color:var(--txd);text-align:center;">Sin registros.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "partials/_pagination.html" %}
+{% endblock %}

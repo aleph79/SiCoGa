@@ -4,7 +4,7 @@ from django.contrib import admin
 
 from simple_history.admin import SimpleHistoryAdmin
 
-from .models import TipoCorral, TipoGanado, TipoOrigen
+from .models import Proveedor, TipoCorral, TipoGanado, TipoOrigen
 
 
 @admin.register(TipoCorral)
@@ -26,3 +26,10 @@ class TipoOrigenAdmin(SimpleHistoryAdmin):
     list_display = ("nombre", "activo", "updated_at")
     list_filter = ("activo",)
     search_fields = ("nombre",)
+
+
+@admin.register(Proveedor)
+class ProveedorAdmin(SimpleHistoryAdmin):
+    list_display = ("nombre", "contacto", "telefono", "activo", "updated_at")
+    list_filter = ("activo",)
+    search_fields = ("nombre", "contacto", "rfc")

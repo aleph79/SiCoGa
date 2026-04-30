@@ -71,4 +71,26 @@ urlpatterns = [
         views.TipoOrigenDeleteView.as_view(),
         name="tipoorigen_delete",
     ),
+    # Proveedor
+    path("proveedores/", views.ProveedorListView.as_view(), name="proveedor_list"),
+    path(
+        "proveedores/nuevo/",
+        views.ProveedorCreateView.as_view(),
+        name="proveedor_create",
+    ),
+    path(
+        "proveedores/<int:pk>/",
+        views.ProveedorDetailView.as_view(),
+        name="proveedor_detail",
+    ),
+    path(
+        "proveedores/<int:pk>/editar/",
+        views.ProveedorUpdateView.as_view(),
+        name="proveedor_update",
+    ),
+    path(
+        "proveedores/<int:pk>/eliminar/",
+        views.ProveedorDeleteView.as_view(),
+        name="proveedor_delete",
+    ),
 ]

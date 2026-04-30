@@ -7,8 +7,8 @@ from django.views.generic import CreateView, DetailView, ListView, UpdateView, V
 
 from apps.core.mixins import CatalogoMixin
 
-from .forms import TipoCorralForm, TipoGanadoForm, TipoOrigenForm
-from .models import TipoCorral, TipoGanado, TipoOrigen
+from .forms import ProveedorForm, TipoCorralForm, TipoGanadoForm, TipoOrigenForm
+from .models import Proveedor, TipoCorral, TipoGanado, TipoOrigen
 
 
 # ----- TipoCorral -----
@@ -177,3 +177,59 @@ class TipoOrigenDeleteView(CatalogoMixin, View):
         obj.save()
         messages.success(request, f"'{obj}' marcado como inactivo.")
         return redirect("catalogos:tipoorigen_list")
+
+
+# ----- Proveedor -----
+class ProveedorListView(CatalogoMixin, ListView):
+    model = Proveedor
+    template_name = "catalogos/proveedor_list.html"
+    permission_required = "catalogos.view_proveedor"
+    context_object_name = "objetos"
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.request.GET.get("ver") != "todos":
+            qs = qs.filter(activo=True)
+        return qs
+
+
+class ProveedorCreateView(CatalogoMixin, CreateView):
+    model = Proveedor
+    form_class = ProveedorForm
+    template_name = "catalogos/proveedor_form.html"
+    permission_required = "catalogos.add_proveedor"
+    success_url = reverse_lazy("catalogos:proveedor_list")
+
+
+class ProveedorUpdateView(CatalogoMixin, UpdateView):
+    model = Proveedor
+    form_class = ProveedorForm
+    template_name = "catalogos/proveedor_form.html"
+    permission_required = "catalogos.change_proveedor"
+    success_url = reverse_lazy("catalogos:proveedor_list")
+
+
+class ProveedorDetailView(CatalogoMixin, DetailView):
+    model = Proveedor
+    template_name = "catalogos/proveedor_detail.html"
+    permission_required = "catalogos.view_proveedor"
+    context_object_name = "obj"
+
+
+class ProveedorDeleteView(CatalogoMixin, View):
+    permission_required = "catalogos.delete_proveedor"
+
+    def get(self, request, pk):
+        obj = get_object_or_404(Proveedor, pk=pk)
+        return render(
+            request,
+            "catalogos/proveedor_confirm_delete.html",
+            {"object": obj, "cancel_url": reverse_lazy("catalogos:proveedor_list")},
+        )
+
+    def post(self, request, pk):
+        obj = get_object_or_404(Proveedor, pk=pk)
+        obj.activo = False
+        obj.save()
+        messages.success(request, f"'{obj}' marcado como inactivo.")
+        return redirect("catalogos:proveedor_list")
