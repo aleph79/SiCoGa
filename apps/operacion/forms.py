@@ -2,7 +2,7 @@
 
 from django import forms
 
-from .models import EntradaZilpaterol, Reimplante, Transicion
+from .models import EntradaZilpaterol, Pesaje, Reimplante, Transicion
 
 
 class ReimplanteForm(forms.ModelForm):
@@ -44,4 +44,16 @@ class EntradaZilpaterolForm(forms.ModelForm):
         widgets = {
             "fecha_entrada": forms.DateInput(attrs={"class": "input", "type": "date"}),
             "observaciones": forms.Textarea(attrs={"class": "input", "rows": 2}),
+        }
+
+
+class PesajeForm(forms.ModelForm):
+    class Meta:
+        model = Pesaje
+        fields = ["lote", "fecha", "peso_promedio", "cabezas_pesadas", "notas", "activo"]
+        widgets = {
+            "fecha": forms.DateInput(attrs={"class": "input", "type": "date"}),
+            "peso_promedio": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
+            "cabezas_pesadas": forms.NumberInput(attrs={"class": "input", "min": 1}),
+            "notas": forms.Textarea(attrs={"class": "input", "rows": 2}),
         }

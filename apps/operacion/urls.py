@@ -23,4 +23,10 @@ urlpatterns = [
         views.RegistrarEntradaZilpaterolView.as_view(),
         name="registrar_zilpaterol",
     ),
+    path("pesajes/", views.PesajesListView.as_view(), name="pesajes"),
+    path(
+        "pesajes/registrar/",
+        views.RegistrarPesajeView.as_view(),
+        name="registrar_pesaje",
+    ),
 ]

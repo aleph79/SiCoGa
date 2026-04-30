@@ -10,8 +10,8 @@ from django.views.generic import CreateView, TemplateView
 from apps.core.mixins import CatalogoMixin
 from apps.lotes.models import Lote
 
-from .forms import EntradaZilpaterolForm, ReimplanteForm, TransicionForm
-from .models import EntradaZilpaterol, Reimplante, Transicion
+from .forms import EntradaZilpaterolForm, PesajeForm, ReimplanteForm, TransicionForm
+from .models import EntradaZilpaterol, Pesaje, Reimplante, Transicion
 
 
 def _semana_de_fecha(d):
@@ -258,4 +258,53 @@ class RegistrarEntradaZilpaterolView(CatalogoMixin, CreateView):
     def form_valid(self, form):
         response = super().form_valid(form)
         messages.success(self.request, f"Entrada a Zilpaterol registrada: {self.object}")
+        return response
+
+
+class PesajesListView(CatalogoMixin, TemplateView):
+    template_name = "operacion/pesajes_list.html"
+    permission_required = "operacion.view_pesaje"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        # Lista todos los pesajes ordenados por fecha desc, con info del lote
+        ctx["pesajes"] = (
+            Pesaje.objects.filter(activo=True)
+            .select_related("lote", "lote__corral", "lote__tipo_ganado")
+            .order_by("-fecha", "-created_at")[:100]
+        )
+        # Lotes activos sin pesaje reciente (>30 días o nunca)
+        sin_pesaje = []
+        for lote in Lote.objects.filter(activo=True).select_related("corral", "tipo_ganado"):
+            ultimo = lote.pesajes.filter(activo=True).order_by("-fecha").first()
+            dias_sin = (date.today() - ultimo.fecha).days if ultimo else None
+            if dias_sin is None or dias_sin > 30:
+                sin_pesaje.append({"lote": lote, "ultimo": ultimo, "dias_sin": dias_sin})
+        ctx["sin_pesaje"] = sin_pesaje
+        return ctx
+
+
+class RegistrarPesajeView(CatalogoMixin, CreateView):
+    model = Pesaje
+    form_class = PesajeForm
+    template_name = "operacion/registrar_pesaje.html"
+    permission_required = "operacion.add_pesaje"
+    success_url = reverse_lazy("operacion:pesajes")
+
+    def get_initial(self):
+        initial = super().get_initial()
+        lote_pk = self.request.GET.get("lote")
+        if lote_pk:
+            initial["lote"] = lote_pk
+            initial["fecha"] = date.today()
+            try:
+                lote = Lote.objects.get(pk=lote_pk, activo=True)
+                initial["cabezas_pesadas"] = lote.cabezas_iniciales
+            except Lote.DoesNotExist:
+                pass
+        return initial
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, f"Pesaje registrado: {self.object}")
         return response

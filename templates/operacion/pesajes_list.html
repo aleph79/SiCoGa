@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Pesajes{% endblock %}
+{% block content %}
+<div class="ph">
+  <div><div class="ptitle">Pesajes</div><div class="psub">Pesos reales que corrigen la proyección</div></div>
+  <div class="bg">
+    {% if perms.operacion.add_pesaje %}<a href="{% url 'operacion:registrar_pesaje' %}" class="btn bp">+ Registrar pesaje</a>{% endif %}
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:14px;">
+  <div class="ct">⚠️ Lotes sin pesaje reciente (>30 días o nunca)</div>
+  <table class="tbl">
+    <thead><tr>
+      <th>Corral</th><th>Lote</th><th>Tipo</th><th>Cabezas</th>
+      <th>Último pesaje</th><th>Días desde</th><th></th>
+    </tr></thead>
+    <tbody>
+      {% for s in sin_pesaje %}
+        <tr>
+          <td>{{ s.lote.corral.clave }}</td>
+          <td><a href="{% url 'lotes:lote_detail' s.lote.pk %}">{{ s.lote.folio }}</a></td>
+          <td>{{ s.lote.tipo_ganado.nombre }}</td>
+          <td class="mn">{{ s.lote.cabezas_iniciales }}</td>
+          <td class="mn">{% if s.ultimo %}{{ s.ultimo.fecha|date:"Y-m-d" }} · {{ s.ultimo.peso_promedio }} kg{% else %}—{% endif %}</td>
+          <td class="mn">{% if s.dias_sin %}{{ s.dias_sin }}{% else %}<span class="pill pr">Nunca</span>{% endif %}</td>
+          <td>
+            {% if perms.operacion.add_pesaje %}
+              <a href="{% url 'operacion:registrar_pesaje' %}?lote={{ s.lote.pk }}" class="btn bp bsm">Registrar</a>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="7" style="color:var(--txd);text-align:center;">Todos los lotes activos tienen pesaje reciente.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <div class="ct">📋 Pesajes registrados (últimos 100)</div>
+  <table class="tbl">
+    <thead><tr>
+      <th>Fecha</th><th>Corral</th><th>Lote</th><th>Tipo</th>
+      <th>Peso promedio</th><th>Cabezas pesadas</th><th>Notas</th>
+    </tr></thead>
+    <tbody>
+      {% for p in pesajes %}
+        <tr>
+          <td class="mn">{{ p.fecha|date:"Y-m-d" }}</td>
+          <td>{{ p.lote.corral.clave }}</td>
+          <td><a href="{% url 'lotes:lote_detail' p.lote.pk %}">{{ p.lote.folio }}</a></td>
+          <td>{{ p.lote.tipo_ganado.nombre }}</td>
+          <td class="mn">{{ p.peso_promedio }} kg</td>
+          <td class="mn">{{ p.cabezas_pesadas }}</td>
+          <td>{{ p.notas|default:"—"|truncatechars:60 }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="7" style="color:var(--txd);text-align:center;">Aún no hay pesajes registrados.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

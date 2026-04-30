@@ -4,8 +4,9 @@
 **Estado:**
 - 🚧 **DRAFT** general
 - ✅ **D.1 Reimplantes — ENTREGADO 2026-04-30**
-- ✅ **D.2 Transiciones y Zilpaterol — ENTREGADO 2026-04-30** (168 tests, cobertura 87.08% en `apps.operacion`)
-- ⏸ D.3 (Pesajes) y D.4 (Reportes) pendientes
+- ✅ **D.2 Transiciones y Zilpaterol — ENTREGADO 2026-04-30**
+- ✅ **D.3 Pesajes — ENTREGADO 2026-04-30** (175 tests · `Lote.peso_actual_proyectado` ahora usa el último pesaje real como base)
+- ⏸ D.4 (Reportes) pendiente
 **Cliente:** Chamizal Camperos
 **Spec previo:** [C — Disponibilidad](./2026-04-30-sicoga-spec-c-disponibilidad-design.md) ✅ entregado
 

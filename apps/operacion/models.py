@@ -147,3 +147,30 @@ class EntradaZilpaterol(AuditableModel):
     @property
     def listo_para_venta(self):
         return self.dias_en_zilpaterol >= 35
+
+
+class Pesaje(AuditableModel):
+    """Pesaje real del lote — corrige la proyección a partir de esta fecha."""
+
+    lote = models.ForeignKey(Lote, on_delete=models.PROTECT, related_name="pesajes")
+    fecha = models.DateField()
+    peso_promedio = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        verbose_name="Peso promedio (kg)",
+    )
+    cabezas_pesadas = models.PositiveIntegerField(
+        verbose_name="Cabezas pesadas",
+        help_text="Si fue muestreo, este número puede ser menor que el inventario.",
+    )
+    notas = models.TextField(blank=True)
+
+    history = HistoricalRecords()
+
+    class Meta:
+        verbose_name = "Pesaje"
+        verbose_name_plural = "Pesajes"
+        ordering = ["-fecha", "-created_at"]
+
+    def __str__(self):
+        return f"{self.lote.folio} · {self.fecha} · {self.peso_promedio} kg"

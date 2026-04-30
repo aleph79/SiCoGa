@@ -181,10 +181,32 @@ class Lote(AuditableModel):
 
     @property
     def peso_actual_proyectado(self):
-        """peso_inicial + dias_transcurridos × gdp_efectiva."""
+        """peso base + (días desde la base) × gdp_efectiva.
+
+        La base es el último pesaje real si existe; si no, el peso inicial.
+        Esto hace que la proyección se "corrija sola" cuando se captura un
+        pesaje real intermedio.
+        """
+        from datetime import date
+
         if not self.gdp_efectiva:
             return None
-        return self.peso_inicial_promedio + (self.dias_transcurridos * self.gdp_efectiva)
+
+        base_peso = self.peso_inicial_promedio
+        base_fecha = self.fecha_inicio
+
+        # Si hay app `operacion` instalada y existen pesajes, usar el último
+        try:
+            ultimo = self.pesajes.filter(activo=True).order_by("-fecha").first()
+        except Exception:
+            ultimo = None
+
+        if ultimo:
+            base_peso = ultimo.peso_promedio
+            base_fecha = ultimo.fecha
+
+        dias = (date.today() - base_fecha).days
+        return base_peso + (dias * self.gdp_efectiva)
 
     @property
     def peso_estimado_rango(self):

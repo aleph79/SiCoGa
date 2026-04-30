@@ -4,7 +4,7 @@ from django.contrib import admin
 
 from simple_history.admin import SimpleHistoryAdmin
 
-from .models import EntradaZilpaterol, Reimplante, Transicion
+from .models import EntradaZilpaterol, Pesaje, Reimplante, Transicion
 
 
 @admin.register(Reimplante)
@@ -32,5 +32,12 @@ class TransicionAdmin(SimpleHistoryAdmin):
 @admin.register(EntradaZilpaterol)
 class EntradaZilpaterolAdmin(SimpleHistoryAdmin):
     list_display = ("lote", "fecha_entrada", "activo")
+    list_filter = ("activo",)
+    search_fields = ("lote__folio",)
+
+
+@admin.register(Pesaje)
+class PesajeAdmin(SimpleHistoryAdmin):
+    list_display = ("lote", "fecha", "peso_promedio", "cabezas_pesadas", "activo")
     list_filter = ("activo",)
     search_fields = ("lote__folio",)
