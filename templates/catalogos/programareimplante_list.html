@@ -9,7 +9,12 @@
 </div>
 
 <div class="card" style="margin-bottom:14px;">
-  <form method="get" hx-get="{% url 'catalogos:programareimplante_list' %}" hx-target="#tabla-programa" hx-trigger="change">
+  <form method="get"
+        hx-get="{% url 'catalogos:programareimplante_list' %}"
+        hx-target="#tabla-programa"
+        hx-select="#tabla-programa"
+        hx-swap="outerHTML"
+        hx-trigger="change">
     <div class="bg">
       <select name="tipo_ganado" class="input" style="padding:7px;">
         <option value="">Todos los tipos</option>
