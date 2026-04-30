@@ -5,8 +5,9 @@ import pytest
 
 @pytest.fixture
 def tipos(db):
-    from apps.catalogos.models import TipoGanado, TipoOrigen
+    from apps.catalogos.models import ProgramaReimplante, TipoGanado, TipoOrigen
 
+    ProgramaReimplante.objects.all().delete()
     return {
         "macho": TipoGanado.objects.get_or_create(nombre="Macho")[0],
         "corral": TipoOrigen.objects.get_or_create(nombre="Corral")[0],
