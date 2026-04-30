@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema Integral de Gestión Ganadera — SIWEB</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0D1117;--surface:#161B22;--s2:#1C2430;--s3:#21293A;
+  --bdr:#2A3548;--bdr2:#354060;
+  --tx:#CDD9F0;--txd:#6E7E99;--txb:#EEF4FF;
+  --gn:#3FB950;--gnd:#1A3B24;
+  --bl:#58A6FF;--bld:#1A2D4A;
+  --am:#F0A020;--amd:#3B2A0A;
+  --rd:#FF7070;--rdd:#3B1A1A;
+  --pu:#BC8CFF;--pud:#2A1A4A;
+  --tl:#39D5C8;--tld:#0F2D2B;
+  --font:'Sora',sans-serif;--mono:'IBM Plex Mono',monospace;
+  --sw:258px;--hh:52px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--bg);color:var(--tx);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+/* HEADER */
+header{height:var(--hh);background:var(--surface);border-bottom:1px solid var(--bdr);display:flex;align-items:center;padding:0 20px;gap:14px;position:fixed;top:0;left:0;right:0;z-index:100;}
+.logo{font-weight:700;font-size:15px;color:var(--txb);} .logo span{color:var(--am);}
+.sem{margin-left:auto;background:var(--amd);border:1px solid var(--am);color:var(--am);font-family:var(--mono);font-size:12px;padding:3px 10px;border-radius:4px;}
+.hdr-r{display:flex;align-items:center;gap:12px;}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--bld);border:1px solid var(--bl);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--bl);font-weight:600;}
+
+/* LAYOUT */
+.layout{display:flex;margin-top:var(--hh);height:calc(100vh - var(--hh));overflow:hidden;}
+
+/* SIDEBAR */
+aside{width:var(--sw);min-width:var(--sw);background:var(--surface);border-right:1px solid var(--bdr);overflow-y:auto;display:flex;flex-direction:column;padding-bottom:20px;}
+.nsec{padding:13px 12px 3px;font-size:10px;font-weight:700;color:var(--txd);letter-spacing:1.4px;text-transform:uppercase;}
+.ni{display:flex;align-items:center;gap:9px;padding:7px 14px;cursor:pointer;border-radius:6px;margin:1px 6px;font-size:12.5px;color:var(--txd);transition:all .15s;border:1px solid transparent;}
+.ni:hover{background:var(--s2);color:var(--tx);}
+.ni.active{background:var(--bld);color:var(--bl);border-color:var(--bl);font-weight:600;}
+.ni .ico{width:16px;text-align:center;font-size:13px;flex-shrink:0;}
+.nbg{margin-left:auto;font-size:10px;font-family:var(--mono);padding:1px 6px;border-radius:10px;}
+.nbg.r{background:var(--rdd);color:var(--rd);}
+.nbg.a{background:var(--amd);color:var(--am);}
+.nbg.d{background:var(--s3);color:var(--txd);}
+.ndiv{height:1px;background:var(--bdr);margin:6px 12px;}
+
+/* MAIN */
+main{flex:1;overflow-y:auto;padding:22px;display:flex;flex-direction:column;gap:18px;}
+.page{display:none;flex-direction:column;gap:18px;}
+.page.active{display:flex;animation:fi .15s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* PAGE HEADER */
+.ph{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.ptitle{font-size:21px;font-weight:700;color:var(--txb);}
+.psub{font-size:12.5px;color:var(--txd);margin-top:2px;}
+.bg{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;font-size:12.5px;font-weight:600;cursor:pointer;border:none;transition:all .15s;font-family:var(--font);}
+.bp{background:var(--bl);color:#000;} .bp:hover{background:#79BCFF;}
+.bo{background:transparent;border:1px solid var(--bdr2);color:var(--tx);} .bo:hover{border-color:var(--bl);color:var(--bl);}
+.ba{background:var(--am);color:#000;} .ba:hover{background:#FFB83F;}
+.bsm{padding:4px 10px;font-size:11.5px;}
+
+/* KPI */
+.kg{display:grid;gap:12px;}
+.k4{grid-template-columns:repeat(4,1fr);}
+.k3{grid-template-columns:repeat(3,1fr);}
+.k2{grid-template-columns:repeat(2,1fr);}
+.kpi{background:var(--s2);border:1px solid var(--bdr);border-radius:10px;padding:14px;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.kpi.g::before{background:var(--gn);} .kpi.b::before{background:var(--bl);}
+.kpi.a::before{background:var(--am);} .kpi.r::before{background:var(--rd);}
+.kpi.p::before{background:var(--pu);} .kpi.t::before{background:var(--tl);}
+.klbl{font-size:10.5px;color:var(--txd);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;}
+.kval{font-size:26px;font-weight:700;color:var(--txb);font-family:var(--mono);line-height:1;}
+.ksub{font-size:11px;color:var(--txd);margin-top:4px;}
+.kdelta{font-size:11px;margin-top:3px;} .kdelta.up{color:var(--gn);} .kdelta.dn{color:var(--rd);}
+
+/* CARD */
+.card{background:var(--s2);border:1px solid var(--bdr);border-radius:10px;padding:16px;}
+.ct{font-size:12.5px;font-weight:600;color:var(--txb);margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.tbl th{background:var(--s3);color:var(--txd);text-align:left;padding:7px 11px;font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--bdr);font-weight:600;white-space:nowrap;}
+.tbl td{padding:8px 11px;border-bottom:1px solid var(--bdr);color:var(--tx);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:var(--s3);}
+.mn{font-family:var(--mono);font-size:11.5px;}
+.pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:600;white-space:nowrap;}
+.pg{background:var(--gnd);color:var(--gn);} .pb{background:var(--bld);color:var(--bl);}
+.pa{background:var(--amd);color:var(--am);} .pr{background:var(--rdd);color:var(--rd);}
+.pp{background:var(--pud);color:var(--pu);} .pt{background:var(--tld);color:var(--tl);}
+
+/* WEEK CHART */
+.wc{display:flex;align-items:flex-end;gap:5px;height:86px;padding:0 2px;}
+.ww{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;}
+.wb{width:100%;border-radius:3px 3px 0 0;cursor:pointer;} .wb:hover{filter:brightness(1.3);}
+.wb.cur{outline:2px solid var(--am);outline-offset:1px;}
+.wlbl,.wval{font-size:9px;color:var(--txd);font-family:var(--mono);}
+
+/* CORRAL MAP */
+.cgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;}
+.cc{aspect-ratio:1;border-radius:7px;border:1px solid var(--bdr);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .14s;gap:1px;padding:3px;}
+.cc.oc{background:var(--gnd);border-color:var(--gn);} .cc.vp{background:var(--amd);border-color:var(--am);}
+.cc.zp{background:var(--pud);border-color:var(--pu);} .cc.li{background:var(--s3);border-color:var(--bdr2);color:var(--txd);}
+.cc:hover{transform:scale(1.05);z-index:2;}
+.cc .cn{font-weight:700;font-family:var(--mono);font-size:11px;}
+.cc .ci{font-size:8.5px;opacity:.8;text-align:center;}
+
+/* ALERTS */
+.ali{display:flex;flex-direction:column;gap:7px;}
+.ai{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;font-size:12px;}
+.ai.warn{background:var(--amd);border:1px solid var(--am);color:var(--am);}
+.ai.info{background:var(--bld);border:1px solid var(--bl);color:var(--bl);}
+.ai.ok{background:var(--gnd);border:1px solid var(--gn);color:var(--gn);}
+.ai.err{background:var(--rdd);border:1px solid var(--rd);color:var(--rd);}
+
+/* FORM */
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fg{display:flex;flex-direction:column;gap:4px;}
+.fg.full{grid-column:1/-1;}
+label{font-size:10.5px;color:var(--txd);text-transform:uppercase;letter-spacing:.6px;font-weight:600;}
+input,select,textarea{background:var(--s3);border:1px solid var(--bdr2);border-radius:6px;color:var(--tx);padding:7px 11px;font-family:var(--font);font-size:12.5px;outline:none;transition:border .15s;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--bl);}
+select option{background:var(--s2);}
+
+/* CALC BOX */
+.cbox{background:var(--s3);border:1px solid var(--gnd);border-radius:8px;padding:12px;}
+.crow{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--bdr);font-size:12px;}
+.crow:last-child{border-bottom:none;}
+.ck{color:var(--txd);} .cv{font-family:var(--mono);font-weight:600;color:var(--txb);}
+.cv.g{color:var(--gn);} .cv.a{color:var(--am);} .cv.p{color:var(--pu);}
+
+/* TIMELINE */
+.tl{display:flex;flex-direction:column;}
+.tli{display:flex;gap:12px;padding-bottom:13px;}
+.tli:last-child{padding-bottom:0;}
+.tll{display:flex;flex-direction:column;align-items:center;min-width:26px;}
+.tld{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:3px;}
+.tlln{width:1px;flex:1;background:var(--bdr);margin-top:3px;}
+.tli:last-child .tlln{display:none;}
+.tlc{flex:1;}
+.tlt{font-size:12px;font-weight:600;color:var(--tx);}
+.tls{font-size:11px;color:var(--txd);margin-top:1px;font-family:var(--mono);}
+.tli.done .tld{background:var(--gn);} .tli.act .tld{background:var(--am);box-shadow:0 0 5px var(--am);}
+.tli.pend .tld{background:var(--bdr2);}
+
+/* CIERRE */
+.csum{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-bottom:14px;}
+.cblk{background:var(--s3);border:1px solid var(--bdr);border-radius:8px;padding:12px;}
+.cbt{font-size:10px;color:var(--txd);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;}
+.cbr{display:flex;justify-content:space-between;font-size:11.5px;padding:3px 0;}
+.cbr .ck{color:var(--txd);} .cbr .cv{font-family:var(--mono);font-size:11.5px;}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--bdr);margin-bottom:14px;}
+.tab{padding:8px 16px;font-size:12.5px;cursor:pointer;color:var(--txd);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;}
+.tab:hover{color:var(--tx);} .tab.active{color:var(--bl);border-bottom-color:var(--bl);font-weight:600;}
+
+/* PROG BAR */
+.pb{height:5px;background:var(--bdr);border-radius:3px;overflow:hidden;}
+.pf{height:100%;border-radius:3px;transition:width .5s;}
+
+/* LEGEND */
+.leg{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;}
+.li{display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--txd);}
+.ld{width:7px;height:7px;border-radius:2px;}
+
+/* STAT ROW */
+.srow{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:12px;}
+.srow:last-child{border-bottom:none;}
+.srow .sk{color:var(--txd);} .srow .sv{font-family:var(--mono);font-weight:600;}
+
+.stitle{font-size:10.5px;font-weight:600;color:var(--txd);text-transform:uppercase;letter-spacing:1px;margin:10px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--bdr);}
+
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🐄 Gestión <span>Ganadera</span></div>
+  <div class="sem">Semana 30 · 2025</div>
+  <div class="hdr-r"><div class="avatar">ZG</div></div>
+</header>
+
+<div class="layout">
+<aside>
+  <div class="nsec">Principal</div>
+  <div class="ni active" data-p="dash" onclick="nav('dash')"><span class="ico">📊</span>Dashboard</div>
+
+  <div class="nsec">Operación</div>
+  <div class="ni" data-p="disp" onclick="nav('disp')"><span class="ico">🐂</span>Disponibilidad</div>
+  <div class="ni" data-p="reimp" onclick="nav('reimp')"><span class="ico">💉</span>Reimplantes<span class="nbg r">3</span></div>
+  <div class="ni" data-p="trans" onclick="nav('trans')"><span class="ico">🔄</span>Transiciones<span class="nbg a">2</span></div>
+  <div class="ni" data-p="zilp" onclick="nav('zilp')"><span class="ico">⚡</span>Zilpaterol</div>
+
+  <div class="nsec">Planeación</div>
+  <div class="ni" data-p="vta-sem" onclick="nav('vta-sem')"><span class="ico">📅</span>Venta por Semana</div>
+  <div class="ni" data-p="proy-anual" onclick="nav('proy-anual')"><span class="ico">📆</span>Proyección Anual</div>
+
+  <div class="nsec">Inventario</div>
+  <div class="ni" data-p="inv-gral" onclick="nav('inv-gral')"><span class="ico">📦</span>Inventario General</div>
+  <div class="ni" data-p="inv-corr" onclick="nav('inv-corr')"><span class="ico">🏗️</span>Corrales</div>
+  <div class="ni" data-p="inv-pot" onclick="nav('inv-pot')"><span class="ico">🌾</span>Potreros</div>
+
+  <div class="nsec">Cierre</div>
+  <div class="ni" data-p="cierre-res" onclick="nav('cierre-res')"><span class="ico">📄</span>Generar Cierre</div>
+  <div class="ni" data-p="cierre-cmp" onclick="nav('cierre-cmp')"><span class="ico">🛒</span>Compra / Recepción</div>
+  <div class="ni" data-p="cierre-mue" onclick="nav('cierre-mue')"><span class="ico">💀</span>Muertes</div>
+  <div class="ni" data-p="cierre-vta" onclick="nav('cierre-vta')"><span class="ico">💵</span>Ventas</div>
+  <div class="ni" data-p="cierre-ali" onclick="nav('cierre-ali')"><span class="ico">🌽</span>Alimentación</div>
+  <div class="ni" data-p="cierre-med" onclick="nav('cierre-med')"><span class="ico">💊</span>Medicación</div>
+  <div class="ni" data-p="cierre-hot" onclick="nav('cierre-hot')"><span class="ico">🏨</span>Costo Hotel</div>
+  <div class="ni" data-p="cierre-ind" onclick="nav('cierre-ind')"><span class="ico">📈</span>Indicadores</div>
+
+  <div class="nsec">Catálogos</div>
+  <div class="ni" data-p="cat-corrales" onclick="nav('cat-corrales')"><span class="ico">🏗️</span>Corrales</div>
+  <div class="ni" data-p="cat-lotes" onclick="nav('cat-lotes')"><span class="ico">🐂</span>Lotes</div>
+  <div class="ni" data-p="cat-prg" onclick="nav('cat-prg')"><span class="ico">📐</span>Prog. Reimplantes</div>
+  <div class="ni" data-p="cat-ali" onclick="nav('cat-ali')"><span class="ico">🌿</span>Parámetros Alim.</div>
+  <div class="ni" data-p="cat-imp" onclick="nav('cat-imp')"><span class="ico">💉</span>Implantes</div>
+  <div class="ni" data-p="cat-med" onclick="nav('cat-med')"><span class="ico">🧪</span>Medicamentos</div>
+  <div class="ni" data-p="cat-par" onclick="nav('cat-par')"><span class="ico">⚙️</span>Parámetros</div>
+
+  <div class="ndiv"></div>
+  <div class="ni" data-p="hospital" onclick="nav('hospital')"><span class="ico">🏥</span>Hospitales<span class="nbg d">Fase 2</span></div>
+</aside>
+
+<main>
+
+<!-- ═══ DASHBOARD ════════════════════════════════════════════════════════════ -->
+<div class="page active" id="page-dash">
+  <div class="ph">
+    <div><div class="ptitle">Dashboard Operativo</div><div class="psub">Semana 30 · lunes 21 jul 2025 · Rancho Chamizal</div></div>
+    <button class="btn bo">📥 Exportar</button>
+  </div>
+  <div class="kg k4">
+    <div class="kpi a"><div class="klbl">Venta esta semana</div><div class="kval">342</div><div class="ksub">CH087 + CH091H</div></div>
+    <div class="kpi g"><div class="klbl">Kilos proyectados</div><div class="kval">94,640</div><div class="ksub">prom. 276.7 kg/cab</div></div>
+    <div class="kpi b"><div class="klbl">Inventario total rancho</div><div class="kval">2,847</div><div class="ksub">corrales + potreros</div><div class="kdelta up">↑ 124 vs sem. ant.</div></div>
+    <div class="kpi r"><div class="klbl">Semanas sin salida</div><div class="kval">3</div><div class="ksub">S34 · S36 · S38</div></div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="ct">📅 Salidas proyectadas por semana <span class="pill pa" style="font-size:10px">S28–S40</span></div>
+      <div class="wc" id="wChart"></div>
+      <div class="leg">
+        <div class="li"><div class="ld" style="background:var(--gn)"></div>Con salida</div>
+        <div class="li"><div class="ld" style="background:var(--am)"></div>Semana actual</div>
+        <div class="li"><div class="ld" style="background:var(--bdr2)"></div>Sin salida</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">🗺️ Mapa de corrales</div>
+      <div class="cgrid" id="corralMap"></div>
+      <div class="leg" style="margin-top:10px">
+        <div class="li"><div class="ld" style="background:var(--gn)"></div>Ocupado</div>
+        <div class="li"><div class="ld" style="background:var(--am)"></div>Sale sem. actual</div>
+        <div class="li"><div class="ld" style="background:var(--pu)"></div>Zilpaterol</div>
+        <div class="li"><div class="ld" style="background:var(--bdr2)"></div>Libre</div>
+      </div>
+    </div>
+  </div>
+  <div class="g3">
+    <div class="card">
+      <div class="ct">📈 Indicadores operativos</div>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <div><div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:3px"><span style="color:var(--txd)">GDP proyectada</span><span class="mn">1.35 kg/d</span></div><div class="pb"><div class="pf" style="width:78%;background:var(--gn)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:3px"><span style="color:var(--txd)">GDP real promedio</span><span class="mn">1.28 kg/d</span></div><div class="pb"><div class="pf" style="width:72%;background:var(--bl)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:3px"><span style="color:var(--txd)">Conversión alim.</span><span class="mn">7.42</span></div><div class="pb"><div class="pf" style="width:60%;background:var(--am)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:3px"><span style="color:var(--txd)">Mortalidad acum.</span><span class="mn">0.82%</span></div><div class="pb"><div class="pf" style="width:16%;background:var(--rd)"></div></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">⚡ Actividad sem. 30</div>
+      <div class="tl">
+        <div class="tli done"><div class="tll"><div class="tld"></div><div class="tlln"></div></div><div class="tlc"><div class="tlt">Reimplante CH083 — Imp.3</div><div class="tls">Lun 21 · 214 cab</div></div></div>
+        <div class="tli act"><div class="tll"><div class="tld"></div><div class="tlln"></div></div><div class="tlc"><div class="tlt">Entrada Zilpaterol CH088</div><div class="tls">Mié 23 · 210 cab · F3+Zilp</div></div></div>
+        <div class="tli pend"><div class="tll"><div class="tld"></div><div class="tlln"></div></div><div class="tlc"><div class="tlt">Transición CH090H: FT→F3</div><div class="tls">Jue 24 · 174 cab</div></div></div>
+        <div class="tli pend"><div class="tll"><div class="tld"></div></div><div class="tlc"><div class="tlt">Venta CH087 + CH091H</div><div class="tls">Vie 25 · 342 cab · Sem 30</div></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">🔔 Alertas</div>
+      <div class="ali">
+        <div class="ai err">🚨 Sem 34 sin salida programada</div>
+        <div class="ai warn">⚠️ CH089: GDP real −12% vs objetivo</div>
+        <div class="ai info">ℹ️ 3 reimplantes pendientes sem. 30</div>
+        <div class="ai ok">✅ CH087H lista para venta sem. 30</div>
+        <div class="ai warn">⚠️ C07, C12, C14, C16 libres</div>
+      </div>
+    </div>
+  <!-- AI INSIGHT PANEL -->
+  <div class="card" style="border-color:var(--pud)">
+    <div class="ct" style="justify-content:space-between">
+      <span>🤖 Asistente IA — Análisis operativo</span>
+      <span style="font-size:10.5px;color:var(--txd);font-weight:400">Claude · consumo mínimo de tokens</span>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <button class="btn bo bsm" onclick="askAI('resumen')">📊 Resumen sem. 30</button>
+      <button class="btn bo bsm" onclick="askAI('riesgos')">⚠️ Riesgos operativos</button>
+      <button class="btn bo bsm" onclick="askAI('compra')">🛒 ¿Necesito comprar?</button>
+      <button class="btn bo bsm" onclick="askAI('rentabilidad')">💰 Proyección rentabilidad</button>
+      <button class="btn bo bsm" onclick="askAI('libre')">✏️ Pregunta libre...</button>
+    </div>
+    <div id="ai-input-area" style="display:none;margin-bottom:10px;display:flex;gap:8px">
+      <input id="ai-custom-q" placeholder="Escribe tu pregunta sobre el rancho..." style="flex:1"/>
+      <button class="btn bp bsm" onclick="askAICustom()">Enviar</button>
+    </div>
+    <div id="ai-response-area" style="min-height:80px">
+      <div style="color:var(--txd);font-size:12.5px;text-align:center;padding:20px 0">
+        Selecciona una pregunta o escribe la tuya para obtener análisis basado en los datos de la semana.
+      </div>
+    </div>
+    <div id="ai-token-info" style="margin-top:8px;font-size:11px;color:var(--txd);display:none;text-align:right"></div>
+  </div>
+</div>
+
+<!-- ═══ DISPONIBILIDAD ═══════════════════════════════════════════════════════ -->
+<div class="page" id="page-disp">
+  <div class="ph">
+    <div><div class="ptitle">Disponibilidad</div><div class="psub">Módulo principal · seguimiento por corral con proyección automática de peso, reimplantes y salida</div></div>
+    <div class="bg"><button class="btn bp" onclick="nav('disp-alta')">➕ Alta de lote</button><button class="btn bo">📥 Exportar</button></div>
+  </div>
+  <div class="kg k4">
+    <div class="kpi g"><div class="klbl">Lotes activos</div><div class="kval">22</div></div>
+    <div class="kpi b"><div class="klbl">Inventario corrales</div><div class="kval">2,527</div></div>
+    <div class="kpi a"><div class="klbl">Salen sem. 30</div><div class="kval">342</div></div>
+    <div class="kpi p"><div class="klbl">Corrales libres</div><div class="kval">4</div></div>
+  </div>
+  <div class="card">
+    <div class="ct">📋 Consulta de disponibilidad — todos los corrales</div>
+    <div style="overflow-x:auto">
+    <table class="tbl">
+      <thead><tr>
+        <th>Corral</th><th>Lote</th><th>Sexo</th><th>Inventario</th>
+        <th>F. Inicio</th><th>Peso Inicio</th><th>Días Trans.</th>
+        <th>Días Eng. Proy.</th><th>Peso Act. Proy.</th><th>GDP</th>
+        <th>Peso Salida</th><th>Peso Est. Rango</th>
+        <th>Días 1er Reimp.</th><th>F. 1er Reimp.</th><th>Peso Prom.</th>
+        <th>Etapa</th><th>Sem. Venta</th><th></th>
+      </tr></thead>
+      <tbody id="dispTbl"></tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ALTA DE LOTE ══════════════════════════════════════════════════════════ -->
+<div class="page" id="page-disp-alta">
+  <div class="ph">
+    <div><div class="ptitle">Alta de Lote en Corral</div><div class="psub">Captura mínima · el sistema calcula proyección completa automáticamente</div></div>
+    <button class="btn bo" onclick="nav('disp')">← Volver</button>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="ct">📋 Datos de entrada</div>
+      <div class="fg2">
+        <div class="fg"><label>Corral</label><select id="fCorral"><option>C07 — Libre (200 cap.)</option><option>C12 — Libre (180 cap.)</option><option>C14 — Libre (220 cap.)</option></select></div>
+        <div class="fg"><label>Lote (auto-generado)</label><input value="CH095" id="fLote" readonly style="color:var(--am)"/></div>
+        <div class="fg"><label>Sexo</label><select id="fSexo" onchange="recalc()"><option value="M">Macho</option><option value="H">Hembra</option><option value="HV">Hembra-Vaca</option></select></div>
+        <div class="fg"><label>Inventario inicial (cab.)</label><input type="number" id="fCab" value="220" oninput="recalc()"/></div>
+        <div class="fg"><label>Fecha inicio</label><input type="date" id="fFech" value="2025-07-21" oninput="recalc()"/></div>
+        <div class="fg"><label>Peso inicio prom. (kg)</label><input type="number" id="fPI" value="250" oninput="recalc()"/></div>
+        <div class="fg"><label>Peso salida objetivo (kg)</label><input type="number" id="fPO" value="480" oninput="recalc()"/></div>
+        <div class="fg"><label>GDP esperada (kg/día)</label><input type="number" id="fGDP" value="1.35" step="0.01" oninput="recalc()"/></div>
+        <div class="fg"><label>Peso promedio actual (kg)</label><input type="number" id="fPP" value="250" oninput="recalc()"/></div>
+        <div class="fg"><label>Proveedor</label><select><option>Ganadería La Esperanza</option><option>Rancho El Toro</option><option>Agr. San Miguel</option></select></div>
+        <div class="fg full"><label>Observaciones</label><input placeholder="Notas opcionales..."/></div>
+      </div>
+      <div class="bg" style="margin-top:14px">
+        <button class="btn bp" onclick="alert('✅ Lote CH095 dado de alta correctamente')">💾 Guardar lote</button>
+        <button class="btn bo">Limpiar</button>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="ct">🤖 Proyección automática <span class="pill pg" style="font-size:10px">calculado</span></div>
+        <div class="cbox">
+          <div class="crow"><span class="ck">Días engorda proyectados</span><span class="cv" id="pDias">—</span></div>
+          <div class="crow"><span class="ck">Peso actual proyectado (hoy)</span><span class="cv" id="pPhoy">—</span></div>
+          <div class="crow"><span class="ck">Peso estimado por rango (día 60)</span><span class="cv" id="pRango">—</span></div>
+          <div class="crow"><span class="ck">Fecha proyectada de venta</span><span class="cv a" id="pFV">—</span></div>
+          <div class="crow"><span class="ck">Semana del año (venta)</span><span class="cv a" id="pSV">—</span></div>
+          <div class="crow"><span class="ck">Días 1er reimplante</span><span class="cv">60 días desde inicio</span></div>
+          <div class="crow"><span class="ck">Fecha 1er reimplante</span><span class="cv" id="pR1">—</span></div>
+          <div class="crow"><span class="ck">Fecha 2do reimplante</span><span class="cv" id="pR2">—</span></div>
+          <div class="crow"><span class="ck">Fecha 3er reimplante</span><span class="cv" id="pR3">—</span></div>
+          <div class="crow"><span class="ck">Fin transición F1→F3</span><span class="cv" id="pFT">—</span></div>
+          <div class="crow"><span class="ck">Entrada a Zilpaterol</span><span class="cv p" id="pZilp">—</span></div>
+          <div class="crow"><span class="ck">Kilos proyectados en venta</span><span class="cv g" id="pKilos">—</span></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <div class="ct">📅 Etapas alimenticias</div>
+        <div class="tl" id="etapasTL"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ REIMPLANTES ══════════════════════════════════════════════════════════ -->
+<div class="page" id="page-reimp">
+  <div class="ph">
+    <div><div class="ptitle">Reimplantes por Semana</div><div class="psub">Qué corrales y lotes deben reimplantarse · programa automático por rango de peso</div></div>
+    <button class="btn bp" onclick="alert('✅ Reimplante registrado')">✔ Registrar</button>
+  </div>
+  <div class="kg k4">
+    <div class="kpi r"><div class="klbl">Pendientes esta semana</div><div class="kval">3</div></div>
+    <div class="kpi a"><div class="klbl">Próxima semana</div><div class="kval">5</div></div>
+    <div class="kpi g"><div class="klbl">Completados (año)</div><div class="kval">147</div></div>
+    <div class="kpi b"><div class="klbl">Lotes en programa</div><div class="kval">22</div></div>
+  </div>
+  <div class="card">
+    <div class="ct">💉 Reimplantes programados — próximas 4 semanas</div>
+    <table class="tbl"><thead><tr><th>Semana</th><th>Corral</th><th>Lote</th><th>Sexo</th><th>Inventario</th><th>Fecha Proyectada</th><th>Tipo Reimplante</th><th>Peso Est.</th><th>Estatus</th></tr></thead><tbody>
+      <tr><td class="mn">Sem 30</td><td>C03</td><td class="mn">CH083</td><td>M</td><td>214</td><td class="mn">21 Jul</td><td>Revalor-200</td><td class="mn">375 kg</td><td><span class="pill pr">Hoy</span></td></tr>
+      <tr><td class="mn">Sem 30</td><td>C05</td><td class="mn">CH092</td><td>M</td><td>186</td><td class="mn">22 Jul</td><td>Component TE-G</td><td class="mn">292 kg</td><td><span class="pill pa">Esta sem.</span></td></tr>
+      <tr><td class="mn">Sem 30</td><td>C06</td><td class="mn">CH090H</td><td>H</td><td>174</td><td class="mn">25 Jul</td><td>Revalor-G</td><td class="mn">274 kg</td><td><span class="pill pa">Esta sem.</span></td></tr>
+      <tr><td class="mn">Sem 31</td><td>C02</td><td class="mn">CH089</td><td>M</td><td>196</td><td class="mn">28 Jul</td><td>Revalor-200</td><td class="mn">362 kg</td><td><span class="pill pb">Prox. sem.</span></td></tr>
+      <tr><td class="mn">Sem 31</td><td>C10</td><td class="mn">CH086H</td><td>H</td><td>164</td><td class="mn">29 Jul</td><td>Revalor-G</td><td class="mn">350 kg</td><td><span class="pill pb">Prox. sem.</span></td></tr>
+      <tr><td class="mn">Sem 32</td><td>C09</td><td class="mn">CH085</td><td>M</td><td>222</td><td class="mn">05 Ago</td><td>Component TE-200</td><td class="mn">381 kg</td><td><span class="pill pb">Programado</span></td></tr>
+    </tbody></table>
+  </div>
+  <div class="card">
+    <div class="ct">📋 Historial reciente</div>
+    <table class="tbl"><thead><tr><th>Fecha</th><th>Corral</th><th>Lote</th><th>Sexo</th><th>Inventario</th><th>Tipo reimplante</th></tr></thead><tbody>
+      <tr><td class="mn">14 Jul</td><td>C01</td><td class="mn">CH087</td><td>M</td><td>214</td><td>Revalor-200 / Imp. 3</td></tr>
+      <tr><td class="mn">10 Jul</td><td>C10</td><td class="mn">CH086H</td><td>H</td><td>164</td><td>Ralgro / Imp. 1</td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<!-- ═══ TRANSICIONES ══════════════════════════════════════════════════════════ -->
+<div class="page" id="page-trans">
+  <div class="ph">
+    <div><div class="ptitle">Transiciones de Alimentación</div><div class="psub">Cambios de fórmula programados · F1, F3, combinaciones y días de transición por corral</div></div>
+    <button class="btn bp" onclick="alert('✅ Transición registrada')">✔ Registrar</button>
+  </div>
+  <div class="kg k4">
+    <div class="kpi a"><div class="klbl">Esta semana</div><div class="kval">2</div></div>
+    <div class="kpi b"><div class="klbl">En transición activa</div><div class="kval">174</div><div class="ksub">CH090H · FT</div></div>
+    <div class="kpi g"><div class="klbl">Completadas año</div><div class="kval">68</div></div>
+    <div class="kpi p"><div class="klbl">Próx. a Zilpaterol</div><div class="kval">2</div></div>
+  </div>
+  <div class="card">
+    <div class="ct">🔄 Transiciones programadas por semana</div>
+    <table class="tbl"><thead><tr><th>Fecha Inicio</th><th>Corral</th><th>Lote</th><th>Sexo</th><th>Cantidad</th><th>F1</th><th>F3</th><th>F1/F3 Combinación</th><th>Días Transición</th><th>Proporciones</th><th>Estatus</th></tr></thead><tbody>
+      <tr><td class="mn">23 Jul</td><td>C04</td><td class="mn">CH088</td><td>M</td><td>210</td><td>—</td><td>F3</td><td>F3→F3+Zilp</td><td class="mn">0 días</td><td>100% F3+Zilp</td><td><span class="pill pa">Esta sem.</span></td></tr>
+      <tr><td class="mn">24 Jul</td><td>C06</td><td class="mn">CH090H</td><td>H</td><td>174</td><td>FT</td><td>F3</td><td>FT→F3</td><td class="mn">14 días</td><td>50/50 → 100% F3</td><td><span class="pill pa">Esta sem.</span></td></tr>
+      <tr><td class="mn">28 Jul</td><td>C05</td><td class="mn">CH092</td><td>M</td><td>186</td><td>F1</td><td>FT</td><td>F1→Transición</td><td class="mn">14 días</td><td>50% F1 + 50% FT</td><td><span class="pill pb">Prox.</span></td></tr>
+      <tr><td class="mn">04 Ago</td><td>C02</td><td class="mn">CH089</td><td>M</td><td>196</td><td>F1</td><td>FT</td><td>F1→Transición</td><td class="mn">14 días</td><td>50% F1 + 50% FT</td><td><span class="pill pb">Programado</span></td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<!-- ═══ ZILPATEROL ════════════════════════════════════════════════════════════ -->
+<div class="page" id="page-zilp">
+  <div class="ph">
+    <div><div class="ptitle">Entradas a Zilpaterol</div><div class="psub">Reporte semanal · 35 días obligatorios F3+Zilpaterol previos a venta</div></div>
+    <button class="btn bp" onclick="alert('✅ Entrada registrada')">✔ Registrar</button>
+  </div>
+  <div class="kg k4">
+    <div class="kpi p"><div class="klbl">Activos en Zilpaterol</div><div class="kval">2</div><div class="ksub">374 cabezas</div></div>
+    <div class="kpi a"><div class="klbl">Entran esta semana</div><div class="kval">1</div><div class="ksub">CH088 · 210 cab</div></div>
+    <div class="kpi g"><div class="klbl">Completan 35 días</div><div class="kval">2</div><div class="ksub">CH087 + CH091H</div></div>
+    <div class="kpi b"><div class="klbl">En cola (6 sem.)</div><div class="kval">4</div></div>
+  </div>
+  <div class="card">
+    <div class="ct">⚡ Entradas a Zilpaterol por semana</div>
+    <table class="tbl"><thead><tr><th>Semana</th><th>Corral</th><th>Lote</th><th>Sexo</th><th>Inventario</th><th>Fecha Proyectada</th><th>Días en Zilp.</th><th>Días Rest.</th><th>Fecha Venta</th><th>Observaciones</th><th>Progreso</th></tr></thead><tbody>
+      <tr><td class="mn">Sem 30</td><td>C01</td><td class="mn">CH087</td><td>M</td><td>214</td><td class="mn">16 Jun</td><td class="mn">35</td><td class="mn" style="color:var(--gn)">✅ Listo</td><td class="mn">21 Jul</td><td>Venta confirmada</td><td><div class="pb" style="width:80px"><div class="pf" style="width:100%;background:var(--gn)"></div></div></td></tr>
+      <tr><td class="mn">Sem 30</td><td>C03</td><td class="mn">CH091H</td><td>H</td><td>128</td><td class="mn">19 Jun</td><td class="mn">32</td><td class="mn" style="color:var(--am)">3 días</td><td class="mn">24 Jul</td><td></td><td><div class="pb" style="width:80px"><div class="pf" style="width:91%;background:var(--bl)"></div></div></td></tr>
+      <tr><td class="mn">Sem 30</td><td>C04</td><td class="mn">CH088</td><td>M</td><td>210</td><td class="mn">23 Jul</td><td class="mn">—</td><td class="mn">35 días</td><td class="mn">27 Ago</td><td>Entra esta sem.</td><td><div class="pb" style="width:80px"><div class="pf" style="width:2%;background:var(--pu)"></div></div></td></tr>
+      <tr><td class="mn">Sem 32</td><td>C09</td><td class="mn">CH085</td><td>M</td><td>222</td><td class="mn">08 Ago</td><td class="mn">—</td><td class="mn">35 días</td><td class="mn">12 Sep</td><td></td><td><div class="pb" style="width:80px"><div class="pf" style="width:0%;background:var(--pu)"></div></div></td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<!-- ═══ VENTA POR SEMANA ══════════════════════════════════════════════════════ -->
+<div class="page" id="page-vta-sem">
+  <div class="ph">
+    <div><div class="ptitle">Venta por Semana</div><div class="psub">Qué puede venderse por semana del año · cabezas, lotes, kilos estimados y cliente/destino</div></div>
+    <button class="btn bo">📥 Exportar</button>
+  </div>
+  <div class="kg k4">
+    <div class="kpi a"><div class="klbl">Esta semana (S30)</div><div class="kval">342</div><div class="ksub">94,640 kg</div></div>
+    <div class="kpi b"><div class="klbl">Siguiente (S31)</div><div class="kval">164</div><div class="ksub">47,560 kg</div></div>
+    <div class="kpi r"><div class="klbl">Semanas sin salida</div><div class="kval">3</div><div class="ksub">S34 · S36 · S38</div></div>
+    <div class="kpi g"><div class="klbl">Total proy. 8 sem.</div><div class="kval">2,116</div></div>
+  </div>
+  <div class="card">
+    <table class="tbl"><thead><tr><th>Semana</th><th>Corral</th><th>Lote</th><th>Sexo</th><th>Inventario</th><th>Kilos Est.</th><th>Cliente / Destino</th><th>Alerta</th></tr></thead><tbody>
+      <tr><td class="mn">Sem 30</td><td>C01</td><td class="mn">CH087</td><td>M</td><td>214</td><td class="mn">62,622</td><td>Rastro Norteño</td><td><span class="pill pa">Esta sem.</span></td></tr>
+      <tr><td class="mn">Sem 30</td><td>C03</td><td class="mn">CH091H</td><td>H</td><td>128</td><td class="mn">32,018</td><td>Rastro Norteño</td><td><span class="pill pa">Esta sem.</span></td></tr>
+      <tr><td class="mn">Sem 31</td><td>C10</td><td class="mn">CH086H</td><td>H</td><td>164</td><td class="mn">47,560</td><td>—</td><td><span class="pill pb">Próx. sem.</span></td></tr>
+      <tr><td class="mn">Sem 32</td><td>C02</td><td class="mn">CH089</td><td>M</td><td>196</td><td class="mn">57,624</td><td>—</td><td><span class="pill pb">OK</span></td></tr>
+      <tr><td class="mn">Sem 32</td><td>C08</td><td class="mn">CH093</td><td>M</td><td>198</td><td class="mn">59,004</td><td>—</td><td><span class="pill pb">OK</span></td></tr>
+      <tr><td class="mn">Sem 33</td><td>C06</td><td class="mn">CH090H</td><td>H</td><td>174</td><td class="mn">46,980</td><td>—</td><td><span class="pill pb">OK</span></td></tr>
+      <tr><td class="mn">Sem 34</td><td>—</td><td>—</td><td>—</td><td>0</td><td>0</td><td>—</td><td><span class="pill pr">⚠ Sin salida</span></td></tr>
+      <tr><td class="mn">Sem 35</td><td>C04</td><td class="mn">CH088</td><td>M</td><td>210</td><td class="mn">61,950</td><td>—</td><td><span class="pill pb">OK</span></td></tr>
+      <tr><td class="mn">Sem 36</td><td>—</td><td>—</td><td>—</td><td>0</td><td>0</td><td>—</td><td><span class="pill pr">⚠ Sin salida</span></td></tr>
+      <tr><td class="mn">Sem 37</td><td>C09</td><td class="mn">CH085</td><td>M</td><td>222</td><td class="mn">68,820</td><td>—</td><td><span class="pill pb">OK</span></td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<!-- ═══ PROYECCIÓN ANUAL ══════════════════════════════════════════════════════ -->
+<div class="page" id="page-proy-anual">
+  <div class="ph">
+    <div><div class="ptitle">Proyección Anual 2025</div><div class="psub">Vista anual semana a semana · detectar huecos, planear compras y apoyar al dashboard</div></div>
+    <div class="bg"><select style="padding:7px 10px;font-size:12px;width:90px"><option>2025</option><option>2026</option></select><button class="btn bo">📥 Exportar</button></div>
+  </div>
+  <div class="kg k4">
+    <div class="kpi g"><div class="klbl">Semanas con salida</div><div class="kval">39</div><div class="ksub">de 52 semanas</div></div>
+    <div class="kpi r"><div class="klbl">Semanas sin salida</div><div class="kval">13</div><div class="ksub">requieren planeación</div></div>
+    <div class="kpi b"><div class="klbl">Cabezas proy. año</div><div class="kval">9,840</div></div>
+    <div class="kpi a"><div class="klbl">Prom. cab./semana</div><div class="kval">252</div></div>
+  </div>
+  <div class="card">
+    <table class="tbl"><thead><tr><th>Semana</th><th>Fecha inicio sem.</th><th>Corral</th><th>Lote</th><th>Sexo</th><th>Inventario</th><th>Alerta compra</th></tr></thead>
+    <tbody id="proyAnualTbl"></tbody></table>
+  </div>
+</div>
+
+<!-- ═══ INVENTARIO GENERAL ═══════════════════════════════════════════════════ -->
+<div class="page" id="page-inv-gral">
+  <div class="ph">
+    <div><div class="ptitle">Inventario General</div><div class="psub">Total Chamizal — corrales + potreros · base para dashboard</div></div>
+    <button class="btn bo">📥 Exportar</button>
+  </div>
+  <div class="kg k4">
+    <div class="kpi g"><div class="klbl">Total corrales</div><div class="kval">2,527</div></div>
+    <div class="kpi b"><div class="klbl">Total potreros</div><div class="kval">320</div></div>
+    <div class="kpi a"><div class="klbl">Total Chamizal</div><div class="kval">2,847</div></div>
+    <div class="kpi p"><div class="klbl">Corrales ocupados</div><div class="kval">14/18</div></div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="ct">🐂 Inventario en corrales</div>
+      <table class="tbl"><thead><tr><th>Corral</th><th>Lote</th><th>Sexo</th><th>Inventario</th><th>Peso Prom. Hoy</th><th>Etapa</th></tr></thead><tbody>
+        <tr><td>C01</td><td class="mn">CH087</td><td>M</td><td>214</td><td class="mn">480 kg</td><td><span class="pill pp">Zilpaterol</span></td></tr>
+        <tr><td>C02</td><td class="mn">CH089</td><td>M</td><td>196</td><td class="mn">362 kg</td><td><span class="pill pg">F3</span></td></tr>
+        <tr><td>C03</td><td class="mn">CH091H</td><td>H</td><td>128</td><td class="mn">465 kg</td><td><span class="pill pp">Zilpaterol</span></td></tr>
+        <tr><td>C04</td><td class="mn">CH088</td><td>M</td><td>210</td><td class="mn">347 kg</td><td><span class="pill pg">F3</span></td></tr>
+        <tr><td>C05</td><td class="mn">CH092</td><td>M</td><td>186</td><td class="mn">284 kg</td><td><span class="pill pb">F1</span></td></tr>
+        <tr><td>C06</td><td class="mn">CH090H</td><td>H</td><td>174</td><td class="mn">275 kg</td><td><span class="pill pa">Transición</span></td></tr>
+        <tr><td>C07</td><td>—</td><td>—</td><td>0</td><td>—</td><td><span class="pill pb">Libre</span></td></tr>
+        <tr><td>C09</td><td class="mn">CH085</td><td>M</td><td>222</td><td class="mn">355 kg</td><td><span class="pill pg">F3</span></td></tr>
+        <tr><td colspan="6" style="color:var(--txd);font-size:11px;text-align:right">… y 10 corrales más</td></tr>
+      </tbody></table>
+    </div>
+    <div>
+      <div class="card">
+        <div class="ct">🌾 Potreros</div>
+        <table class="tbl"><thead><tr><th>Potrero</th><th>Lote</th><th>Sexo</th><th>Inventario</th></tr></thead><tbody>
+          <tr><td>P01</td><td class="mn">CH080</td><td>M</td><td>320</td></tr>
+          <tr><td>P02</td><td>—</td><td>—</td><td>0</td></tr>
+          <tr><td>P03</td><td>—</td><td>—</td><td>0</td></tr>
+        </tbody></table>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <div class="ct">📊 Por sexo — Total Chamizal</div>
+        <div class="srow"><span class="sk">Machos</span><span class="sv">1,828 cab · 64%</span></div>
+        <div class="srow"><span class="sk">Hembras</span><span class="sv">679 cab · 24%</span></div>
+        <div class="srow"><span class="sk">Hembra-Vaca</span><span class="sv">340 cab · 12%</span></div>
+        <div class="srow"><span class="sk" style="font-weight:600">Total Chamizal</span><span class="sv" style="color:var(--gn)">2,847 cab</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ INVENTARIO CORRALES ══════════════════════════════════════════════════ -->
+<div class="page" id="page-inv-corr">
+  <div class="ph"><div><div class="ptitle">Corrales</div><div class="psub">Capacidad, ocupación y lote asignado</div></div><button class="btn bp" onclick="alert('➕ Nuevo corral')">➕ Nuevo</button></div>
+  <div class="card">
+    <table class="tbl"><thead><tr><th>Clave</th><th>Nombre</th><th>Tipo</th><th>Cap.</th><th>Inventario</th><th>% Ocup.</th><th>Lote actual</th><th>Estatus</th></tr></thead><tbody>
+      <tr><td>C01</td><td>Corral Norte 1</td><td>Engorda</td><td>250</td><td>214</td><td class="mn">85.6%</td><td class="mn">CH087</td><td><span class="pill pa">Sale S30</span></td></tr>
+      <tr><td>C02</td><td>Corral Norte 2</td><td>Engorda</td><td>220</td><td>196</td><td class="mn">89.1%</td><td class="mn">CH089</td><td><span class="pill pg">Ocupado</span></td></tr>
+      <tr><td>C03</td><td>Corral Sur 1</td><td>Engorda</td><td>160</td><td>128</td><td class="mn">80.0%</td><td class="mn">CH091H</td><td><span class="pill pa">Sale S30</span></td></tr>
+      <tr><td>C07</td><td>Corral Este 1</td><td>Engorda</td><td>200</td><td>0</td><td class="mn">0%</td><td>—</td><td><span class="pill pb">Libre</span></td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<!-- ═══ INVENTARIO POTREROS ══════════════════════════════════════════════════ -->
+<div class="page" id="page-inv-pot">
+  <div class="ph"><div><div class="ptitle">Potreros</div><div class="psub">Inventario por potrero — lote, sexo, cantidad</div></div><button class="btn bp" onclick="alert('➕ Nuevo potrero')">➕ Nuevo</button></div>
+  <div class="card">
+    <table class="tbl"><thead><tr><th>Potrero</th><th>Nombre</th><th>Cap.</th><th>Lote</th><th>Sexo</th><th>Inventario</th><th>Estatus</th></tr></thead><tbody>
+      <tr><td>P01</td><td>Potrero Grande Norte</td><td>500</td><td class="mn">CH080</td><td>M</td><td>320</td><td><span class="pill pg">Ocupado</span></td></tr>
+      <tr><td>P02</td><td>Potrero Sur</td><td>400</td><td>—</td><td>—</td><td>0</td><td><span class="pill pb">Libre</span></td></tr>
+      <tr><td>P03</td><td>Potrero Oriente</td><td>350</td><td>—</td><td>—</td><td>0</td><td><span class="pill pb">Libre</span></td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<!-- ═══ CIERRE — RESUMEN ══════════════════════════════════════════════════════ -->
+<div class="page" id="page-cierre-res">
+  <div class="ph">
+    <div><div class="ptitle">Generar Cierre de Lote</div><div class="psub">Resumen técnico y financiero consolidado — pantalla principal del módulo Cierre</div></div>
+    <div class="bg"><button class="btn ba" onclick="alert('📄 PDF generado')">📄 PDF</button><button class="btn bo">📥 Excel</button></div>
+  </div>
+  <div class="card">
+    <div style="display:flex;gap:12px;align-items:flex-end;margin-bottom:14px">
+      <div class="fg" style="flex:1"><label>Seleccionar lote</label>
+        <select id="cLote" onchange="updCierre()">
+          <option value="CH083">CH083 — Macho — 214 cab</option>
+          <option value="CH078H">CH078H — Hembra — 186 cab</option>
+          <option value="CH071">CH071 — Macho — 198 cab</option>
+        </select>
+      </div>
+    </div>
+    <div class="csum" id="cBlocks"></div>
+    <div class="stitle">Resumen financiero</div>
+    <table class="tbl"><thead><tr><th>Concepto</th><th>Cantidad</th><th>Costo unitario</th><th>Total</th></tr></thead>
+    <tbody id="cTbl"></tbody></table>
+    <div style="margin-top:14px;padding:12px;background:var(--s3);border-radius:8px;border:1px solid var(--gnd)">
+      <div class="stitle" style="margin-top:0">Indicadores del lote</div>
+      <div id="cInd" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CIERRE — COMPRA ═══════════════════════════════════════════════════════ -->
+<div class="page" id="page-cierre-cmp">
+  <div class="ph"><div><div class="ptitle">Compra / Recepción del Lote</div><div class="psub">Datos de entrada — origen y recibo en corral</div></div><button class="btn bp" onclick="alert('✅ Guardado')">💾 Guardar</button></div>
+  <div class="g2">
+    <div class="card">
+      <div class="ct">🛒 Datos de compra</div>
+      <div class="fg2">
+        <div class="fg"><label>Lote</label><select><option>CH083</option><option>CH078H</option></select></div>
+        <div class="fg"><label>Fecha compra</label><input type="date" value="2025-03-14"/></div>
+        <div class="fg"><label>Proveedor</label><input value="Ganadería La Esperanza"/></div>
+        <div class="fg"><label>Cabezas origen</label><input type="number" value="224"/></div>
+        <div class="fg"><label>Kilos origen</label><input type="number" value="56000"/></div>
+        <div class="fg"><label>Promedio origen (calc.)</label><input value="250.0 kg" readonly style="color:var(--am)"/></div>
+        <div class="fg"><label>Cabezas recibidas</label><input type="number" value="220"/></div>
+        <div class="fg"><label>Kilos recibo</label><input type="number" value="55330"/></div>
+        <div class="fg"><label>Promedio recibo (calc.)</label><input value="251.5 kg" readonly style="color:var(--am)"/></div>
+        <div class="fg"><label>Costo total compra ($MXN)</label><input type="number" value="2486850"/></div>
+        <div class="fg"><label>Costo por cabeza (calc.)</label><input value="$11,304" readonly style="color:var(--am)"/></div>
+        <div class="fg"><label>Costo por kilo (calc.)</label><input value="$44.95" readonly style="color:var(--am)"/></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">📊 Resumen recepción</div>
+      <div class="srow"><span class="sk">Merma en tránsito</span><span class="sv" style="color:var(--rd)">4 cab (1.79%)</span></div>
+      <div class="srow"><span class="sk">Diferencia kilos origen vs recibo</span><span class="sv" style="color:var(--am)">−670 kg</span></div>
+      <div class="srow"><span class="sk">Costo por kilo puesto en corral</span><span class="sv">$44.95</span></div>
+      <div class="srow"><span class="sk">Costo por cabeza</span><span class="sv">$11,304</span></div>
+      <div class="srow"><span class="sk">Costo total compra</span><span class="sv" style="color:var(--bl)">$2,486,850</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CIERRE — MUERTES ══════════════════════════════════════════════════════ -->
+<div class="page" id="page-cierre-mue">
+  <div class="ph"><div><div class="ptitle">Muertes del Lote</div><div class="psub">Control de mortalidad · ajuste automático de días animal y costo imputado</div></div><button class="btn bp" onclick="alert('✅ Muerte registrada')">➕ Registrar</button></div>
+  <div class="kg k4">
+    <div class="kpi r"><div class="klbl">Total muertes CH083</div><div class="kval">6</div></div>
+    <div class="kpi a"><div class="klbl">Mortalidad %</div><div class="kval">2.73%</div></div>
+    <div class="kpi b"><div class="klbl">Días animal desc.</div><div class="kval">−548</div></div>
+    <div class="kpi p"><div class="klbl">Costo imputado</div><div class="kval">$67,840</div></div>
+  </div>
+  <div class="card">
+    <table class="tbl"><thead><tr><th>Fecha</th><th>Arete</th><th>Causa</th><th>Peso Est. (kg)</th><th>Días Descontados</th><th>Costo Imputado</th></tr></thead><tbody>
+      <tr><td class="mn">28 Mar</td><td class="mn">#04821</td><td>Neumonía</td><td class="mn">280</td><td class="mn">119</td><td class="mn">$12,590</td></tr>
+      <tr><td class="mn">15 Abr</td><td class="mn">#04855</td><td>Neumonía</td><td class="mn">310</td><td class="mn">101</td><td class="mn">$11,820</td></tr>
+      <tr><td class="mn">02 May</td><td class="mn">#04902</td><td>Timpanismo</td><td class="mn">325</td><td class="mn">84</td><td class="mn">$11,340</td></tr>
+      <tr><td class="mn">18 May</td><td class="mn">#04918</td><td>Timpanismo</td><td class="mn">345</td><td class="mn">68</td><td class="mn">$11,060</td></tr>
+      <tr><td class="mn">30 Jun</td><td class="mn">#04944</td><td>Neumonía</td><td class="mn">380</td><td class="mn">25</td><td class="mn">$10,580</td></tr>
+      <tr><td class="mn">10 Jul</td><td class="mn">#04967</td><td>Neumonía</td><td class="mn">390</td><td class="mn">11</td><td class="mn">$10,450</td></tr>
+      <tr><td colspan="4" style="text-align:right;color:var(--txd);font-size:11px">Totales:</td><td class="mn" style="color:var(--rd)">−548 días</td><td class="mn" style="color:var(--rd)">$67,840</td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<!-- ═══ CIERRE — VENTAS ═══════════════════════════════════════════════════════ -->
+<div class="page" id="page-cierre-vta">
+  <div class="ph"><div><div class="ptitle">Ventas del Lote</div><div class="psub">Salidas totales y parciales · ajuste días animal en venta parcial</div></div><button class="btn bp" onclick="alert('✅ Venta registrada')">➕ Registrar</button></div>
+  <div class="card">
+    <table class="tbl"><thead><tr><th>Fecha Venta</th><th>Cliente</th><th>Cabezas</th><th>Kilos</th><th>Promedio (kg)</th><th>Precio/kg</th><th>Precio/cab</th><th>% del Lote</th><th>Rendimiento</th><th>Ingreso Total</th></tr></thead><tbody>
+      <tr><td class="mn">21 Jul 2025</td><td>Rastro Norteño</td><td>214</td><td class="mn">60,242</td><td class="mn">281.5</td><td class="mn">$52.00</td><td class="mn">$14,638</td><td class="mn">100%</td><td class="mn">50.6%</td><td class="mn" style="color:var(--gn)">$3,132,584</td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<!-- ═══ CIERRE — ALIMENTACIÓN ══════════════════════════════════════════════════ -->
+<div class="page" id="page-cierre-ali">
+  <div class="ph"><div><div class="ptitle">Alimentación del Lote</div><div class="psub">Consumo por fórmula y periodo · fuente: CATLE o carga manual</div></div>
+    <div class="bg"><button class="btn bo">📥 Importar CATLE</button><button class="btn bp" onclick="alert('✅ Guardado')">➕ Manual</button></div>
+  </div>
+  <div class="kg k3">
+    <div class="kpi b"><div class="klbl">Kg alimento total</div><div class="kval">234,800</div></div>
+    <div class="kpi a"><div class="klbl">Costo alimentación</div><div class="kval">$914,720</div></div>
+    <div class="kpi g"><div class="klbl">Conversión alim.</div><div class="kval">7.42</div><div class="ksub">kg alim / kg ganado</div></div>
+  </div>
+  <div class="card">
+    <table class="tbl"><thead><tr><th>Fecha</th><th>Fórmula</th><th>Días</th><th>Cantidad (kg)</th><th>Costo/kg</th><th>Costo total</th></tr></thead><tbody>
+      <tr><td class="mn">14–04 Mar/Abr</td><td><span class="pill pb">F1 sin melaza</span></td><td class="mn">21</td><td class="mn">41,160</td><td class="mn">$3.20</td><td class="mn">$131,712</td></tr>
+      <tr><td class="mn">04–18 Abr</td><td><span class="pill pa">Transición</span></td><td class="mn">14</td><td class="mn">25,200</td><td class="mn">$3.60</td><td class="mn">$90,720</td></tr>
+      <tr><td class="mn">18 Abr–16 Jun</td><td><span class="pill pg">F3 SSS</span></td><td class="mn">59</td><td class="mn">109,148</td><td class="mn">$3.90</td><td class="mn">$425,677</td></tr>
+      <tr><td class="mn">16 Jun–21 Jul</td><td><span class="pill pp">F3 SZ + Zilpaterol</span></td><td class="mn">35</td><td class="mn">59,292</td><td class="mn">$4.20</td><td class="mn">$249,026</td></tr>
+      <tr><td colspan="3" style="text-align:right;color:var(--txd);font-size:11px">Totales:</td><td class="mn"><b>234,800</b></td><td></td><td class="mn" style="color:var(--am)"><b>$897,135</b></td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<!-- ═══ CIERRE — MEDICACIÓN ══════════════════════════════════════════════════ -->
+<div class="page" id="page-cierre-med">
+  <div class="ph"><div><div class="ptitle">Medicación del Lote</div><div class="psub">Recepción (metafilaxia) + hospital · cálculo por ml desde frasco · catálogo editable</div></div><button class="btn bp" onclick="alert('✅ Registrado')">➕ Registrar</button></div>
+  <div class="kg k3">
+    <div class="kpi b"><div class="klbl">Costo recepción</div><div class="kval">$28,644</div></div>
+    <div class="kpi r"><div class="klbl">Costo hospital</div><div class="kval">$9,600</div></div>
+    <div class="kpi a"><div class="klbl">Total medicación</div><div class="kval">$38,244</div></div>
+  </div>
+  <div class="card">
+    <div class="tabs"><div class="tab active" onclick="swTab(this)">Recepción / Metafilaxia</div><div class="tab" onclick="swTab(this)">Hospital</div></div>
+    <table class="tbl"><thead><tr><th>Medicamento</th><th>Tipo</th><th>Dosis</th><th>Unidad</th><th>Cabezas</th><th>Costo unitario</th><th>Costo total</th><th>Arete</th></tr></thead><tbody>
+      <tr><td>Draxxin</td><td><span class="pill pb">Recepción</span></td><td class="mn">2.5 ml</td><td>ml/cab</td><td>220</td><td class="mn">$7.36</td><td class="mn">$16,192</td><td>—</td></tr>
+      <tr><td>Baytril 10%</td><td><span class="pill pb">Recepción</span></td><td class="mn">1 ml/10 kg</td><td>ml/kg</td><td>220</td><td class="mn">$3.10</td><td class="mn">$6,820</td><td>—</td></tr>
+      <tr><td>Ivermectina</td><td><span class="pill pb">Recepción</span></td><td class="mn">1 ml/50 kg</td><td>ml/kg</td><td>220</td><td class="mn">$1.12</td><td class="mn">$2,464</td><td>—</td></tr>
+      <tr><td>Vitaminas ADE</td><td><span class="pill pb">Recepción</span></td><td class="mn">5 ml</td><td>ml/cab</td><td>220</td><td class="mn">$1.44</td><td class="mn">$3,168</td><td>—</td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<!-- ═══ CIERRE — HOTEL ════════════════════════════════════════════════════════ -->
+<div class="page" id="page-cierre-hot">
+  <div class="ph"><div><div class="ptitle">Costo Hotel</div><div class="psub">Costos indirectos por día animal neto · configurable para evitar duplicidad</div></div></div>
+  <div class="g2">
+    <div class="card">
+      <div class="ct">🏨 Cálculo de días animal — CH083</div>
+      <div class="srow"><span class="sk">Fecha recepción</span><span class="sv mn">14 Mar 2025</span></div>
+      <div class="srow"><span class="sk">Fecha cierre / venta</span><span class="sv mn">21 Jul 2025</span></div>
+      <div class="srow"><span class="sk">Días calendario</span><span class="sv mn">129 días</span></div>
+      <div class="srow"><span class="sk">Cabezas iniciales</span><span class="sv mn">220</span></div>
+      <div class="srow"><span class="sk">Días animal base</span><span class="sv mn">28,380</span></div>
+      <div class="srow"><span class="sk">Descuento por muertes (6 cab)</span><span class="sv mn" style="color:var(--rd)">−548 d-a</span></div>
+      <div class="srow"><span class="sk">Ajustes por ventas parciales</span><span class="sv mn">—</span></div>
+      <div class="srow"><span class="sk"><b>Días animal netos</b></span><span class="sv mn" style="color:var(--gn)"><b>27,392</b></span></div>
+      <div class="stitle">Costo hotel</div>
+      <div class="srow"><span class="sk">Costo por día-animal</span><span class="sv mn">$12.50</span></div>
+      <div class="srow"><span class="sk"><b>Total costo hotel</b></span><span class="sv mn" style="color:var(--am)"><b>$342,400</b></span></div>
+    </div>
+    <div class="card">
+      <div class="ct">⚙️ Componentes incluidos en hotel</div>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:12.5px">
+        <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0"><input type="checkbox" checked style="width:auto;padding:0"> Agua y sanidad — $4.20/d-a</label>
+        <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0"><input type="checkbox" checked style="width:auto;padding:0"> Mano de obra operativa — $5.80/d-a</label>
+        <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0"><input type="checkbox" style="width:auto;padding:0"> Depreciación instalaciones — $2.10/d-a</label>
+        <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0"><input type="checkbox" style="width:auto;padding:0"> Costos administrativos — $1.40/d-a</label>
+      </div>
+      <div style="margin-top:12px;padding:10px;background:var(--amd);border:1px solid var(--am);border-radius:6px;font-size:12px;color:var(--am)">
+        ⚠️ Desmarcar partidas que ya están incluidas en otra cuenta para evitar duplicidad.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CIERRE — INDICADORES ════════════════════════════════════════════════════ -->
+<div class="page" id="page-cierre-ind">
+  <div class="ph"><div><div class="ptitle">Indicadores del Lote</div><div class="psub">KPIs técnicos y financieros · comparativo entre lotes cerrados</div></div><button class="btn bo">📥 Exportar</button></div>
+  <div class="kg k3" style="margin-bottom:0">
+    <div style="background:var(--s2);border:1px solid var(--bdr);border-radius:10px;padding:14px;text-align:center"><div style="font-size:22px;font-family:var(--mono);font-weight:700;color:var(--bl)">1.34 kg/d</div><div style="font-size:10.5px;color:var(--txd);margin-top:5px;text-transform:uppercase">GDP Real</div></div>
+    <div style="background:var(--s2);border:1px solid var(--bdr);border-radius:10px;padding:14px;text-align:center"><div style="font-size:22px;font-family:var(--mono);font-weight:700;color:var(--am)">7.42</div><div style="font-size:10.5px;color:var(--txd);margin-top:5px;text-transform:uppercase">Conversión alimenticia</div></div>
+    <div style="background:var(--s2);border:1px solid var(--bdr);border-radius:10px;padding:14px;text-align:center"><div style="font-size:22px;font-family:var(--mono);font-weight:700;color:var(--txb)">$34.20</div><div style="font-size:10.5px;color:var(--txd);margin-top:5px;text-transform:uppercase">Costo/kg producido</div></div>
+    <div style="background:var(--s2);border:1px solid var(--bdr);border-radius:10px;padding:14px;text-align:center"><div style="font-size:22px;font-family:var(--mono);font-weight:700;color:var(--txb)">$11,304</div><div style="font-size:10.5px;color:var(--txd);margin-top:5px;text-transform:uppercase">Costo/cabeza</div></div>
+    <div style="background:var(--s2);border:1px solid var(--bdr);border-radius:10px;padding:14px;text-align:center"><div style="font-size:22px;font-family:var(--mono);font-weight:700;color:var(--gn)">$1,130,410</div><div style="font-size:10.5px;color:var(--txd);margin-top:5px;text-transform:uppercase">Utilidad</div></div>
+    <div style="background:var(--s2);border:1px solid var(--bdr);border-radius:10px;padding:14px;text-align:center"><div style="font-size:22px;font-family:var(--mono);font-weight:700;color:var(--gn)">23.0%</div><div style="font-size:10.5px;color:var(--txd);margin-top:5px;text-transform:uppercase">Margen %</div></div>
+    <div style="background:var(--s2);border:1px solid var(--bdr);border-radius:10px;padding:14px;text-align:center"><div style="font-size:22px;font-family:var(--mono);font-weight:700;color:var(--rd)">2.73%</div><div style="font-size:10.5px;color:var(--txd);margin-top:5px;text-transform:uppercase">Mortalidad</div></div>
+    <div style="background:var(--s2);border:1px solid var(--bdr);border-radius:10px;padding:14px;text-align:center"><div style="font-size:22px;font-family:var(--mono);font-weight:700;color:var(--pu)">128 días</div><div style="font-size:10.5px;color:var(--txd);margin-top:5px;text-transform:uppercase">Días estancia</div></div>
+    <div style="background:var(--s2);border:1px solid var(--bdr);border-radius:10px;padding:14px;text-align:center"><div style="font-size:22px;font-family:var(--mono);font-weight:700;color:var(--tl)">27,392</div><div style="font-size:10.5px;color:var(--txd);margin-top:5px;text-transform:uppercase">Días animal netos</div></div>
+  </div>
+  <div class="card">
+    <div class="ct">📊 Comparativo lotes recientes</div>
+    <table class="tbl"><thead><tr><th>Lote</th><th>GDP Real</th><th>Conversión</th><th>Costo/kg</th><th>Costo/cab</th><th>Utilidad</th><th>Margen</th><th>Mortalidad</th></tr></thead><tbody>
+      <tr><td class="mn" style="color:var(--am)">CH083 ★</td><td class="mn">1.34</td><td class="mn">7.42</td><td class="mn">$34.20</td><td class="mn">$11,304</td><td class="mn" style="color:var(--gn)">$1,130,410</td><td><span class="pill pg">23.0%</span></td><td class="mn">2.73%</td></tr>
+      <tr><td class="mn">CH081</td><td class="mn">1.42</td><td class="mn">7.24</td><td class="mn">$32.80</td><td class="mn">$10,820</td><td class="mn" style="color:var(--gn)">$1,038,800</td><td><span class="pill pg">22.4%</span></td><td class="mn">1.75%</td></tr>
+      <tr><td class="mn">CH078H</td><td class="mn">1.24</td><td class="mn">7.81</td><td class="mn">$37.20</td><td class="mn">$12,140</td><td class="mn" style="color:var(--gn)">$697,700</td><td><span class="pill pg">18.0%</span></td><td class="mn">3.13%</td></tr>
+      <tr><td class="mn">CH077</td><td class="mn">1.28</td><td class="mn">8.01</td><td class="mn">$38.80</td><td class="mn">$12,750</td><td class="mn" style="color:var(--am)">$624,000</td><td><span class="pill pa">14.6%</span></td><td class="mn">1.89%</td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<!-- ═══ CAT: PROGRAMA REIMPLANTES ══════════════════════════════════════════════ -->
+<!-- ═══ CAT: CORRALES ═══════════════════════════════════════════════════════ -->
+<div class="page" id="page-cat-corrales">
+  <div class="ph">
+    <div><div class="ptitle">Catálogo de Corrales</div><div class="psub">Administración de corrales y potreros del rancho</div></div>
+    <button class="btn bp" onclick="alert('➕ Formulario nuevo corral')">➕ Nuevo corral</button>
+  </div>
+  <div class="kg k4">
+    <div class="kpi g"><div class="klbl">Corrales totales</div><div class="kval">18</div></div>
+    <div class="kpi b"><div class="klbl">Ocupados</div><div class="kval">14</div><div class="ksub">77.8% ocupación</div></div>
+    <div class="kpi a"><div class="klbl">Disponibles</div><div class="kval">4</div></div>
+    <div class="kpi p"><div class="klbl">Potreros</div><div class="kval">6</div><div class="ksub">3 con ganado</div></div>
+  </div>
+  <div class="card">
+    <div class="ct">📋 Lista de corrales</div>
+    <table class="tbl"><thead><tr><th>Clave</th><th>Nombre</th><th>Tipo</th><th>Cap. máx.</th><th>Ocupación actual</th><th>Lote actual</th><th>Estatus</th><th></th></tr></thead><tbody>
+      <tr><td class="mn">C01</td><td>Corral Norte 1</td><td>Engorda</td><td>250</td><td class="mn">214 / 250</td><td class="mn">CH087</td><td><span class="pill pa">Sale sem. 30</span></td><td><button class="btn bo bsm">Editar</button></td></tr>
+      <tr><td class="mn">C02</td><td>Corral Norte 2</td><td>Engorda</td><td>220</td><td class="mn">196 / 220</td><td class="mn">CH089</td><td><span class="pill pg">Ocupado</span></td><td><button class="btn bo bsm">Editar</button></td></tr>
+      <tr><td class="mn">C03</td><td>Corral Sur 1</td><td>Engorda</td><td>160</td><td class="mn">128 / 160</td><td class="mn">CH091H</td><td><span class="pill pa">Sale sem. 30</span></td><td><button class="btn bo bsm">Editar</button></td></tr>
+      <tr><td class="mn">C04</td><td>Corral Sur 2</td><td>Engorda</td><td>230</td><td class="mn">210 / 230</td><td class="mn">CH088</td><td><span class="pill pp">Zilpaterol</span></td><td><button class="btn bo bsm">Editar</button></td></tr>
+      <tr><td class="mn">C05</td><td>Corral Centro 1</td><td>Engorda</td><td>200</td><td class="mn">186 / 200</td><td class="mn">CH092</td><td><span class="pill pg">Ocupado</span></td><td><button class="btn bo bsm">Editar</button></td></tr>
+      <tr><td class="mn">C06</td><td>Corral Centro 2</td><td>Engorda</td><td>190</td><td class="mn">174 / 190</td><td class="mn">CH090H</td><td><span class="pill pg">Ocupado</span></td><td><button class="btn bo bsm">Editar</button></td></tr>
+      <tr><td class="mn">C07</td><td>Corral Este 1</td><td>Engorda</td><td>200</td><td class="mn">0 / 200</td><td>—</td><td><span class="pill pb">Disponible</span></td><td><button class="btn bo bsm">Editar</button></td></tr>
+      <tr><td class="mn">C12</td><td>Corral Oeste 2</td><td>Engorda</td><td>180</td><td class="mn">0 / 180</td><td>—</td><td><span class="pill pb">Disponible</span></td><td><button class="btn bo bsm">Editar</button></td></tr>
+      <tr><td class="mn">P01</td><td>Potrero Grande Norte</td><td>Potrero</td><td>500</td><td class="mn">320 / 500</td><td class="mn">CH080</td><td><span class="pill pg">Ocupado</span></td><td><button class="btn bo bsm">Editar</button></td></tr>
+      <tr><td class="mn">P02</td><td>Potrero Sur</td><td>Potrero</td><td>400</td><td class="mn">0 / 400</td><td>—</td><td><span class="pill pb">Disponible</span></td><td><button class="btn bo bsm">Editar</button></td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<!-- ═══ CAT: LOTES ═══════════════════════════════════════════════════════════ -->
+<div class="page" id="page-cat-lotes">
+  <div class="ph">
+    <div><div class="ptitle">Catálogo de Lotes</div><div class="psub">Historial y configuración de lotes registrados</div></div>
+    <button class="btn bp" onclick="nav('disp-alta')">➕ Nuevo lote</button>
+  </div>
+  <div class="card">
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <input placeholder="Buscar lote..." style="flex:1;min-width:180px;max-width:260px"/>
+      <select style="width:155px"><option>Todos los estatus</option><option>Activo</option><option>Cerrado</option><option>Vendido</option></select>
+      <select style="width:135px"><option>Todos los sexos</option><option>Macho</option><option>Hembra</option><option>HV</option></select>
+    </div>
+    <table class="tbl"><thead><tr><th>Lote</th><th>Sexo</th><th>Corral</th><th>Cabezas</th><th>Peso inicio</th><th>Fecha inicio</th><th>Días</th><th>Etapa</th><th>Estatus</th><th></th></tr></thead><tbody>
+      <tr><td class="mn">CH094</td><td>Macho</td><td>C11</td><td>220</td><td class="mn">250 kg</td><td class="mn">21/07/2025</td><td class="mn">0</td><td><span class="pill pb">F1</span></td><td><span class="pill pg">Activo</span></td><td><button class="btn bo bsm" onclick="nav('disp')">Ver</button></td></tr>
+      <tr><td class="mn">CH092</td><td>Macho</td><td>C05</td><td>186</td><td class="mn">265 kg</td><td class="mn">07/07/2025</td><td class="mn">14</td><td><span class="pill pb">F1</span></td><td><span class="pill pg">Activo</span></td><td><button class="btn bo bsm" onclick="nav('disp')">Ver</button></td></tr>
+      <tr><td class="mn">CH090H</td><td>Hembra</td><td>C06</td><td>174</td><td class="mn">240 kg</td><td class="mn">23/06/2025</td><td class="mn">28</td><td><span class="pill pa">Transición</span></td><td><span class="pill pg">Activo</span></td><td><button class="btn bo bsm" onclick="nav('disp')">Ver</button></td></tr>
+      <tr><td class="mn">CH088</td><td>Macho</td><td>C04</td><td>210</td><td class="mn">290 kg</td><td class="mn">09/06/2025</td><td class="mn">42</td><td><span class="pill pp">Zilpaterol</span></td><td><span class="pill pg">Activo</span></td><td><button class="btn bo bsm" onclick="nav('disp')">Ver</button></td></tr>
+      <tr><td class="mn">CH085</td><td>Macho</td><td>C09</td><td>222</td><td class="mn">275 kg</td><td class="mn">07/05/2025</td><td class="mn">75</td><td><span class="pill pg">F3 SSS</span></td><td><span class="pill pg">Activo</span></td><td><button class="btn bo bsm" onclick="nav('disp')">Ver</button></td></tr>
+      <tr><td class="mn">CH083</td><td>Macho</td><td>—</td><td>214</td><td class="mn">252 kg</td><td class="mn">14/03/2025</td><td class="mn">128</td><td>—</td><td><span class="pill pt">Vendido</span></td><td><button class="btn bo bsm" onclick="nav('cierre-res')">Cierre</button></td></tr>
+      <tr><td class="mn">CH078H</td><td>Hembra</td><td>—</td><td>186</td><td class="mn">238 kg</td><td class="mn">10/02/2025</td><td class="mn">140</td><td>—</td><td><span class="pill pt">Vendido</span></td><td><button class="btn bo bsm" onclick="nav('cierre-res')">Cierre</button></td></tr>
+      <tr><td class="mn">CH071</td><td>Macho</td><td>—</td><td>198</td><td class="mn">241 kg</td><td class="mn">05/01/2025</td><td class="mn">135</td><td>—</td><td><span class="pill pt">Vendido</span></td><td><button class="btn bo bsm" onclick="nav('cierre-res')">Cierre</button></td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<div class="page" id="page-cat-prg">
+  <div class="ph"><div><div class="ptitle">Programa de Reimplantes y Alimentación</div><div class="psub">Catálogo técnico editable · reglas automáticas por rango de peso · alimenta a Disponibilidad</div></div><button class="btn ba" onclick="alert('✅ Cambios guardados')">💾 Guardar</button></div>
+  <div class="card">
+    <div class="ct">📐 Parámetros por rango de peso</div>
+    <div style="overflow-x:auto">
+    <table class="tbl"><thead><tr><th>Rango Peso</th><th>Prom.</th><th>Kg x Hacer</th><th>GDP Esp.</th><th>Días Estancia</th><th>Implante</th><th>1er Reimp.</th><th>2do Reimp.</th><th>3er Reimp.</th><th>4to Reimp.</th><th>Recepción</th><th>Días F1 s/Mel.</th><th>Días Transición</th><th>Días F3 SSS</th><th>Días F3 SZ</th></tr></thead><tbody>
+      <tr><td>180–230 kg</td><td class="mn">205</td><td class="mn">275</td><td class="mn">1.20</td><td class="mn">229</td><td>Ralgro</td><td class="mn">Día 60</td><td class="mn">Día 120</td><td class="mn">Día 180</td><td class="mn">Día 240</td><td style="font-size:11px">Draxxin+Iverm.</td><td class="mn">21</td><td class="mn">14</td><td class="mn">variable</td><td class="mn">35</td></tr>
+      <tr><td>230–290 kg</td><td class="mn">260</td><td class="mn">220</td><td class="mn">1.30</td><td class="mn">169</td><td>Ralgro</td><td class="mn">Día 60</td><td class="mn">Día 120</td><td class="mn">Día 180</td><td>—</td><td style="font-size:11px">Draxxin+Iverm.</td><td class="mn">21</td><td class="mn">14</td><td class="mn">variable</td><td class="mn">35</td></tr>
+      <tr><td>290–350 kg</td><td class="mn">320</td><td class="mn">160</td><td class="mn">1.38</td><td class="mn">116</td><td>Synovex-C</td><td class="mn">Día 60</td><td class="mn">Día 120</td><td>—</td><td>—</td><td style="font-size:11px">Draxxin+Iverm.</td><td class="mn">21</td><td class="mn">14</td><td class="mn">variable</td><td class="mn">35</td></tr>
+      <tr><td>350–420 kg</td><td class="mn">385</td><td class="mn">100</td><td class="mn">1.42</td><td class="mn">70</td><td>Revalor-G</td><td class="mn">Día 60</td><td>—</td><td>—</td><td>—</td><td style="font-size:11px">Draxxin+Iverm.</td><td class="mn">14</td><td class="mn">14</td><td class="mn">variable</td><td class="mn">35</td></tr>
+    </tbody></table>
+    </div>
+    <div style="margin-top:10px;font-size:11.5px;color:var(--txd)">⚠️ Esta tabla es la fuente de todos los cálculos automáticos del módulo Disponibilidad. Los cambios aquí se reflejan en todas las proyecciones activas.</div>
+  </div>
+</div>
+
+<!-- ═══ CAT: PARÁMETROS ALIM ════════════════════════════════════════════════════ -->
+<div class="page" id="page-cat-ali">
+  <div class="ph"><div><div class="ptitle">Parámetros de Alimentación</div><div class="psub">Fórmulas F1, FT, F3 SSS, F3 SZ · días mín./máx. y costos por tonelada</div></div><button class="btn bp" onclick="alert('➕ Nueva fórmula')">➕ Nueva</button></div>
+  <div class="card">
+    <table class="tbl"><thead><tr><th>Clave</th><th>Nombre</th><th>Etapa</th><th>Días mín.</th><th>Días máx.</th><th>Costo/ton (MXN)</th><th>Composición</th></tr></thead><tbody>
+      <tr><td class="mn">F1</td><td>F1 sin melaza</td><td><span class="pill pb">Adaptación</span></td><td class="mn">14</td><td class="mn">28</td><td class="mn">$3,200</td><td>Maíz 40%, sorgo 30%, proteína 20%</td></tr>
+      <tr><td class="mn">FT</td><td>Transición</td><td><span class="pill pa">Transición</span></td><td class="mn">14</td><td class="mn">14</td><td class="mn">$3,600</td><td>50% F1 + 50% F3</td></tr>
+      <tr><td class="mn">F3-SSS</td><td>F3 sin Zilpaterol</td><td><span class="pill pg">Engorda</span></td><td class="mn">30</td><td class="mn">120</td><td class="mn">$3,900</td><td>Maíz 50%, sorgo 25%, proteína 25%</td></tr>
+      <tr><td class="mn">F3-SZ</td><td>F3 + Zilpaterol</td><td><span class="pill pp">Finalización</span></td><td class="mn">35</td><td class="mn">35</td><td class="mn">$4,200</td><td>F3 + Zilmax 8.3 mg/cab/día</td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<!-- ═══ CAT: IMPLANTES ══════════════════════════════════════════════════════════ -->
+<div class="page" id="page-cat-imp">
+  <div class="ph"><div><div class="ptitle">Catálogo de Implantes</div><div class="psub">Productos implantables por rango de peso y número de implante</div></div><button class="btn bp" onclick="alert('➕ Nuevo implante')">➕ Nuevo</button></div>
+  <div class="card">
+    <table class="tbl"><thead><tr><th>Producto</th><th>Tipo</th><th>Uso</th><th>Rango peso</th><th>Implante #</th><th>Duración (días)</th><th>Costo unitario</th></tr></thead><tbody>
+      <tr><td>Ralgro</td><td>Zeranol</td><td>M + H</td><td>180–280 kg</td><td class="mn">1, 2</td><td class="mn">60</td><td class="mn">$28.50</td></tr>
+      <tr><td>Synovex-C</td><td>Estradiol + Prog.</td><td>Machos</td><td>230–320 kg</td><td class="mn">1, 2</td><td class="mn">70</td><td class="mn">$42.00</td></tr>
+      <tr><td>Component TE-G</td><td>TBA + Estradiol</td><td>Machos</td><td>280–380 kg</td><td class="mn">2, 3</td><td class="mn">70</td><td class="mn">$54.00</td></tr>
+      <tr><td>Revalor-G</td><td>TBA + Estradiol</td><td>Hembras</td><td>240–380 kg</td><td class="mn">2, 3</td><td class="mn">70</td><td class="mn">$52.00</td></tr>
+      <tr><td>Revalor-200</td><td>TBA + Estradiol</td><td>Machos</td><td>350–450 kg</td><td class="mn">3, 4</td><td class="mn">80</td><td class="mn">$68.00</td></tr>
+      <tr><td>Component TE-200</td><td>TBA + Estradiol</td><td>Machos pesados</td><td>380–480 kg</td><td class="mn">3, 4</td><td class="mn">80</td><td class="mn">$72.00</td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<!-- ═══ CAT: MEDICAMENTOS ══════════════════════════════════════════════════════ -->
+<div class="page" id="page-cat-med">
+  <div class="ph"><div><div class="ptitle">Catálogo de Medicamentos</div><div class="psub">Presentación, dosis y costo calculado por ml desde frasco</div></div><button class="btn bp" onclick="alert('➕ Nuevo')">➕ Nuevo</button></div>
+  <div class="g2">
+    <div class="card">
+      <div class="ct">💊 Recepción obligatoria</div>
+      <table class="tbl"><thead><tr><th>Producto</th><th>Presentación</th><th>ml/frasco</th><th>Dosis</th><th>Costo frasco</th><th>$/cab</th></tr></thead><tbody>
+        <tr><td>Draxxin</td><td>250 ml</td><td class="mn">250</td><td class="mn">2.5 ml/cab</td><td class="mn">$1,840</td><td class="mn">$18.40</td></tr>
+        <tr><td>Baytril 10%</td><td>1,000 ml</td><td class="mn">1000</td><td class="mn">1 ml/10 kg</td><td class="mn">$620</td><td class="mn">$15.50</td></tr>
+        <tr><td>Ivermectina</td><td>500 ml</td><td class="mn">500</td><td class="mn">1 ml/50 kg</td><td class="mn">$280</td><td class="mn">$5.60</td></tr>
+        <tr><td>Vitaminas ADE</td><td>250 ml</td><td class="mn">250</td><td class="mn">5 ml/cab</td><td class="mn">$320</td><td class="mn">$6.40</td></tr>
+      </tbody></table>
+    </div>
+    <div class="card">
+      <div class="ct">🏥 Hospital / adicionales</div>
+      <table class="tbl"><thead><tr><th>Producto</th><th>Presentación</th><th>Dosis</th><th>Costo frasco</th><th>$/cab</th></tr></thead><tbody>
+        <tr><td>Penicilina</td><td>100 ml</td><td class="mn">5 ml/cab</td><td class="mn">$180</td><td class="mn">$9.00</td></tr>
+        <tr><td>Dexametasona</td><td>50 ml</td><td class="mn">2 ml/cab</td><td class="mn">$140</td><td class="mn">$5.60</td></tr>
+        <tr><td>Flunixin</td><td>100 ml</td><td class="mn">2 ml/50 kg</td><td class="mn">$390</td><td class="mn">$7.80</td></tr>
+        <tr><td>Zilmax (Zilp.)</td><td>1 kg</td><td class="mn">8.3 mg/cab/d</td><td class="mn">$2,100</td><td class="mn">$2.94/d</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CAT: PARÁMETROS GENERALES ══════════════════════════════════════════════ -->
+<div class="page" id="page-cat-par">
+  <div class="ph"><div><div class="ptitle">Parámetros Generales</div><div class="psub">Configuración global del sistema</div></div><button class="btn ba" onclick="alert('✅ Guardado')">💾 Guardar</button></div>
+  <div class="g2">
+    <div class="card">
+      <div class="ct">🏨 Costo hotel por día-animal</div>
+      <div class="fg2">
+        <div class="fg"><label>Costo base (MXN/d-a)</label><input value="$12.50"/></div>
+        <div class="fg"><label>Factor ajuste (%)</label><input value="95%"/></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">⚙️ Parámetros de operación</div>
+      <div class="fg2">
+        <div class="fg"><label>Días Zilpaterol (fijo)</label><input value="35" readonly style="color:var(--am)"/></div>
+        <div class="fg"><label>Frec. base reimplante (días)</label><input value="60"/></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ HOSPITALES (FASE 2) ═════════════════════════════════════════════════════ -->
+<div class="page" id="page-hospital">
+  <div class="ph"><div><div class="ptitle">Hospitales</div><div class="psub">Módulo opcional — Fase 2</div></div></div>
+  <div class="card">
+    <div style="padding:32px;text-align:center;color:var(--txd)">
+      <div style="font-size:40px;margin-bottom:12px">🏥</div>
+      <div style="font-size:16px;font-weight:600;color:var(--tx);margin-bottom:8px">Hospitales — Fase 2</div>
+      <div style="font-size:13px;max-width:500px;margin:0 auto;line-height:1.6">Este módulo está fuera del alcance de la Fase 1. Se incorporará como consulta simple de ocupación de corrales hospital en una fase posterior, sujeto a confirmación del alcance operativo y origen de datos.</div>
+      <table class="tbl" style="margin-top:24px;max-width:480px;margin-left:auto;margin-right:auto"><thead><tr><th>Corral Hospital</th><th>Capacidad real</th><th>Inventario actual</th><th>%</th></tr></thead><tbody>
+        <tr><td>H-01</td><td>30</td><td>4</td><td class="mn">13.3%</td></tr>
+        <tr><td>H-02</td><td>20</td><td>2</td><td class="mn">10.0%</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+// ─── NAV
+function nav(p) {
+  document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active');});
+  document.querySelectorAll('.ni').forEach(function(x){x.classList.remove('active');});
+  var pg = document.getElementById('page-'+p);
+  if (pg) pg.classList.add('active');
+  var ni = document.querySelector('.ni[data-p="'+p+'"]');
+  if (ni) ni.classList.add('active');
+  if (p==='disp' && !document.getElementById('dispTbl').hasChildNodes()) buildDisp();
+  if (p==='proy-anual' && !document.getElementById('proyAnualTbl').hasChildNodes()) buildProyAnual();
+}
+
+// ─── WEEK CHART
+(function(){
+  var data=[{w:28,c:186},{w:29,c:214},{w:30,c:342,cur:1},{w:31,c:164},{w:32,c:394},
+    {w:33,c:174},{w:34,c:0},{w:35,c:210},{w:36,c:0},{w:37,c:222},{w:38,c:0},{w:39,c:402},{w:40,c:186}];
+  var mx=Math.max.apply(null,data.map(function(d){return d.c||1;}));
+  var el=document.getElementById('wChart');
+  data.forEach(function(d){
+    var pct=d.c?Math.max(8,Math.round(d.c/mx*100)):8;
+    var col=d.cur?'var(--am)':d.c?'var(--gn)':'var(--bdr2)';
+    var w=document.createElement('div'); w.className='ww';
+    w.innerHTML='<div class="wval">'+(d.c||'—')+'</div><div class="wb'+(d.cur?' cur':'')+'" style="height:'+pct+'%;background:'+col+'"></div><div class="wlbl">S'+d.w+'</div>';
+    el.appendChild(w);
+  });
+})();
+
+// ─── CORRAL MAP
+(function(){
+  var corrales=[
+    {n:'C01',t:'vp',l:'CH087',c:214},{n:'C02',t:'oc',l:'CH089',c:196},
+    {n:'C03',t:'vp',l:'CH091H',c:128},{n:'C04',t:'zp',l:'CH088',c:210},
+    {n:'C05',t:'oc',l:'CH092',c:186},{n:'C06',t:'oc',l:'CH090H',c:174},
+    {n:'C07',t:'li'},{n:'C08',t:'oc',l:'CH093',c:198},
+    {n:'C09',t:'oc',l:'CH085',c:222},{n:'C10',t:'zp',l:'CH086H',c:164},
+    {n:'C11',t:'oc',l:'CH094',c:220},{n:'C12',t:'li'},
+    {n:'C13',t:'oc',l:'CH082',c:208},{n:'C14',t:'li'},
+    {n:'C15',t:'oc',l:'CH084',c:194},{n:'C16',t:'li'},
+    {n:'C17',t:'oc',l:'CH081',c:176},{n:'C18',t:'oc',l:'CH083',c:214},
+  ];
+  var cg=document.getElementById('corralMap');
+  corrales.forEach(function(c){
+    var el=document.createElement('div');
+    el.className='cc '+c.t;
+    el.innerHTML='<div class="cn">'+c.n+'</div><div class="ci">'+(c.l||'Libre')+(c.c?' · '+c.c:'')+'</div>';
+    if(c.l) el.onclick=function(){nav('disp');};
+    cg.appendChild(el);
+  });
+})();
+
+// ─── DISPONIBILIDAD TABLE
+var lotesData=[
+  {l:'CH094',c:'C11',cab:220,dias:0,pi:250,pp:250,gdp:1.35,etapa:'F1',po:480,ini:'2025-07-21'},
+  {l:'CH092',c:'C05',cab:186,dias:14,pi:265,pp:266,gdp:1.38,etapa:'F1',po:490,ini:'2025-07-07'},
+  {l:'CH090H',c:'C06',cab:174,dias:28,pi:240,pp:242,gdp:1.22,etapa:'Transición',po:460,ini:'2025-06-23'},
+  {l:'CH089',c:'C02',cab:196,dias:49,pi:270,pp:272,gdp:1.32,etapa:'F1',po:488,ini:'2025-06-02'},
+  {l:'CH088',c:'C04',cab:210,dias:42,pi:290,pp:291,gdp:1.40,etapa:'F3 SSS',po:500,ini:'2025-06-09'},
+  {l:'CH087',c:'C01',cab:214,dias:128,pi:252,pp:254,gdp:1.34,etapa:'F3 SZ',po:480,ini:'2025-03-14'},
+  {l:'CH086H',c:'C10',cab:164,dias:32,pi:238,pp:239,gdp:1.25,etapa:'Zilpaterol',po:460,ini:'2025-04-16'},
+  {l:'CH085',c:'C09',cab:222,dias:75,pi:275,pp:276,gdp:1.38,etapa:'F3 SSS',po:495,ini:'2025-05-07'},
+];
+var epill={'F1':'pill pb','Transición':'pill pa','F3 SSS':'pill pg','F3 SZ':'pill pp','Zilpaterol':'pill pp'};
+
+function getWeek(d){var f=new Date(d.getFullYear(),0,1);return Math.ceil(((d-f)/86400000+f.getDay()+1)/7);}
+function addD(d,n){var r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function fmt(d){return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short'});}
+function fmtFull(d){return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});}
+
+function buildDisp(){
+  var tb=document.getElementById('dispTbl');
+  lotesData.forEach(function(l){
+    var ph=(l.pi+l.dias*l.gdp).toFixed(0);
+    var dr=Math.ceil((l.po-l.pi)/l.gdp);
+    var vd=addD(new Date(l.ini),dr);
+    var sv=getWeek(vd);
+    var r1=addD(new Date(l.ini),60);
+    var pr=(l.pi+60*l.gdp).toFixed(0);
+    var sexo=l.l.endsWith('HV')?'HV':l.l.endsWith('H')?'H':'M';
+    tb.innerHTML+='<tr><td>'+l.c+'</td><td class="mn" style="color:var(--am)">'+l.l+'</td><td>'+sexo+'</td><td class="mn">'+l.cab+'</td><td class="mn">'+fmt(new Date(l.ini))+'</td><td class="mn">'+l.pi+' kg</td><td class="mn">'+l.dias+'</td><td class="mn">'+dr+'</td><td class="mn">'+ph+' kg</td><td class="mn">'+l.gdp+' kg/d</td><td class="mn">'+l.po+' kg</td><td class="mn">'+pr+' kg</td><td class="mn">60</td><td class="mn">'+fmt(r1)+'</td><td class="mn">'+l.pp+' kg</td><td><span class="'+(epill[l.etapa]||'pill pb')+'">'+l.etapa+'</span></td><td class="mn">S'+sv+'</td><td><span style="cursor:pointer;color:var(--bl);font-size:12px" onclick="nav(\'disp-alta\')">Alta →</span></td></tr>';
+  });
+}
+
+// ─── PROYECCIÓN ANUAL
+var proyData=[
+  {s:28,f:'07 Jul',c:'C17',l:'CH081',sx:'M',inv:176},{s:29,f:'14 Jul',c:'C18',l:'CH083',sx:'M',inv:214},
+  {s:30,f:'21 Jul',c:'C01',l:'CH087',sx:'M',inv:214},{s:30,f:'21 Jul',c:'C03',l:'CH091H',sx:'H',inv:128},
+  {s:31,f:'28 Jul',c:'C10',l:'CH086H',sx:'H',inv:164},
+  {s:32,f:'04 Ago',c:'C02',l:'CH089',sx:'M',inv:196},{s:32,f:'04 Ago',c:'C08',l:'CH093',sx:'M',inv:198},
+  {s:33,f:'11 Ago',c:'C06',l:'CH090H',sx:'H',inv:174},
+  {s:34,f:'18 Ago',c:null},{s:35,f:'25 Ago',c:'C04',l:'CH088',sx:'M',inv:210},
+  {s:36,f:'01 Sep',c:null},{s:37,f:'08 Sep',c:'C09',l:'CH085',sx:'M',inv:222},
+  {s:38,f:'15 Sep',c:null},{s:39,f:'22 Sep',c:'C15',l:'CH084',sx:'M',inv:194},
+  {s:40,f:'29 Sep',c:'C05',l:'CH092',sx:'M',inv:186},
+];
+function buildProyAnual(){
+  var tb=document.getElementById('proyAnualTbl');
+  proyData.forEach(function(d){
+    var sinSal=!d.c;
+    tb.innerHTML+='<tr><td class="mn">Sem '+d.s+'</td><td class="mn">'+d.f+'</td><td>'+(d.c||'—')+'</td><td class="mn">'+(d.l||'—')+'</td><td>'+(d.sx||'—')+'</td><td class="mn">'+(d.inv||'0')+'</td><td>'+(sinSal?'<span class="pill pr">⚠ Planear compra</span>':'<span class="pill pg">OK</span>')+'</td></tr>';
+  });
+}
+
+// ─── ALTA LOTE CALC
+function recalc(){
+  var pi=parseFloat(document.getElementById('fPI').value)||250;
+  var po=parseFloat(document.getElementById('fPO').value)||480;
+  var gdp=parseFloat(document.getElementById('fGDP').value)||1.35;
+  var cab=parseInt(document.getElementById('fCab').value)||220;
+  var fs=document.getElementById('fFech').value;
+  var ini=fs?new Date(fs):new Date();
+  var dias=Math.ceil((po-pi)/gdp);
+  var hoy=new Date();
+  var dt=Math.max(0,Math.floor((hoy-ini)/86400000));
+  var ph=(pi+dt*gdp).toFixed(1);
+  var pr=(pi+60*gdp).toFixed(0);
+  var vd=addD(ini,dias); var sv=getWeek(vd);
+  var r1=addD(ini,60),r2=addD(ini,120);
+  var r3=pi<290?addD(ini,180):null;
+  var tf=addD(ini,35),zd=addD(vd,-35);
+  document.getElementById('pDias').textContent=dias+' días';
+  document.getElementById('pPhoy').textContent=ph+' kg';
+  document.getElementById('pRango').textContent=pr+' kg (al día 60)';
+  document.getElementById('pFV').textContent=fmtFull(vd);
+  document.getElementById('pSV').textContent='Semana '+sv;
+  document.getElementById('pR1').textContent=fmtFull(r1);
+  document.getElementById('pR2').textContent=fmtFull(r2);
+  document.getElementById('pR3').textContent=r3?fmtFull(r3):'No aplica (peso ≥290 kg)';
+  document.getElementById('pFT').textContent=fmtFull(tf);
+  document.getElementById('pZilp').textContent=fmtFull(zd);
+  document.getElementById('pKilos').textContent=(po*cab).toLocaleString()+' kg';
+  var etapas=[
+    {t:'F1 sin melaza',s:fmt(ini)+' → '+fmt(addD(ini,21))+' · 21 días',done:dt>=21},
+    {t:'Transición F1→F3',s:fmt(addD(ini,21))+' → '+fmt(tf)+' · 14 días',done:dt>=35},
+    {t:'F3 SSS — Engorda',s:fmt(tf)+' → '+fmt(zd),done:hoy>zd},
+    {t:'F3 SZ + Zilpaterol (35 días)',s:fmt(zd)+' → '+fmt(vd),done:hoy>vd},
+    {t:'Venta proyectada',s:fmt(vd)+' · Semana '+sv,done:false,act:true},
+  ];
+  document.getElementById('etapasTL').innerHTML=etapas.map(function(e,i){
+    return '<div class="tli '+(e.done?'done':e.act?'act':'pend')+'"><div class="tll"><div class="tld"></div>'+(i<etapas.length-1?'<div class="tlln"></div>':'')+'</div><div class="tlc"><div class="tlt">'+e.t+'</div><div class="tls">'+e.s+'</div></div></div>';
+  }).join('');
+}
+recalc();
+['fPI','fPO','fGDP','fCab','fFech'].forEach(function(id){
+  var el=document.getElementById(id);
+  if(el) el.addEventListener('input',recalc);
+});
+
+// ─── CIERRE
+var cData={
+  'CH083':{cab:214,cabI:220,mu:6,fc:'2025-03-14',fci:'2025-07-25',kR:55330,cC:2486850,kV:60242,pvK:52,alK:234800,alC:914720,mC:38200,hC:342400,gdpR:1.34,conv:7.42,mort:2.73},
+  'CH078H':{cab:186,cabI:192,mu:6,fc:'2025-02-10',fci:'2025-06-30',kR:44928,cC:2067688,kV:50886,pvK:48,alK:192600,alC:763182,mC:32100,hC:317250,gdpR:1.24,conv:7.81,mort:3.13},
+  'CH071':{cab:198,cabI:202,mu:4,fc:'2025-01-05',fci:'2025-05-20',kR:49290,cC:2218050,kV:55836,pvK:50,alK:216000,alC:842400,mC:29600,hC:334125,gdpR:1.38,conv:7.20,mort:1.98}
+};
+function updCierre(){
+  var k=document.getElementById('cLote').value;
+  var d=cData[k]; if(!d) return;
+  var dc=Math.round((new Date(d.fci)-new Date(d.fc))/86400000);
+  var daB=dc*d.cabI, daN=daB-d.mu*Math.round(dc*0.4);
+  var ing=d.kV*d.pvK, ct=d.cC+d.alC+d.mC+d.hC;
+  var util=ing-ct, mg=((util/ing)*100).toFixed(1), cpk=(ct/d.kV).toFixed(2);
+  document.getElementById('cBlocks').innerHTML=
+    '<div class="cblk"><div class="cbt">Compra y recibo</div>'+
+      '<div class="cbr"><span class="ck">Cab. compradas</span><span class="cv">'+d.cabI+'</span></div>'+
+      '<div class="cbr"><span class="ck">Cab. recibidas</span><span class="cv">'+d.cab+'</span></div>'+
+      '<div class="cbr"><span class="ck">Kilos recepción</span><span class="cv">'+d.kR.toLocaleString()+'</span></div>'+
+      '<div class="cbr"><span class="ck">Costo compra</span><span class="cv">$'+d.cC.toLocaleString()+'</span></div>'+
+      '<div class="cbr"><span class="ck">Muertos</span><span class="cv" style="color:var(--rd)">'+d.mu+' ('+d.mort+'%)</span></div>'+
+    '</div>'+
+    '<div class="cblk"><div class="cbt">Días animal</div>'+
+      '<div class="cbr"><span class="ck">Días calendario</span><span class="cv">'+dc+'</span></div>'+
+      '<div class="cbr"><span class="ck">D-A base</span><span class="cv">'+daB.toLocaleString()+'</span></div>'+
+      '<div class="cbr"><span class="ck">Desc. x muertes</span><span class="cv" style="color:var(--rd)">−'+(daB-daN).toLocaleString()+'</span></div>'+
+      '<div class="cbr"><span class="ck">D-A netos</span><span class="cv" style="color:var(--gn)">'+daN.toLocaleString()+'</span></div>'+
+    '</div>'+
+    '<div class="cblk"><div class="cbt">Venta</div>'+
+      '<div class="cbr"><span class="ck">Kilos vendidos</span><span class="cv">'+d.kV.toLocaleString()+'</span></div>'+
+      '<div class="cbr"><span class="ck">Precio/kg</span><span class="cv">$'+d.pvK+'</span></div>'+
+      '<div class="cbr"><span class="ck">Ingreso total</span><span class="cv" style="color:var(--gn)">$'+ing.toLocaleString()+'</span></div>'+
+    '</div>';
+  document.getElementById('cTbl').innerHTML=[
+    ['Compra del ganado',d.cabI+' cab','$'+(d.cC/d.cabI).toFixed(0)+'/cab','$'+d.cC.toLocaleString()],
+    ['Alimentación',d.alK.toLocaleString()+' kg','$'+(d.alC/d.alK).toFixed(2)+'/kg','$'+d.alC.toLocaleString()],
+    ['Medicación',d.cab+' cab','$'+(d.mC/d.cab).toFixed(0)+'/cab','$'+d.mC.toLocaleString()],
+    ['Costo hotel',daN.toLocaleString()+' d-a','$12.50/d-a','$'+d.hC.toLocaleString()],
+    ['<strong>COSTO TOTAL</strong>','','','<strong>$'+ct.toLocaleString()+'</strong>'],
+    ['<strong style="color:var(--gn)">UTILIDAD</strong>','','','<strong style="color:var(--gn)">$'+util.toLocaleString()+'</strong>'],
+  ].map(function(r){return '<tr>'+r.map(function(c){return '<td class="mn">'+c+'</td>';}).join('')+'</tr>';}).join('');
+  document.getElementById('cInd').innerHTML=[
+    {l:'GDP Real',v:d.gdpR+' kg/d',cl:'var(--bl)'},
+    {l:'Conversión',v:d.conv.toFixed(2),cl:'var(--am)'},
+    {l:'Costo/kg prod.',v:'$'+cpk,cl:'var(--txb)'},
+    {l:'Margen %',v:mg+'%',cl:parseFloat(mg)>=18?'var(--gn)':'var(--am)'},
+  ].map(function(i){return '<div style="text-align:center"><div style="font-size:22px;font-family:var(--mono);font-weight:700;color:'+i.cl+'">'+i.v+'</div><div style="font-size:10.5px;color:var(--txd);margin-top:4px;text-transform:uppercase;letter-spacing:.6px">'+i.l+'</div></div>';}).join('');
+}
+updCierre();
+
+// ─── TAB SWITCH
+// ─── IA DASHBOARD ────────────────────────────────────────────────────────────
+// Contexto comprimido: ~250 tokens de entrada por llamada
+// Respuesta limitada a 180 tokens → costo por consulta ~0.001 USD con Claude Haiku
+function buildContext() {
+  return [
+    "Rancho Chamizal · Sem 30 · 21 Jul 2025",
+    "Inventario: 2847 cab (2527 corrales + 320 potreros)",
+    "Venta sem30: 342 cab (CH087 M 214 + CH091H H 128) · 94,640 kg · Rastro Norteño",
+    "Lotes activos: 22 · GDP prom real: 1.28 kg/d · Conversión: 7.42 · Mort: 0.82%",
+    "Semanas sin salida: S34, S36, S38 · Corrales libres: C07 C12 C14 C16",
+    "Reimplantes pendientes sem30: CH083 C03, CH092 C05, CH090H C06",
+    "Zilpaterol activos: CH087 (35d ✓) CH091H (32d) · Entra: CH088 (23jul)",
+    "Transiciones sem30: CH088 F3→F3+Zilp, CH090H FT→F3",
+  ].join(". ");
+}
+
+var preguntas = {
+  resumen: "En máximo 4 viñetas cortas: qué pasa esta semana en el rancho (ventas, reimplantes, transiciones, Zilpaterol). Sin introducción.",
+  riesgos: "Lista los 3 principales riesgos operativos de las próximas 4 semanas basándote en los datos. Máximo 3 líneas por riesgo.",
+  compra: "Con base en las semanas sin salida (S34, S36, S38) y los corrales libres (C07,C12,C14,C16), ¿cuándo conviene comprar ganado y cuántas cabezas aproximadamente? Respuesta directa, máximo 80 palabras.",
+  rentabilidad: "Con GDP real 1.28 vs proy 1.35 y conversión 7.42: ¿qué impacto tiene eso en la rentabilidad de los lotes activos? Respuesta concreta, máximo 80 palabras.",
+};
+
+function showLoading() {
+  document.getElementById('ai-response-area').innerHTML =
+    '<div style="display:flex;align-items:center;gap:10px;padding:16px 0;color:var(--txd);font-size:12.5px">' +
+    '<div style="width:16px;height:16px;border:2px solid var(--pud);border-top-color:var(--pu);border-radius:50%;animation:spin .8s linear infinite"></div>' +
+    'Analizando datos del rancho...</div>';
+  if (!document.getElementById('ai-spin-style')) {
+    var s = document.createElement('style');
+    s.id = 'ai-spin-style';
+    s.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+    document.head.appendChild(s);
+  }
+}
+
+function renderResponse(text, tokens) {
+  var html = '<div style="font-size:13px;line-height:1.7;color:var(--tx)">' +
+    text.replace(/\n/g, '<br>').replace(/^[•·-] /gm, '<span style="color:var(--pu)">▸</span> ') +
+    '</div>';
+  document.getElementById('ai-response-area').innerHTML = html;
+  var info = document.getElementById('ai-token-info');
+  info.style.display = 'block';
+  info.textContent = '~' + tokens + ' tokens · costo estimado: $0.001 USD · modelo: claude-haiku-4-5';
+}
+
+function renderError(msg) {
+  document.getElementById('ai-response-area').innerHTML =
+    '<div style="color:var(--rd);font-size:12.5px;padding:12px 0">⚠️ ' + msg + '</div>';
+}
+
+async function callAI(pregunta) {
+  showLoading();
+  var ctx = buildContext();
+  var userMsg = "DATOS DEL RANCHO: " + ctx + "\n\nPREGUNTA: " + pregunta;
+  try {
+    var resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 220,
+        system: "Eres el asistente de gestión ganadera del Rancho Chamizal. Responde en español, de forma directa y concisa, solo con la información solicitada. Sin saludos ni despedidas.",
+        messages: [{ role: "user", content: userMsg }]
+      })
+    });
+    var data = await resp.json();
+    if (data.content && data.content[0]) {
+      var totalTk = (data.usage ? data.usage.input_tokens + data.usage.output_tokens : 320);
+      renderResponse(data.content[0].text, totalTk);
+    } else {
+      renderError("Sin respuesta del modelo. " + (data.error ? data.error.message : ''));
+    }
+  } catch(e) {
+    renderError("Error de conexión: " + e.message);
+  }
+}
+
+function askAI(tipo) {
+  document.getElementById('ai-input-area').style.display = 'none';
+  if (tipo === 'libre') {
+    document.getElementById('ai-input-area').style.display = 'flex';
+    document.getElementById('ai-custom-q').focus();
+    document.getElementById('ai-response-area').innerHTML =
+      '<div style="color:var(--txd);font-size:12.5px;padding:8px 0">Escribe tu pregunta y presiona Enviar.</div>';
+    return;
+  }
+  callAI(preguntas[tipo]);
+}
+
+function askAICustom() {
+  var q = document.getElementById('ai-custom-q').value.trim();
+  if (!q) return;
+  document.getElementById('ai-input-area').style.display = 'none';
+  callAI(q);
+}
+
+document.getElementById('ai-custom-q') && document.getElementById('ai-custom-q').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') askAICustom();
+});
+
+function swTab(el){
+  el.closest('.tabs').querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>
