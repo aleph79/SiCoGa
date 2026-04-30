@@ -17,4 +17,9 @@ urlpatterns = [
         views.RegistrarVentaView.as_view(),
         name="registrar_venta",
     ),
+    path(
+        "lotes/<int:pk>/compra/",
+        views.CompraLoteView.as_view(),
+        name="compra_lote",
+    ),
 ]

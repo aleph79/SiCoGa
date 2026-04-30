@@ -89,3 +89,30 @@ class RegistrarVentaView(CatalogoMixin, CreateView):
         response = super().form_valid(form)
         messages.success(self.request, f"Venta registrada: {self.object}")
         return response
+
+
+from django.views.generic import UpdateView  # noqa: E402
+
+from apps.lotes.models import Lote  # noqa: E402
+
+from .forms import CompraLoteForm  # noqa: E402
+
+
+class CompraLoteView(CatalogoMixin, UpdateView):
+    """Captura los datos de compra/recepción del lote (campos del modelo Lote)."""
+
+    model = Lote
+    form_class = CompraLoteForm
+    template_name = "cierre/compra_lote.html"
+    permission_required = "lotes.change_lote"
+    pk_url_kwarg = "pk"
+
+    def get_success_url(self):
+        from django.urls import reverse
+
+        return reverse("lotes:lote_detail", args=[self.object.pk])
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, f"Compra/recepción guardada para {self.object.folio}")
+        return response

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Compra · {{ object.folio }}{% endblock %}
+{% block content %}
+<div class="ph">
+  <div><div class="ptitle">Compra / Recepción · {{ object.folio }}</div><div class="psub">Datos de origen y costo de compra</div></div>
+</div>
+
+<div class="g2">
+  <div class="card">
+    <div class="ct">🛒 Datos de compra</div>
+    <form method="post">
+      {% csrf_token %}
+      {% for field in form %}
+        <div style="margin-bottom:12px;">
+          <label class="klbl">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}<div class="ai err">{{ field.errors|join:", " }}</div>{% endif %}
+          {% if field.help_text %}<div class="psub">{{ field.help_text }}</div>{% endif %}
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn bp">Guardar</button>
+      <a href="{% url 'lotes:lote_detail' object.pk %}" class="btn bo">Cancelar</a>
+    </form>
+  </div>
+  <div class="card">
+    <div class="ct">📊 Resumen recepción</div>
+    <div class="srow"><span class="sk">Cabezas iniciales (recibidas)</span><span class="sv mn">{{ object.cabezas_iniciales }}</span></div>
+    <div class="srow"><span class="sk">Cabezas origen</span><span class="sv mn">{{ object.cabezas_origen|default:"—" }}</span></div>
+    <div class="srow"><span class="sk">Merma en tránsito (cabezas)</span><span class="sv mn" style="color:var(--rd)">{{ object.merma_transito_cabezas|default:"—" }}{% if object.merma_transito_pct %} ({{ object.merma_transito_pct|floatformat:2 }}%){% endif %}</span></div>
+    <div class="srow"><span class="sk">Kilos origen</span><span class="sv mn">{{ object.kilos_origen|default:"—" }}</span></div>
+    <div class="srow"><span class="sk">Kilos recibo</span><span class="sv mn">{{ object.kilos_recibo|default:"—" }}</span></div>
+    <div class="srow"><span class="sk">Diferencia kg origen vs recibo</span><span class="sv mn" style="color:var(--am)">{{ object.merma_transito_kilos|default:"—" }}</span></div>
+    <div class="srow"><span class="sk">Peso prom. origen</span><span class="sv mn">{{ object.peso_promedio_origen|default:"—"|floatformat:2 }}</span></div>
+    <div class="srow"><span class="sk">Peso prom. recibo</span><span class="sv mn">{{ object.peso_promedio_recibo|default:"—"|floatformat:2 }}</span></div>
+    <div class="stitle">Costos</div>
+    <div class="srow"><span class="sk">Costo total compra</span><span class="sv mn" style="color:var(--bl)">${{ object.costo_compra|default:"—"|floatformat:2 }}</span></div>
+    <div class="srow"><span class="sk">Costo por cabeza</span><span class="sv mn">${{ object.costo_por_cabeza|default:"—"|floatformat:2 }}</span></div>
+    <div class="srow"><span class="sk">Costo por kilo</span><span class="sv mn">${{ object.costo_por_kilo|default:"—"|floatformat:2 }}</span></div>
+  </div>
+</div>
+{% endblock %}

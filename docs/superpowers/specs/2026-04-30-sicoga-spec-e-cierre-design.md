@@ -3,8 +3,9 @@
 **Fecha:** 2026-04-30
 **Estado:**
 - 🚧 **DRAFT** general
-- ✅ **E.1 Muertes y Ventas — ENTREGADO 2026-04-30** (192 tests · `Lote.cabezas_actuales` ya considera muertes y ventas parciales)
-- ⏸ E.2 (Compra), E.3 (Alimentación/Medicación), E.4 (Costo Hotel), E.5 (Cierre consolidado) pendientes
+- ✅ **E.1 Muertes y Ventas — ENTREGADO 2026-04-30**
+- ✅ **E.2 Compra / Recepción — ENTREGADO 2026-04-30** (199 tests · campos en Lote + properties merma_transito, costo_por_cabeza, costo_por_kilo)
+- ⏸ E.3 (Alimentación/Medicación), E.4 (Costo Hotel), E.5 (Cierre consolidado) pendientes
 **Cliente:** Chamizal Camperos
 **Spec previo:** [D — Submódulos Operativos](./2026-04-30-sicoga-spec-d-submodulos-operativos-design.md) ✅ entregado
 

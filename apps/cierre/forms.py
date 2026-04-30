@@ -39,3 +39,27 @@ class VentaForm(forms.ModelForm):
             "precio_kg": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
             "notas": forms.Textarea(attrs={"class": "input", "rows": 2}),
         }
+
+
+from apps.lotes.models import Lote  # noqa: E402
+
+
+class CompraLoteForm(forms.ModelForm):
+    """Form para capturar los datos de compra/recepción de un lote existente."""
+
+    class Meta:
+        model = Lote
+        fields = [
+            "fecha_compra",
+            "cabezas_origen",
+            "kilos_origen",
+            "kilos_recibo",
+            "costo_compra",
+        ]
+        widgets = {
+            "fecha_compra": forms.DateInput(attrs={"class": "input", "type": "date"}),
+            "cabezas_origen": forms.NumberInput(attrs={"class": "input", "min": 1}),
+            "kilos_origen": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
+            "kilos_recibo": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
+            "costo_compra": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
+        }

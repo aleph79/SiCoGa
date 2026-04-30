@@ -54,6 +54,39 @@ class Lote(AuditableModel):
     )
     observaciones = models.TextField(blank=True)
 
+    # ----- Compra / Recepción (Spec E.2) -----
+    fecha_compra = models.DateField(
+        null=True, blank=True, verbose_name="Fecha de compra"
+    )
+    cabezas_origen = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="Cabezas en origen",
+        help_text="Cabezas embarcadas en el rancho/proveedor.",
+    )
+    kilos_origen = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="Kilos en origen",
+    )
+    kilos_recibo = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="Kilos en recibo",
+        help_text="Kilos al desembarque en corral.",
+    )
+    costo_compra = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="Costo total de compra ($)",
+    )
+
     history = HistoricalRecords()
 
     class Meta:
@@ -214,6 +247,58 @@ class Lote(AuditableModel):
         if not self.gdp_efectiva:
             return None
         return self.peso_inicial_promedio + (60 * self.gdp_efectiva)
+
+    # ----- Properties para Compra / Recepción (Spec E.2) -----
+
+    @property
+    def peso_promedio_origen(self):
+        from decimal import Decimal
+
+        if not self.cabezas_origen or not self.kilos_origen:
+            return None
+        return self.kilos_origen / Decimal(self.cabezas_origen)
+
+    @property
+    def peso_promedio_recibo(self):
+        from decimal import Decimal
+
+        if not self.cabezas_iniciales or not self.kilos_recibo:
+            return None
+        return self.kilos_recibo / Decimal(self.cabezas_iniciales)
+
+    @property
+    def merma_transito_cabezas(self):
+        if self.cabezas_origen is None:
+            return None
+        return self.cabezas_origen - self.cabezas_iniciales
+
+    @property
+    def merma_transito_pct(self):
+        from decimal import Decimal
+
+        if not self.cabezas_origen:
+            return None
+        return Decimal(self.merma_transito_cabezas) / Decimal(self.cabezas_origen) * Decimal("100")
+
+    @property
+    def merma_transito_kilos(self):
+        if self.kilos_origen is None or self.kilos_recibo is None:
+            return None
+        return self.kilos_origen - self.kilos_recibo
+
+    @property
+    def costo_por_cabeza(self):
+        from decimal import Decimal
+
+        if not self.costo_compra or not self.cabezas_iniciales:
+            return None
+        return self.costo_compra / Decimal(self.cabezas_iniciales)
+
+    @property
+    def costo_por_kilo(self):
+        if not self.costo_compra or not self.kilos_recibo:
+            return None
+        return self.costo_compra / self.kilos_recibo
 
     # ----- Properties para Cierre (Spec E.1) -----
 
