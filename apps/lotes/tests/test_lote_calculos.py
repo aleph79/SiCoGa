@@ -58,3 +58,32 @@ def test_kg_por_hacer_sin_peso_objetivo_y_sin_programa(fixtures):
 def test_dias_engorda_sin_gdp(fixtures):
     lote = _make(fixtures, gdp_esperada=None)
     assert lote.dias_engorda_proyectados is None
+
+
+def test_fecha_proyectada_venta(fixtures):
+    from datetime import timedelta
+
+    lote = _make(fixtures, fecha_inicio=date(2026, 1, 1))
+    # 253 días desde 2026-01-01
+    assert lote.fecha_proyectada_venta == date(2026, 1, 1) + timedelta(days=253)
+
+
+def test_semana_proyectada_venta(fixtures):
+    lote = _make(fixtures, fecha_inicio=date(2026, 1, 1))
+    expected = lote.fecha_proyectada_venta.isocalendar()[1]
+    assert lote.semana_proyectada_venta == expected
+
+
+def test_kilos_proyectados_venta(fixtures):
+    lote = _make(fixtures, cabezas_iniciales=200, peso_salida_objetivo=Decimal("580"))
+    assert lote.kilos_proyectados_venta == Decimal("116000.00")
+
+
+def test_fecha_proyectada_venta_sin_dias(fixtures):
+    lote = _make(fixtures, gdp_esperada=None)
+    assert lote.fecha_proyectada_venta is None
+
+
+def test_kilos_proyectados_venta_sin_peso_objetivo(fixtures):
+    lote = _make(fixtures, peso_salida_objetivo=None, gdp_esperada=None)
+    assert lote.kilos_proyectados_venta is None

@@ -120,3 +120,24 @@ class Lote(AuditableModel):
         if not gdp or kg is None or gdp <= 0:
             return None
         return int(kg / gdp)
+
+    @property
+    def fecha_proyectada_venta(self):
+        from datetime import timedelta
+
+        dias = self.dias_engorda_proyectados
+        if dias is None:
+            return None
+        return self.fecha_inicio + timedelta(days=dias)
+
+    @property
+    def semana_proyectada_venta(self):
+        f = self.fecha_proyectada_venta
+        return f.isocalendar()[1] if f else None
+
+    @property
+    def kilos_proyectados_venta(self):
+        peso = self.peso_objetivo_efectivo
+        if peso is None:
+            return None
+        return peso * self.cabezas_iniciales
