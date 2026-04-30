@@ -8,8 +8,8 @@ def tipos(db):
     from apps.catalogos.models import TipoGanado, TipoOrigen
 
     return {
-        "macho": TipoGanado.objects.create(nombre="Macho"),
-        "corral": TipoOrigen.objects.create(nombre="Corral"),
+        "macho": TipoGanado.objects.get_or_create(nombre="Macho")[0],
+        "corral": TipoOrigen.objects.get_or_create(nombre="Corral")[0],
     }
 
 

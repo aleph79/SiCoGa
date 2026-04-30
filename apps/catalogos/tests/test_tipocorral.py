@@ -33,17 +33,17 @@ def lectura_user(db):
 def test_tipocorral_str_returns_nombre():
     from apps.catalogos.models import TipoCorral
 
-    t = TipoCorral.objects.create(nombre="Recepción")
-    assert str(t) == "Recepción"
+    t = TipoCorral.objects.create(nombre="RecepciónTest")
+    assert str(t) == "RecepciónTest"
 
 
 @pytest.mark.django_db(transaction=True)
 def test_tipocorral_nombre_unique():
     from apps.catalogos.models import TipoCorral
 
-    TipoCorral.objects.create(nombre="Engorda")
+    TipoCorral.objects.create(nombre="EngordaTest")
     with pytest.raises(Exception):
-        TipoCorral.objects.create(nombre="Engorda")
+        TipoCorral.objects.create(nombre="EngordaTest")
 
 
 def test_tipocorral_history_records_changes():
@@ -79,13 +79,13 @@ def test_admin_can_create_tipocorral(client, admin_user):
     client.force_login(admin_user)
     response = client.post(
         reverse("catalogos:tipocorral_create"),
-        {"nombre": "Zilpaterol", "activo": "on"},
+        {"nombre": "ZilpaterolTest", "activo": "on"},
         follow=True,
     )
     assert response.status_code == 200
     from apps.catalogos.models import TipoCorral
 
-    assert TipoCorral.objects.filter(nombre="Zilpaterol").exists()
+    assert TipoCorral.objects.filter(nombre="ZilpaterolTest").exists()
 
 
 @pytest.mark.django_db(transaction=True)

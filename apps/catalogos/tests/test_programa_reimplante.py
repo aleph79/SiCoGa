@@ -16,11 +16,11 @@ def tipos(db):
     from apps.catalogos.models import TipoGanado, TipoOrigen
 
     return {
-        "macho": TipoGanado.objects.create(nombre="Macho"),
-        "hembra": TipoGanado.objects.create(nombre="Hembra"),
-        "vaca": TipoGanado.objects.create(nombre="Vaca"),
-        "corral": TipoOrigen.objects.create(nombre="Corral"),
-        "potrero": TipoOrigen.objects.create(nombre="Potrero"),
+        "macho": TipoGanado.objects.get_or_create(nombre="Macho")[0],
+        "hembra": TipoGanado.objects.get_or_create(nombre="Hembra")[0],
+        "vaca": TipoGanado.objects.get_or_create(nombre="Vaca")[0],
+        "corral": TipoOrigen.objects.get_or_create(nombre="Corral")[0],
+        "potrero": TipoOrigen.objects.get_or_create(nombre="Potrero")[0],
     }
 
 
