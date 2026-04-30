@@ -1,0 +1,17 @@
+{% load static %}
+<header>
+  <div class="logo">SiCoGa <span>SIWEB</span></div>
+  <div class="sem">Semana actual: {% now "W" %} / {% now "Y" %}</div>
+  <div class="hdr-r">
+    {% if user.is_authenticated %}
+      <span style="font-size:12px;color:var(--txd);">{{ user.username }}</span>
+      <a href="{% url 'accounts:perfil' %}" class="avatar">{{ user.username|slice:":1"|upper }}</a>
+      <form method="post" action="{% url 'accounts:logout' %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn bo bsm">Salir</button>
+      </form>
+    {% else %}
+      <a href="{% url 'accounts:login' %}" class="btn bp bsm">Entrar</a>
+    {% endif %}
+  </div>
+</header>

@@ -1,0 +1,9 @@
+{% if messages %}
+<div class="ali" style="margin-bottom:18px;">
+  {% for msg in messages %}
+    <div class="ai {% if msg.tags == 'success' %}ok{% elif msg.tags == 'warning' %}warn{% elif msg.tags == 'error' %}err{% else %}info{% endif %}">
+      {{ msg }}
+    </div>
+  {% endfor %}
+</div>
+{% endif %}

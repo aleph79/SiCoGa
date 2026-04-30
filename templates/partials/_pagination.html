@@ -1,0 +1,13 @@
+{% if is_paginated %}
+<nav class="bg" style="margin-top:14px;justify-content:center;">
+  {% if page_obj.has_previous %}
+    <a class="btn bo bsm" href="?page={{ page_obj.previous_page_number }}">‹ Anterior</a>
+  {% endif %}
+  <span style="font-size:12px;color:var(--txd);padding:0 10px;">
+    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+  </span>
+  {% if page_obj.has_next %}
+    <a class="btn bo bsm" href="?page={{ page_obj.next_page_number }}">Siguiente ›</a>
+  {% endif %}
+</nav>
+{% endif %}

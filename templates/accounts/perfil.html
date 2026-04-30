@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Mi perfil{% endblock %}
+{% block content %}
+<div class="ph"><div><div class="ptitle">Mi perfil</div><div class="psub">Información personal y avatar</div></div></div>
+<div class="card" style="max-width:480px;">
+  <p><strong>Usuario:</strong> {{ user.username }}</p>
+  <p><strong>Email:</strong> {{ user.email }}</p>
+  <p><strong>Teléfono:</strong> {{ user.telefono|default:"—" }}</p>
+  <hr style="border:none;border-top:1px solid var(--bdr);margin:14px 0;">
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn bp">Guardar</button>
+    <a href="{% url 'accounts:password_change' %}" class="btn bo">Cambiar contraseña</a>
+  </form>
+</div>
+{% endblock %}

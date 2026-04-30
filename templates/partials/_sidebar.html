@@ -1,0 +1,39 @@
+<aside>
+  <div class="nsec">Dashboard</div>
+  <a class="ni {% if request.resolver_match.url_name == 'dashboard-home-stub' %}active{% endif %}" href="/">
+    <span class="ico">▦</span> Inicio
+  </a>
+
+  <div class="ndiv"></div>
+  <div class="nsec">Catálogos</div>
+  <a class="ni {% if 'corrales' in request.path and 'tipos' not in request.path %}active{% endif %}" href="/catalogos/corrales/">
+    <span class="ico">▢</span> Corrales
+  </a>
+  <a class="ni {% if 'tipos-corral' in request.path %}active{% endif %}" href="/catalogos/tipos-corral/">
+    <span class="ico">▢</span> Tipos de Corral
+  </a>
+  <a class="ni {% if 'tipos-ganado' in request.path %}active{% endif %}" href="/catalogos/tipos-ganado/">
+    <span class="ico">▢</span> Tipos de Ganado
+  </a>
+  <a class="ni {% if 'tipos-origen' in request.path %}active{% endif %}" href="/catalogos/tipos-origen/">
+    <span class="ico">▢</span> Tipos de Origen
+  </a>
+  <a class="ni {% if 'proveedores' in request.path %}active{% endif %}" href="/catalogos/proveedores/">
+    <span class="ico">▢</span> Proveedores
+  </a>
+  <a class="ni {% if 'programa-reimplantes' in request.path %}active{% endif %}" href="/catalogos/programa-reimplantes/">
+    <span class="ico">▢</span> Programa de Reimplantes
+  </a>
+
+  <div class="ndiv"></div>
+  <div class="nsec">Próximamente</div>
+  <a class="ni" style="opacity:.4;cursor:not-allowed;"><span class="ico">▢</span> Disponibilidad <span class="nbg d">soon</span></a>
+  <a class="ni" style="opacity:.4;cursor:not-allowed;"><span class="ico">▢</span> Cierre de Lotes <span class="nbg d">soon</span></a>
+  <a class="ni" style="opacity:.4;cursor:not-allowed;"><span class="ico">▢</span> Reportes <span class="nbg d">soon</span></a>
+
+  {% if user.is_staff %}
+    <div class="ndiv"></div>
+    <div class="nsec">Administración</div>
+    <a class="ni" href="/admin/"><span class="ico">⚙</span> Admin Django</a>
+  {% endif %}
+</aside>
