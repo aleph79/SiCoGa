@@ -2,7 +2,7 @@
 
 from django import forms
 
-from .models import Proveedor, TipoCorral, TipoGanado, TipoOrigen
+from .models import Corral, Proveedor, TipoCorral, TipoGanado, TipoOrigen
 
 
 class TipoCorralForm(forms.ModelForm):
@@ -36,4 +36,15 @@ class ProveedorForm(forms.ModelForm):
             "telefono": forms.TextInput(attrs={"class": "input"}),
             "contacto": forms.TextInput(attrs={"class": "input"}),
             "notas": forms.Textarea(attrs={"class": "input", "rows": 3}),
+        }
+
+
+class CorralForm(forms.ModelForm):
+    class Meta:
+        model = Corral
+        fields = ["clave", "nombre", "tipo_corral", "capacidad_maxima", "activo"]
+        widgets = {
+            "clave": forms.TextInput(attrs={"class": "input"}),
+            "nombre": forms.TextInput(attrs={"class": "input"}),
+            "capacidad_maxima": forms.NumberInput(attrs={"class": "input", "min": 1}),
         }

@@ -7,8 +7,8 @@ from django.views.generic import CreateView, DetailView, ListView, UpdateView, V
 
 from apps.core.mixins import CatalogoMixin
 
-from .forms import ProveedorForm, TipoCorralForm, TipoGanadoForm, TipoOrigenForm
-from .models import Proveedor, TipoCorral, TipoGanado, TipoOrigen
+from .forms import CorralForm, ProveedorForm, TipoCorralForm, TipoGanadoForm, TipoOrigenForm
+from .models import Corral, Proveedor, TipoCorral, TipoGanado, TipoOrigen
 
 
 # ----- TipoCorral -----
@@ -233,3 +233,59 @@ class ProveedorDeleteView(CatalogoMixin, View):
         obj.save()
         messages.success(request, f"'{obj}' marcado como inactivo.")
         return redirect("catalogos:proveedor_list")
+
+
+# ----- Corral -----
+class CorralListView(CatalogoMixin, ListView):
+    model = Corral
+    template_name = "catalogos/corral_list.html"
+    permission_required = "catalogos.view_corral"
+    context_object_name = "objetos"
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.request.GET.get("ver") != "todos":
+            qs = qs.filter(activo=True)
+        return qs
+
+
+class CorralCreateView(CatalogoMixin, CreateView):
+    model = Corral
+    form_class = CorralForm
+    template_name = "catalogos/corral_form.html"
+    permission_required = "catalogos.add_corral"
+    success_url = reverse_lazy("catalogos:corral_list")
+
+
+class CorralUpdateView(CatalogoMixin, UpdateView):
+    model = Corral
+    form_class = CorralForm
+    template_name = "catalogos/corral_form.html"
+    permission_required = "catalogos.change_corral"
+    success_url = reverse_lazy("catalogos:corral_list")
+
+
+class CorralDetailView(CatalogoMixin, DetailView):
+    model = Corral
+    template_name = "catalogos/corral_detail.html"
+    permission_required = "catalogos.view_corral"
+    context_object_name = "obj"
+
+
+class CorralDeleteView(CatalogoMixin, View):
+    permission_required = "catalogos.delete_corral"
+
+    def get(self, request, pk):
+        obj = get_object_or_404(Corral, pk=pk)
+        return render(
+            request,
+            "catalogos/corral_confirm_delete.html",
+            {"object": obj, "cancel_url": reverse_lazy("catalogos:corral_list")},
+        )
+
+    def post(self, request, pk):
+        obj = get_object_or_404(Corral, pk=pk)
+        obj.activo = False
+        obj.save()
+        messages.success(request, f"'{obj}' marcado como inactivo.")
+        return redirect("catalogos:corral_list")

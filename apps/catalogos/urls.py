@@ -93,4 +93,18 @@ urlpatterns = [
         views.ProveedorDeleteView.as_view(),
         name="proveedor_delete",
     ),
+    # Corral
+    path("corrales/", views.CorralListView.as_view(), name="corral_list"),
+    path("corrales/nuevo/", views.CorralCreateView.as_view(), name="corral_create"),
+    path("corrales/<int:pk>/", views.CorralDetailView.as_view(), name="corral_detail"),
+    path(
+        "corrales/<int:pk>/editar/",
+        views.CorralUpdateView.as_view(),
+        name="corral_update",
+    ),
+    path(
+        "corrales/<int:pk>/eliminar/",
+        views.CorralDeleteView.as_view(),
+        name="corral_delete",
+    ),
 ]

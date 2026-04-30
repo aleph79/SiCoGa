@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Corrales{% endblock %}
+{% block content %}
+<div class="ph">
+  <div><div class="ptitle">Corrales</div><div class="psub">Capacidad, ocupación y disponibilidad</div></div>
+  <div class="bg">
+    {% if perms.catalogos.add_corral %}<a href="{% url 'catalogos:corral_create' %}" class="btn bp">+ Nuevo</a>{% endif %}
+  </div>
+</div>
+<div class="card">
+  <table class="tbl">
+    <thead><tr><th>Clave</th><th>Nombre</th><th>Tipo</th><th>Capacidad</th><th>Ocupación</th><th>Disponible</th><th>Estado</th><th></th></tr></thead>
+    <tbody>
+      {% for o in objetos %}
+        <tr>
+          <td>{{ o.clave }}</td>
+          <td>{{ o.nombre }}</td>
+          <td>{{ o.tipo_corral.nombre }}</td>
+          <td class="mn">{{ o.capacidad_maxima }}</td>
+          <td class="mn">{{ o.ocupacion_actual }}</td>
+          <td class="mn">{{ o.disponibilidad }}</td>
+          <td><span class="pill {% if o.activo %}pg{% else %}pr{% endif %}">{% if o.activo %}Activo{% else %}Inactivo{% endif %}</span></td>
+          <td>
+            {% if perms.catalogos.change_corral %}<a href="{% url 'catalogos:corral_update' o.pk %}" class="btn bo bsm">Editar</a>{% endif %}
+            {% if perms.catalogos.delete_corral and o.activo %}<a href="{% url 'catalogos:corral_delete' o.pk %}" class="btn bo bsm">Eliminar</a>{% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="8" style="color:var(--txd);text-align:center;">Sin registros.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "partials/_pagination.html" %}
+{% endblock %}

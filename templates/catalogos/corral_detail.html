@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ obj.clave }}{% endblock %}
+{% block content %}
+<div class="ph"><div><div class="ptitle">{{ obj }}</div><div class="psub">Tipo: {{ obj.tipo_corral.nombre }}</div></div></div>
+<div class="card">
+  <p><strong>Capacidad máxima:</strong> {{ obj.capacidad_maxima }}</p>
+  <p><strong>Ocupación actual:</strong> {{ obj.ocupacion_actual }}</p>
+  <p><strong>Disponibilidad:</strong> {{ obj.disponibilidad }}</p>
+  <p><strong>Estado:</strong> {{ obj.activo|yesno:"Activo,Inactivo" }}</p>
+  <a href="{% url 'catalogos:corral_update' obj.pk %}" class="btn bp">Editar</a>
+  <a href="{% url 'catalogos:corral_list' %}" class="btn bo">Volver</a>
+</div>
+{% endblock %}
