@@ -171,6 +171,52 @@ class Lote(AuditableModel):
             return None
         return self.fecha_proyectada_venta - timedelta(days=self.programa.dias_zilpaterol)
 
+    # ----- Properties para la pantalla de Disponibilidad (Spec C) -----
+
+    @property
+    def dias_transcurridos(self):
+        from datetime import date
+
+        return (date.today() - self.fecha_inicio).days
+
+    @property
+    def peso_actual_proyectado(self):
+        """peso_inicial + dias_transcurridos × gdp_efectiva."""
+        if not self.gdp_efectiva:
+            return None
+        return self.peso_inicial_promedio + (self.dias_transcurridos * self.gdp_efectiva)
+
+    @property
+    def peso_estimado_rango(self):
+        """Peso al cumplir 60 días — referencia para el primer reimplante."""
+        if not self.gdp_efectiva:
+            return None
+        return self.peso_inicial_promedio + (60 * self.gdp_efectiva)
+
+    @property
+    def etapa(self):
+        """Recepción → F1 → Transición → F3 → Zilpaterol → Post-Zilpaterol."""
+        p = self.programa
+        if not p:
+            return "Sin programa"
+        d = self.dias_transcurridos
+        acum = p.dias_recepcion
+        if d < acum:
+            return "Recepción"
+        acum += p.dias_f1
+        if d < acum:
+            return "F1"
+        acum += p.dias_transicion
+        if d < acum:
+            return "Transición"
+        acum += p.dias_f3
+        if d < acum:
+            return "F3"
+        acum += p.dias_zilpaterol
+        if d < acum:
+            return "Zilpaterol"
+        return "Post-Zilpaterol"
+
 
 class LoteFusion(TimeStampedModel):
     """Una fila por cada vez que un lote 'origen' se fusiona en un lote 'destino'."""

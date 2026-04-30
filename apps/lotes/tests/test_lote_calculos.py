@@ -174,3 +174,151 @@ def test_fecha_entrada_zilpaterol(fixtures_con_programa):
 def test_fecha_zilpaterol_sin_programa(fixtures):
     lote = _make(fixtures)  # gdp y peso explícitos en el lote, pero NO hay programa
     assert lote.fecha_entrada_zilpaterol is None
+
+
+# ===== Spec C — properties para la pantalla de Disponibilidad =====
+
+
+def test_dias_transcurridos(fixtures):
+    from datetime import date, timedelta
+
+    lote = _make(fixtures, fecha_inicio=date.today() - timedelta(days=30))
+    assert lote.dias_transcurridos == 30
+
+
+def test_dias_transcurridos_futuro_negativo(fixtures):
+    from datetime import date, timedelta
+
+    lote = _make(fixtures, fecha_inicio=date.today() + timedelta(days=5))
+    assert lote.dias_transcurridos == -5
+
+
+def test_peso_actual_proyectado(fixtures):
+    from datetime import date, timedelta
+
+    lote = _make(
+        fixtures,
+        fecha_inicio=date.today() - timedelta(days=30),
+        peso_inicial_promedio=Decimal("250.00"),
+        gdp_esperada=Decimal("1.30"),
+    )
+    # 250 + 30 * 1.30 = 289
+    assert lote.peso_actual_proyectado == Decimal("289.00")
+
+
+def test_peso_actual_proyectado_sin_gdp(fixtures):
+    lote = _make(fixtures, gdp_esperada=None, peso_salida_objetivo=None)
+    assert lote.peso_actual_proyectado is None
+
+
+def test_peso_estimado_rango(fixtures):
+    lote = _make(fixtures, peso_inicial_promedio=Decimal("250.00"), gdp_esperada=Decimal("1.30"))
+    # 250 + 60 * 1.30 = 328
+    assert lote.peso_estimado_rango == Decimal("328.00")
+
+
+def test_etapa_sin_programa(fixtures):
+    lote = _make(fixtures)
+    assert lote.etapa == "Sin programa"
+
+
+def test_etapa_recepcion(fixtures_con_programa):
+    from datetime import date, timedelta
+
+    # programa: dias_recepcion=0 (default). Necesitamos uno con recepción explícita.
+    fixtures_con_programa["programa"].dias_recepcion = 5
+    fixtures_con_programa["programa"].dias_f1 = 100
+    fixtures_con_programa["programa"].dias_transicion = 14
+    fixtures_con_programa["programa"].dias_f3 = 100
+    fixtures_con_programa["programa"].dias_zilpaterol = 35
+    fixtures_con_programa["programa"].save()
+
+    lote = _make(
+        fixtures_con_programa,
+        peso_inicial_promedio=Decimal("250.00"),
+        peso_salida_objetivo=None,
+        gdp_esperada=None,
+        tipo_origen=fixtures_con_programa["corral_origen"],
+        fecha_inicio=date.today() - timedelta(days=2),
+    )
+    assert lote.etapa == "Recepción"
+
+
+def test_etapa_f1(fixtures_con_programa):
+    from datetime import date, timedelta
+
+    fixtures_con_programa["programa"].dias_recepcion = 5
+    fixtures_con_programa["programa"].dias_f1 = 100
+    fixtures_con_programa["programa"].save()
+
+    lote = _make(
+        fixtures_con_programa,
+        peso_inicial_promedio=Decimal("250.00"),
+        peso_salida_objetivo=None,
+        gdp_esperada=None,
+        tipo_origen=fixtures_con_programa["corral_origen"],
+        fecha_inicio=date.today() - timedelta(days=50),  # día 50: dentro de F1
+    )
+    assert lote.etapa == "F1"
+
+
+def test_etapa_transicion(fixtures_con_programa):
+    from datetime import date, timedelta
+
+    fixtures_con_programa["programa"].dias_recepcion = 5
+    fixtures_con_programa["programa"].dias_f1 = 100
+    fixtures_con_programa["programa"].dias_transicion = 14
+    fixtures_con_programa["programa"].save()
+
+    lote = _make(
+        fixtures_con_programa,
+        peso_inicial_promedio=Decimal("250.00"),
+        peso_salida_objetivo=None,
+        gdp_esperada=None,
+        tipo_origen=fixtures_con_programa["corral_origen"],
+        fecha_inicio=date.today() - timedelta(days=110),  # 5+100=105, +14=119
+    )
+    assert lote.etapa == "Transición"
+
+
+def test_etapa_zilpaterol_y_post(fixtures_con_programa):
+    from datetime import date, timedelta
+
+    fixtures_con_programa["programa"].dias_recepcion = 5
+    fixtures_con_programa["programa"].dias_f1 = 100
+    fixtures_con_programa["programa"].dias_transicion = 14
+    fixtures_con_programa["programa"].dias_f3 = 100
+    fixtures_con_programa["programa"].dias_zilpaterol = 35
+    fixtures_con_programa["programa"].save()
+
+    # Total: 5+100+14+100+35 = 254 días
+    lote = _make(
+        fixtures_con_programa,
+        peso_inicial_promedio=Decimal("250.00"),
+        peso_salida_objetivo=None,
+        gdp_esperada=None,
+        tipo_origen=fixtures_con_programa["corral_origen"],
+        fecha_inicio=date.today() - timedelta(days=240),  # dentro de Zilpaterol
+    )
+    assert lote.etapa == "Zilpaterol"
+
+    # Para el segundo lote, usar otro corral porque single-active-per-corral
+    from apps.catalogos.models import Corral, TipoCorral
+
+    nuevo_corral = Corral.objects.create(
+        clave="CL-POST",
+        nombre="Post",
+        tipo_corral=TipoCorral.objects.get_or_create(nombre="Engorda")[0],
+        capacidad_maxima=300,
+    )
+    lote2 = _make(
+        fixtures_con_programa,
+        folio="CH-POST",
+        corral=nuevo_corral,
+        peso_inicial_promedio=Decimal("250.00"),
+        peso_salida_objetivo=None,
+        gdp_esperada=None,
+        tipo_origen=fixtures_con_programa["corral_origen"],
+        fecha_inicio=date.today() - timedelta(days=300),
+    )
+    assert lote2.etapa == "Post-Zilpaterol"
