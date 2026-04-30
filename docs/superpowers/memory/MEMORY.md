@@ -1,2 +1,3 @@
 - [SiCoGa - Visión y decisiones de proyecto](project_sicoga_overview.md) — Cliente Chamizal, repo aleph79/SiCoGa, hospital fuera de alcance, descomposición en 7 specs
 - [Entorno de desarrollo del usuario](user_dev_environment.md) — PyCharm + virtualenv (no Docker local), proyecto hermano MiContaAI en el mismo server
+- [Entorno alterno - AlmaLinux box](dev_environment_almalinux_box.md) — `/workspace/sicoga` en AlmaLinux 10.1 con MariaDB 10.11 (no MySQL 8.0.46); requiere `dnf install gcc python3.12-devel mariadb-connector-c-devel` antes de pip
