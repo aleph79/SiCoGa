@@ -49,4 +49,26 @@ urlpatterns = [
         views.TipoGanadoDeleteView.as_view(),
         name="tipoganado_delete",
     ),
+    # TipoOrigen
+    path("tipos-origen/", views.TipoOrigenListView.as_view(), name="tipoorigen_list"),
+    path(
+        "tipos-origen/nuevo/",
+        views.TipoOrigenCreateView.as_view(),
+        name="tipoorigen_create",
+    ),
+    path(
+        "tipos-origen/<int:pk>/",
+        views.TipoOrigenDetailView.as_view(),
+        name="tipoorigen_detail",
+    ),
+    path(
+        "tipos-origen/<int:pk>/editar/",
+        views.TipoOrigenUpdateView.as_view(),
+        name="tipoorigen_update",
+    ),
+    path(
+        "tipos-origen/<int:pk>/eliminar/",
+        views.TipoOrigenDeleteView.as_view(),
+        name="tipoorigen_delete",
+    ),
 ]

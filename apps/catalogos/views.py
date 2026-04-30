@@ -7,8 +7,8 @@ from django.views.generic import CreateView, DetailView, ListView, UpdateView, V
 
 from apps.core.mixins import CatalogoMixin
 
-from .forms import TipoCorralForm, TipoGanadoForm
-from .models import TipoCorral, TipoGanado
+from .forms import TipoCorralForm, TipoGanadoForm, TipoOrigenForm
+from .models import TipoCorral, TipoGanado, TipoOrigen
 
 
 # ----- TipoCorral -----
@@ -121,3 +121,59 @@ class TipoGanadoDeleteView(CatalogoMixin, View):
         obj.save()
         messages.success(request, f"'{obj}' marcado como inactivo.")
         return redirect("catalogos:tipoganado_list")
+
+
+# ----- TipoOrigen -----
+class TipoOrigenListView(CatalogoMixin, ListView):
+    model = TipoOrigen
+    template_name = "catalogos/tipoorigen_list.html"
+    permission_required = "catalogos.view_tipoorigen"
+    context_object_name = "objetos"
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.request.GET.get("ver") != "todos":
+            qs = qs.filter(activo=True)
+        return qs
+
+
+class TipoOrigenCreateView(CatalogoMixin, CreateView):
+    model = TipoOrigen
+    form_class = TipoOrigenForm
+    template_name = "catalogos/tipoorigen_form.html"
+    permission_required = "catalogos.add_tipoorigen"
+    success_url = reverse_lazy("catalogos:tipoorigen_list")
+
+
+class TipoOrigenUpdateView(CatalogoMixin, UpdateView):
+    model = TipoOrigen
+    form_class = TipoOrigenForm
+    template_name = "catalogos/tipoorigen_form.html"
+    permission_required = "catalogos.change_tipoorigen"
+    success_url = reverse_lazy("catalogos:tipoorigen_list")
+
+
+class TipoOrigenDetailView(CatalogoMixin, DetailView):
+    model = TipoOrigen
+    template_name = "catalogos/tipoorigen_detail.html"
+    permission_required = "catalogos.view_tipoorigen"
+    context_object_name = "obj"
+
+
+class TipoOrigenDeleteView(CatalogoMixin, View):
+    permission_required = "catalogos.delete_tipoorigen"
+
+    def get(self, request, pk):
+        obj = get_object_or_404(TipoOrigen, pk=pk)
+        return render(
+            request,
+            "catalogos/tipoorigen_confirm_delete.html",
+            {"object": obj, "cancel_url": reverse_lazy("catalogos:tipoorigen_list")},
+        )
+
+    def post(self, request, pk):
+        obj = get_object_or_404(TipoOrigen, pk=pk)
+        obj.activo = False
+        obj.save()
+        messages.success(request, f"'{obj}' marcado como inactivo.")
+        return redirect("catalogos:tipoorigen_list")
