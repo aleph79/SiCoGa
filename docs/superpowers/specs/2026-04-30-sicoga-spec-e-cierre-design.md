@@ -5,8 +5,9 @@
 - 🚧 **DRAFT** general
 - ✅ **E.1 Muertes y Ventas — ENTREGADO 2026-04-30**
 - ✅ **E.2 Compra / Recepción — ENTREGADO 2026-04-30**
-- ✅ **E.3 Alimentación y Medicación — ENTREGADO 2026-04-30** (208 tests · catálogos Formula y Medicamento + modelos Alimentacion y Medicacion con cálculo de costos)
-- ⏸ E.4 (Costo Hotel), E.5 (Cierre consolidado) pendientes
+- ✅ **E.3 Alimentación y Medicación — ENTREGADO 2026-04-30**
+- ✅ **E.4 Costo Hotel — ENTREGADO 2026-04-30** (218 tests · componentes configurables + cálculo de días-animal-netos + vista por lote)
+- ⏸ E.5 (Cierre consolidado) pendiente
 **Cliente:** Chamizal Camperos
 **Spec previo:** [D — Submódulos Operativos](./2026-04-30-sicoga-spec-d-submodulos-operativos-design.md) ✅ entregado
 
