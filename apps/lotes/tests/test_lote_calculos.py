@@ -87,3 +87,55 @@ def test_fecha_proyectada_venta_sin_dias(fixtures):
 def test_kilos_proyectados_venta_sin_peso_objetivo(fixtures):
     lote = _make(fixtures, peso_salida_objetivo=None, gdp_esperada=None)
     assert lote.kilos_proyectados_venta is None
+
+
+@pytest.fixture
+def fixtures_con_programa(fixtures):
+    from apps.catalogos.models import ProgramaReimplante, TipoOrigen
+
+    corral_origen = TipoOrigen.objects.get_or_create(nombre="Corral")[0]
+    programa = ProgramaReimplante.objects.create(
+        tipo_ganado=fixtures["macho"],
+        tipo_origen=corral_origen,
+        peso_min=Decimal("200"),
+        peso_max=Decimal("280"),
+        gdp_esperada=Decimal("1.45"),
+        peso_objetivo_salida=Decimal("580"),
+        dias_zilpaterol=35,
+    )
+    return {**fixtures, "programa": programa, "corral_origen": corral_origen}
+
+
+def test_lote_resuelve_programa(fixtures_con_programa):
+    lote = _make(
+        fixtures_con_programa,
+        peso_inicial_promedio=Decimal("250.00"),
+        peso_salida_objetivo=None,
+        gdp_esperada=None,
+        tipo_origen=fixtures_con_programa["corral_origen"],
+    )
+    assert lote.programa == fixtures_con_programa["programa"]
+
+
+def test_gdp_y_peso_objetivo_se_toman_del_programa(fixtures_con_programa):
+    lote = _make(
+        fixtures_con_programa,
+        peso_inicial_promedio=Decimal("250.00"),
+        peso_salida_objetivo=None,
+        gdp_esperada=None,
+        tipo_origen=fixtures_con_programa["corral_origen"],
+    )
+    assert lote.gdp_efectiva == Decimal("1.45")
+    assert lote.peso_objetivo_efectivo == Decimal("580.00")
+
+
+def test_overrides_del_lote_vencen_al_programa(fixtures_con_programa):
+    lote = _make(
+        fixtures_con_programa,
+        peso_inicial_promedio=Decimal("250.00"),
+        peso_salida_objetivo=Decimal("600"),
+        gdp_esperada=Decimal("1.50"),
+        tipo_origen=fixtures_con_programa["corral_origen"],
+    )
+    assert lote.gdp_efectiva == Decimal("1.50")
+    assert lote.peso_objetivo_efectivo == Decimal("600.00")
