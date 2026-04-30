@@ -280,11 +280,15 @@ Debe mostrar: `Active: active (running)`.
 
 ---
 
-## FASE 8 — Configurar proxy nginx (EA-nginx)
+## FASE 8 — Configurar proxy (EA-nginx + Apache `.htaccess`)
 
-Mismo patrón que ContaAI. nginx público (80/443) sirve `sicoga.com`; el `location /` por defecto va a Apache. Hay que: (1) crear includes para `/static/` y `/media/`, y (2) reemplazar el `location /` principal para que apunte a Gunicorn.
+Arquitectura: nginx público (80/443) → Apache (interno) → `.htaccess` con `[P]` proxy → gunicorn (127.0.0.1:8022).
 
-### 8.1 Includes para static y media
+> **Por qué `.htaccess` y no editar la config de nginx**: cPanel regenera automáticamente `/etc/nginx/conf.d/users/sicoga.conf` cuando renueva SSL o actualiza EA-nginx. Con `.htaccess` la regla vive en el home del usuario y nunca se pisa.
+
+### 8.1 Includes nginx para static y media (NO se regenera)
+
+Estos viven en un **include de usuario** que cPanel respeta:
 
 ```bash
 mkdir -p /etc/nginx/conf.d/users/sicoga/sicoga.com
@@ -305,34 +309,48 @@ location /media/ {
 }
 ```
 
-### 8.2 Modificar el `location /` principal
+> nginx sirve `/static/` y `/media/` directamente desde disco — no tocan Apache ni gunicorn.
 
-```bash
-nano /etc/nginx/conf.d/users/sicoga.conf
-```
-
-Busca el bloque `location /` dentro del primer `server {}` (el de `sicoga.com`) y reemplázalo por:
-
-```nginx
-location / {
-    proxy_pass http://127.0.0.1:8022;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-    proxy_read_timeout 300;
-}
-```
-
-> El header `X-Forwarded-Proto` es **crítico**: sin él, Django no detecta HTTPS y el `SECURE_SSL_REDIRECT=True` de `prod.py` causa loop infinito de redirección.
-
-> **Importante:** cPanel puede regenerar `sicoga.conf` automáticamente al renovar SSL o actualizar EA-nginx. Si el sitio deja de funcionar tras una actualización, repite este paso 8.2.
-
-### 8.3 Verificar y reiniciar nginx
+Aplicar:
 
 ```bash
 nginx -t && /scripts/restartsrv_nginx
 ```
+
+### 8.2 Proxy a gunicorn vía `.htaccess`
+
+Identifica el docroot de `sicoga.com` (normalmente `/home/sicoga/public_html/` si es el dominio principal de la cuenta cPanel; si es addon o subdominio, revísalo en WHM → List Accounts):
+
+```bash
+DOCROOT=/home/sicoga/public_html
+nano $DOCROOT/.htaccess
+```
+
+Contenido del `.htaccess`:
+
+```apache
+# SiCoGa Django proxy a Gunicorn (puerto 8022)
+RewriteEngine On
+
+# Pasar el esquema HTTPS al backend (requerido por SECURE_PROXY_SSL_HEADER en prod.py)
+RequestHeader set X-Forwarded-Proto "https"
+
+# Proxy de todo a Gunicorn
+RewriteRule ^(.*)$ http://127.0.0.1:8022/$1 [P,L]
+```
+
+Permisos:
+
+```bash
+chown sicoga:sicoga /home/sicoga/public_html/.htaccess
+chmod 644 /home/sicoga/public_html/.htaccess
+```
+
+Sin reinicio de Apache — `.htaccess` se relee en cada request.
+
+> Requisitos en Apache (cPanel los trae habilitados por default): `mod_rewrite`, `mod_proxy`, `mod_proxy_http`, `mod_headers`. Verifica con `apachectl -M | grep -E 'rewrite|proxy|headers'` si dudas.
+
+> El header `X-Forwarded-Proto` es **crítico**: sin él, Django no detecta HTTPS y el `SECURE_SSL_REDIRECT=True` de `prod.py` causa loop infinito de redirección.
 
 ---
 
@@ -413,8 +431,18 @@ tail -f /home/sicoga/logs/gunicorn-error.log
 ```
 
 **Loop de redirección a HTTPS:**
-- Verifica que el `proxy_set_header X-Forwarded-Proto $scheme;` esté en el bloque de nginx.
+- Verifica que `RequestHeader set X-Forwarded-Proto "https"` esté en `/home/sicoga/public_html/.htaccess`.
 - Verifica que `prod.py` tenga `SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")` (ya está en el repo).
+- Verifica que `mod_headers` esté habilitado en Apache: `apachectl -M | grep headers`.
+
+**Apache devuelve 500 sin pasar a gunicorn (.htaccess no actúa):**
+- Confirma que `AllowOverride` esté permitido para el docroot. En cPanel suele estar en `All` por default.
+- Confirma los módulos: `apachectl -M | grep -E 'rewrite|proxy|headers'` debe listar los cuatro.
+- Si `mod_proxy` no está cargado: `WHM → EasyApache 4 → Customize → Apache Modules` y habilita `mod_proxy`, `mod_proxy_http`, `mod_rewrite`, `mod_headers`.
+
+**El sitio dejó de funcionar tras una actualización de cPanel:**
+- Con el método `.htaccess` esto NO debería pasar, pero si sucede revisa que `/home/sicoga/public_html/.htaccess` siga ahí (alguien pudo borrarlo).
+- Verifica también que `/etc/nginx/conf.d/users/sicoga/sicoga.com/sicoga.conf` (los includes de static/media) siga existiendo.
 
 **Error de conexión a MySQL:**
 ```bash
