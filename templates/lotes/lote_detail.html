@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ obj.folio }}{% endblock %}
+{% block content %}
+<div class="ph">
+  <div><div class="ptitle">{{ obj.folio }}</div><div class="psub">{{ obj.tipo_ganado.nombre }} · Corral {{ obj.corral.clave }}</div></div>
+  <div class="bg">
+    {% if perms.lotes.change_lote %}<a href="{% url 'lotes:lote_update' obj.pk %}" class="btn bp">Editar</a>{% endif %}
+    {% if perms.lotes.add_lotefusion and obj.activo %}<a href="{% url 'lotes:lote_fusionar' obj.pk %}" class="btn bo">Fusionar otro lote en éste</a>{% endif %}
+    <a href="{% url 'lotes:lote_list' %}" class="btn bo">Volver</a>
+  </div>
+</div>
+<div class="g2">
+  <div class="card">
+    <div class="ct">📋 Datos</div>
+    <div class="g3">
+      <div><strong>Folio:</strong> {{ obj.folio }}</div>
+      <div><strong>Corral:</strong> {{ obj.corral.clave }} — {{ obj.corral.nombre }}</div>
+      <div><strong>Tipo:</strong> {{ obj.tipo_ganado.nombre }}</div>
+      <div><strong>Origen:</strong> {{ obj.tipo_origen.nombre|default:"—" }}</div>
+      <div><strong>Proveedor:</strong> {{ obj.proveedor.nombre|default:"—" }}</div>
+      <div><strong>Cabezas:</strong> {{ obj.cabezas_iniciales }}</div>
+      <div><strong>Fecha inicio:</strong> {{ obj.fecha_inicio|date:"Y-m-d" }}</div>
+      <div><strong>Peso inicial:</strong> {{ obj.peso_inicial_promedio }} kg</div>
+      <div><strong>Estado:</strong> <span class="pill {% if obj.activo %}pg{% else %}pr{% endif %}">{% if obj.activo %}Activo{% else %}Inactivo{% endif %}</span></div>
+    </div>
+    {% if obj.observaciones %}
+      <div style="margin-top:14px;"><strong>Observaciones:</strong><pre style="white-space:pre-wrap;font-family:inherit;">{{ obj.observaciones }}</pre></div>
+    {% endif %}
+  </div>
+  {% include "lotes/_proyeccion_preview.html" with lote=obj %}
+</div>
+{% endblock %}

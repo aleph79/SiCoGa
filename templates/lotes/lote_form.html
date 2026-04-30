@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Editar{% else %}Nuevo{% endif %} lote{% endblock %}
+{% block content %}
+<div class="ph"><div><div class="ptitle">{% if object %}Editar{% else %}Alta de{% endif %} Lote</div></div></div>
+
+<div class="g2">
+  <div class="card">
+    <form method="post"
+          hx-post="{% url 'lotes:lote_preview' %}"
+          hx-trigger="change delay:300ms from:.proyeccion-input, change delay:300ms from:select[name='tipo_ganado'], change delay:300ms from:select[name='tipo_origen']"
+          hx-target="#proyeccion-box">
+      {% csrf_token %}
+      {% for field in form %}
+        <div style="margin-bottom:12px;">
+          <label class="klbl">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}<div class="ai err">{{ field.errors|join:", " }}</div>{% endif %}
+          {% if field.help_text %}<div class="psub">{{ field.help_text }}</div>{% endif %}
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn bp">Guardar</button>
+      <a href="{% url 'lotes:lote_list' %}" class="btn bo">Cancelar</a>
+    </form>
+  </div>
+
+  <div id="proyeccion-box">
+    {% include "lotes/_proyeccion_preview.html" with lote=object %}
+  </div>
+</div>
+{% endblock %}

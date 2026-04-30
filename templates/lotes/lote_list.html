@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Lotes{% endblock %}
+{% block content %}
+<div class="ph">
+  <div><div class="ptitle">Lotes</div><div class="psub">Operación · entradas y formación</div></div>
+  <div class="bg">
+    {% if perms.lotes.add_lote %}<a href="{% url 'lotes:lote_create' %}" class="btn bp">+ Nuevo</a>{% endif %}
+  </div>
+</div>
+<div class="card">
+  <table class="tbl">
+    <thead><tr>
+      <th>Folio</th><th>Corral</th><th>Tipo</th><th>Origen</th>
+      <th>Cabezas</th><th>Peso ini.</th><th>Inicio</th><th>Días proy.</th>
+      <th>Estado</th><th></th>
+    </tr></thead>
+    <tbody>
+      {% for o in objetos %}
+        <tr>
+          <td><a href="{% url 'lotes:lote_detail' o.pk %}">{{ o.folio }}</a></td>
+          <td>{{ o.corral.clave }}</td>
+          <td>{{ o.tipo_ganado.nombre }}</td>
+          <td>{{ o.tipo_origen.nombre|default:"—" }}</td>
+          <td class="mn">{{ o.cabezas_iniciales }}</td>
+          <td class="mn">{{ o.peso_inicial_promedio }}</td>
+          <td class="mn">{{ o.fecha_inicio|date:"Y-m-d" }}</td>
+          <td class="mn">{{ o.dias_engorda_proyectados|default:"—" }}</td>
+          <td><span class="pill {% if o.activo %}pg{% else %}pr{% endif %}">{% if o.activo %}Activo{% else %}Inactivo{% endif %}</span></td>
+          <td>
+            {% if perms.lotes.change_lote %}<a href="{% url 'lotes:lote_update' o.pk %}" class="btn bo bsm">Editar</a>{% endif %}
+            {% if perms.lotes.delete_lote and o.activo %}<a href="{% url 'lotes:lote_delete' o.pk %}" class="btn bo bsm">Eliminar</a>{% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="10" style="color:var(--txd);text-align:center;">Sin lotes registrados.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "partials/_pagination.html" %}
+{% endblock %}

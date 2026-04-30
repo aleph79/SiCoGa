@@ -1,0 +1,23 @@
+<div class="card">
+  <div class="ct">🤖 Proyección automática</div>
+  {% if lote and lote.peso_inicial_promedio %}
+    <div class="g3">
+      <div><strong>Días engorda:</strong> {{ lote.dias_engorda_proyectados|default:"—" }}</div>
+      <div><strong>Fecha venta:</strong> {{ lote.fecha_proyectada_venta|date:"Y-m-d"|default:"—" }}</div>
+      <div><strong>Semana venta:</strong> {{ lote.semana_proyectada_venta|default:"—" }}</div>
+      <div><strong>Kg por hacer:</strong> {{ lote.kg_por_hacer|default:"—" }}</div>
+      <div><strong>Kilos venta:</strong> {{ lote.kilos_proyectados_venta|default:"—" }}</div>
+      <div><strong>GDP efectiva:</strong> {{ lote.gdp_efectiva|default:"—" }}</div>
+      <div><strong>Peso objetivo:</strong> {{ lote.peso_objetivo_efectivo|default:"—" }}</div>
+      <div><strong>1er reimpl.:</strong> {{ lote.fecha_reimplante_1|date:"Y-m-d"|default:"—" }}</div>
+      <div><strong>2do reimpl.:</strong> {{ lote.fecha_reimplante_2|date:"Y-m-d"|default:"—" }}</div>
+      <div><strong>3er reimpl.:</strong> {{ lote.fecha_reimplante_3|date:"Y-m-d"|default:"—" }}</div>
+      <div><strong>Entrada Zilp.:</strong> {{ lote.fecha_entrada_zilpaterol|date:"Y-m-d"|default:"—" }}</div>
+    </div>
+    {% if not lote.programa and not lote.gdp_esperada %}
+      <div class="ai err" style="margin-top:10px;">No hay programa que matchee este (tipo, origen, peso). Captura GDP y peso objetivo manualmente.</div>
+    {% endif %}
+  {% else %}
+    <div class="psub">Captura los datos para ver la proyección.</div>
+  {% endif %}
+</div>
