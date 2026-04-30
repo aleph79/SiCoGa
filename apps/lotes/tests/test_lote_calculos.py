@@ -139,3 +139,38 @@ def test_overrides_del_lote_vencen_al_programa(fixtures_con_programa):
     )
     assert lote.gdp_efectiva == Decimal("1.50")
     assert lote.peso_objetivo_efectivo == Decimal("600.00")
+
+
+def test_fecha_reimplante_1(fixtures):
+    from datetime import timedelta
+
+    lote = _make(fixtures, fecha_inicio=date(2026, 1, 1))
+    assert lote.fecha_reimplante_1 == date(2026, 1, 1) + timedelta(days=60)
+
+
+def test_fecha_reimplante_2_y_3(fixtures):
+    from datetime import timedelta
+
+    lote = _make(fixtures, fecha_inicio=date(2026, 1, 1))
+    assert lote.fecha_reimplante_2 == date(2026, 1, 1) + timedelta(days=120)
+    assert lote.fecha_reimplante_3 == date(2026, 1, 1) + timedelta(days=180)
+
+
+def test_fecha_entrada_zilpaterol(fixtures_con_programa):
+    from datetime import timedelta
+
+    lote = _make(
+        fixtures_con_programa,
+        peso_inicial_promedio=Decimal("250.00"),
+        peso_salida_objetivo=None,
+        gdp_esperada=None,
+        tipo_origen=fixtures_con_programa["corral_origen"],
+        fecha_inicio=date(2026, 1, 1),
+    )
+    venta = lote.fecha_proyectada_venta
+    assert lote.fecha_entrada_zilpaterol == venta - timedelta(days=35)
+
+
+def test_fecha_zilpaterol_sin_programa(fixtures):
+    lote = _make(fixtures)  # gdp y peso explícitos en el lote, pero NO hay programa
+    assert lote.fecha_entrada_zilpaterol is None

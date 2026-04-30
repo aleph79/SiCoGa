@@ -141,3 +141,32 @@ class Lote(AuditableModel):
         if peso is None:
             return None
         return peso * self.cabezas_iniciales
+
+    # ----- Fechas de reimplantes (60 días desde inicio + 60 entre cada uno) -----
+
+    def fecha_reimplante(self, n: int):
+        from datetime import timedelta
+
+        if n < 1:
+            return None
+        return self.fecha_inicio + timedelta(days=60 * n)
+
+    @property
+    def fecha_reimplante_1(self):
+        return self.fecha_reimplante(1)
+
+    @property
+    def fecha_reimplante_2(self):
+        return self.fecha_reimplante(2)
+
+    @property
+    def fecha_reimplante_3(self):
+        return self.fecha_reimplante(3)
+
+    @property
+    def fecha_entrada_zilpaterol(self):
+        from datetime import timedelta
+
+        if not self.programa or not self.fecha_proyectada_venta:
+            return None
+        return self.fecha_proyectada_venta - timedelta(days=self.programa.dias_zilpaterol)
