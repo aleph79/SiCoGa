@@ -2,6 +2,7 @@
 
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import F, Q
 
 from simple_history.models import HistoricalRecords
 
@@ -94,3 +95,94 @@ class Corral(AuditableModel):
     @property
     def disponibilidad(self) -> int:
         return self.capacidad_maxima - self.ocupacion_actual
+
+
+class ProgramaReimplante(AuditableModel):
+    """Motor de cálculo: una fila por (TipoGanado × TipoOrigen × rango de peso)."""
+
+    tipo_ganado = models.ForeignKey(
+        TipoGanado, on_delete=models.PROTECT, verbose_name="Tipo de ganado"
+    )
+    tipo_origen = models.ForeignKey(
+        TipoOrigen,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name="Tipo de origen",
+        help_text="Vacío = aplica a cualquier origen (caso vacas).",
+    )
+
+    peso_min = models.DecimalField(max_digits=6, decimal_places=2, verbose_name="Peso mínimo")
+    peso_max = models.DecimalField(max_digits=6, decimal_places=2, verbose_name="Peso máximo")
+
+    gdp_esperada = models.DecimalField(max_digits=4, decimal_places=2, verbose_name="GDP esperada")
+    peso_objetivo_salida = models.DecimalField(
+        max_digits=6, decimal_places=2, verbose_name="Peso objetivo de salida"
+    )
+
+    implante_inicial = models.CharField(max_length=40, blank=True, verbose_name="Implante inicial")
+    reimplante_1 = models.CharField(max_length=40, blank=True, verbose_name="1er reimplante")
+    reimplante_2 = models.CharField(max_length=40, blank=True, verbose_name="2do reimplante")
+    reimplante_3 = models.CharField(max_length=40, blank=True, verbose_name="3er reimplante")
+    reimplante_4 = models.CharField(max_length=40, blank=True, verbose_name="4to reimplante")
+
+    dias_recepcion = models.PositiveSmallIntegerField(default=0, verbose_name="Días recepción")
+    dias_f1 = models.PositiveSmallIntegerField(default=0, verbose_name="Días F1")
+    dias_transicion = models.PositiveSmallIntegerField(default=14, verbose_name="Días transición")
+    dias_f3 = models.PositiveSmallIntegerField(default=0, verbose_name="Días F3")
+    dias_zilpaterol = models.PositiveSmallIntegerField(default=35, verbose_name="Días Zilpaterol")
+
+    history = HistoricalRecords()
+
+    class Meta:
+        verbose_name = "Programa de reimplante"
+        verbose_name_plural = "Programas de reimplante"
+        ordering = ["tipo_ganado__nombre", "tipo_origen__nombre", "peso_min"]
+        constraints = [
+            models.CheckConstraint(
+                check=Q(peso_max__gt=F("peso_min")),
+                name="programa_peso_max_gt_min",
+            ),
+        ]
+
+    def __str__(self):
+        origen = self.tipo_origen.nombre if self.tipo_origen else "Cualquiera"
+        return f"{self.tipo_ganado.nombre}/{origen} {self.peso_min}-{self.peso_max} kg"
+
+    @property
+    def peso_promedio(self):
+        return (self.peso_min + self.peso_max) / 2
+
+    @property
+    def kg_por_hacer(self):
+        return self.peso_objetivo_salida - self.peso_promedio
+
+    @property
+    def dias_estancia(self):
+        if not self.gdp_esperada:
+            return 0
+        return int(self.kg_por_hacer / self.gdp_esperada)
+
+    @property
+    def total_dias(self):
+        return (
+            self.dias_recepcion
+            + self.dias_f1
+            + self.dias_transicion
+            + self.dias_f3
+            + self.dias_zilpaterol
+        )
+
+    @classmethod
+    def resolver(cls, tipo_ganado, tipo_origen, peso_inicial):
+        """Devuelve la regla aplicable para (tipo_ganado, tipo_origen, peso)."""
+        qs = cls.objects.filter(
+            activo=True,
+            tipo_ganado=tipo_ganado,
+            peso_min__lte=peso_inicial,
+            peso_max__gte=peso_inicial,
+        )
+        return (
+            qs.filter(tipo_origen=tipo_origen).first()
+            or qs.filter(tipo_origen__isnull=True).first()
+        )
