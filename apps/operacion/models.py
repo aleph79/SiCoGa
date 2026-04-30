@@ -73,3 +73,77 @@ class Reimplante(AuditableModel):
                     f"para el lote {self.lote.folio}."
                 )
         super().save(*args, **kwargs)
+
+
+class Transicion(AuditableModel):
+    """Cambio de fórmula alimenticia en un lote (F1 → FT → F3 → F3+Zilp)."""
+
+    FASES = [
+        ("F1", "F1"),
+        ("FT", "F1+F3 transición"),
+        ("F3", "F3"),
+        ("F3Z", "F3+Zilpaterol"),
+    ]
+
+    lote = models.ForeignKey(Lote, on_delete=models.PROTECT, related_name="transiciones")
+    fecha = models.DateField()
+    de_fase = models.CharField(max_length=4, choices=FASES, verbose_name="De fase")
+    a_fase = models.CharField(max_length=4, choices=FASES, verbose_name="A fase")
+    proporcion = models.CharField(
+        max_length=30, blank=True, help_text="Ej: 50/50, 100% F3."
+    )
+    notas = models.TextField(blank=True)
+
+    history = HistoricalRecords()
+
+    class Meta:
+        verbose_name = "Transición"
+        verbose_name_plural = "Transiciones"
+        ordering = ["-fecha", "-created_at"]
+
+    def __str__(self):
+        return f"{self.lote.folio} · {self.de_fase}→{self.a_fase} · {self.fecha}"
+
+
+class EntradaZilpaterol(AuditableModel):
+    """Registro de cuándo un lote entra formalmente a la fase de Zilpaterol.
+
+    Disparara el reloj de 35 días previos a venta (legalmente obligatorio).
+    """
+
+    lote = models.OneToOneField(
+        Lote, on_delete=models.PROTECT, related_name="entrada_zilpaterol"
+    )
+    fecha_entrada = models.DateField()
+    observaciones = models.TextField(blank=True)
+
+    history = HistoricalRecords()
+
+    class Meta:
+        verbose_name = "Entrada a Zilpaterol"
+        verbose_name_plural = "Entradas a Zilpaterol"
+        ordering = ["-fecha_entrada"]
+
+    def __str__(self):
+        return f"{self.lote.folio} · entró {self.fecha_entrada}"
+
+    @property
+    def fecha_salida_proyectada(self):
+        """fecha_entrada + 35 días."""
+        from datetime import timedelta
+
+        return self.fecha_entrada + timedelta(days=35)
+
+    @property
+    def dias_en_zilpaterol(self):
+        from datetime import date
+
+        return (date.today() - self.fecha_entrada).days
+
+    @property
+    def dias_restantes(self):
+        return max(0, 35 - self.dias_en_zilpaterol)
+
+    @property
+    def listo_para_venta(self):
+        return self.dias_en_zilpaterol >= 35

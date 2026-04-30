@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Transiciones{% endblock %}
+{% block content %}
+<div class="ph">
+  <div><div class="ptitle">Transiciones de Alimentación</div><div class="psub">F1 → FT → F3 · semana {{ semana_actual }}</div></div>
+  <div class="bg">
+    {% if perms.operacion.add_transicion %}<a href="{% url 'operacion:registrar_transicion' %}" class="btn bp">+ Registrar transición</a>{% endif %}
+  </div>
+</div>
+
+<div class="kg k4">
+  <div class="kpi a"><div class="klbl">Esta semana</div><div class="kval">{{ kpis.esta_sem }}</div></div>
+  <div class="kpi b"><div class="klbl">Próxima semana</div><div class="kval">{{ kpis.proxima }}</div></div>
+  <div class="kpi g"><div class="klbl">Completadas (año)</div><div class="kval">{{ kpis.completadas_anio }}</div></div>
+  <div class="kpi p"><div class="klbl">Lotes activos</div><div class="kval">{{ kpis.lotes_activos }}</div></div>
+</div>
+
+<div class="card" style="margin-bottom:14px;">
+  <div class="ct">🔄 Transiciones programadas</div>
+  <table class="tbl">
+    <thead><tr>
+      <th>Sem.</th><th>Corral</th><th>Lote</th><th>Tipo</th>
+      <th>Transición</th><th>F. Proyectada</th><th>Estatus</th><th></th>
+    </tr></thead>
+    <tbody>
+      {% for p in pendientes %}
+        <tr>
+          <td class="mn">Sem {{ p.semana }}</td>
+          <td>{{ p.lote.corral.clave }}</td>
+          <td><a href="{% url 'lotes:lote_detail' p.lote.pk %}">{{ p.lote.folio }}</a></td>
+          <td>{{ p.lote.tipo_ganado.nombre }}</td>
+          <td class="mn">{{ p.transicion }}</td>
+          <td class="mn">{{ p.fecha_proyectada|date:"Y-m-d" }}</td>
+          <td>
+            {% if p.vencido %}<span class="pill pr">Vencido</span>
+            {% elif p.semana == semana_actual %}<span class="pill pa">Esta sem.</span>
+            {% else %}<span class="pill pb">Próximo</span>{% endif %}
+          </td>
+          <td>
+            {% if perms.operacion.add_transicion %}
+              <a href="{% url 'operacion:registrar_transicion' %}?lote={{ p.lote.pk }}" class="btn bp bsm">Registrar</a>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="8" style="color:var(--txd);text-align:center;">Sin transiciones pendientes en próximas semanas.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <div class="ct">📋 Historial reciente</div>
+  <table class="tbl">
+    <thead><tr><th>Fecha</th><th>Lote</th><th>Corral</th><th>De</th><th>A</th><th>Proporción</th></tr></thead>
+    <tbody>
+      {% for t in historial %}
+        <tr>
+          <td class="mn">{{ t.fecha|date:"Y-m-d" }}</td>
+          <td><a href="{% url 'lotes:lote_detail' t.lote.pk %}">{{ t.lote.folio }}</a></td>
+          <td>{{ t.lote.corral.clave }}</td>
+          <td>{{ t.get_de_fase_display }}</td>
+          <td>{{ t.get_a_fase_display }}</td>
+          <td>{{ t.proporcion|default:"—" }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6" style="color:var(--txd);text-align:center;">Aún no hay transiciones registradas.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

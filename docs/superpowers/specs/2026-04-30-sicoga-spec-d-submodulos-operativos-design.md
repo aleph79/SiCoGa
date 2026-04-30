@@ -2,7 +2,10 @@
 
 **Fecha:** 2026-04-30
 **Estado:**
-- 🚧 **DRAFT** general; sub-spec D.1 (Reimplantes) ✅ **ENTREGADO 2026-04-30** — 158 tests, cobertura 87.25% en `apps.operacion`. D.2-D.4 pendientes de priorizar con Chamizal.
+- 🚧 **DRAFT** general
+- ✅ **D.1 Reimplantes — ENTREGADO 2026-04-30**
+- ✅ **D.2 Transiciones y Zilpaterol — ENTREGADO 2026-04-30** (168 tests, cobertura 87.08% en `apps.operacion`)
+- ⏸ D.3 (Pesajes) y D.4 (Reportes) pendientes
 **Cliente:** Chamizal Camperos
 **Spec previo:** [C — Disponibilidad](./2026-04-30-sicoga-spec-c-disponibilidad-design.md) ✅ entregado
 

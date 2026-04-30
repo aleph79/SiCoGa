@@ -11,4 +11,16 @@ urlpatterns = [
         views.RegistrarReimplanteView.as_view(),
         name="registrar_reimplante",
     ),
+    path("transiciones/", views.TransicionesCalendarioView.as_view(), name="transiciones"),
+    path(
+        "transiciones/registrar/",
+        views.RegistrarTransicionView.as_view(),
+        name="registrar_transicion",
+    ),
+    path("zilpaterol/", views.ZilpaterolCalendarioView.as_view(), name="zilpaterol"),
+    path(
+        "zilpaterol/registrar/",
+        views.RegistrarEntradaZilpaterolView.as_view(),
+        name="registrar_zilpaterol",
+    ),
 ]

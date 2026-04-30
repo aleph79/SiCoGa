@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Zilpaterol{% endblock %}
+{% block content %}
+<div class="ph">
+  <div><div class="ptitle">Entradas a Zilpaterol</div><div class="psub">35 días obligatorios previos a venta · semana {{ semana_actual }}</div></div>
+  <div class="bg">
+    {% if perms.operacion.add_entradazilpaterol %}<a href="{% url 'operacion:registrar_zilpaterol' %}" class="btn bp">+ Registrar entrada</a>{% endif %}
+  </div>
+</div>
+
+<div class="kg k4">
+  <div class="kpi p"><div class="klbl">Activos en Zilpaterol</div><div class="kval">{{ kpis.activos }}</div><div class="ksub">{{ kpis.cabezas_activas }} cabezas</div></div>
+  <div class="kpi g"><div class="klbl">Listos para venta</div><div class="kval">{{ kpis.listos }}</div><div class="ksub">≥35 días</div></div>
+  <div class="kpi a"><div class="klbl">Pendientes de entrar</div><div class="kval">{{ kpis.pendientes }}</div></div>
+  <div class="kpi b"><div class="klbl">Semana actual</div><div class="kval">{{ semana_actual }}</div></div>
+</div>
+
+<div class="card" style="margin-bottom:14px;">
+  <div class="ct">⚡ Lotes actualmente en Zilpaterol</div>
+  <table class="tbl">
+    <thead><tr>
+      <th>Corral</th><th>Lote</th><th>Tipo</th><th>Cabezas</th>
+      <th>F. Entrada</th><th>Días en Zilp.</th><th>Días Rest.</th>
+      <th>F. Venta proy.</th><th>Estatus</th>
+    </tr></thead>
+    <tbody>
+      {% for e in activos %}
+        <tr>
+          <td>{{ e.lote.corral.clave }}</td>
+          <td><a href="{% url 'lotes:lote_detail' e.lote.pk %}">{{ e.lote.folio }}</a></td>
+          <td>{{ e.lote.tipo_ganado.nombre }}</td>
+          <td class="mn">{{ e.lote.cabezas_iniciales }}</td>
+          <td class="mn">{{ e.fecha_entrada|date:"Y-m-d" }}</td>
+          <td class="mn">{{ e.dias_en_zilpaterol }}</td>
+          <td class="mn">{{ e.dias_restantes }}</td>
+          <td class="mn">{{ e.fecha_salida_proyectada|date:"Y-m-d" }}</td>
+          <td>
+            {% if e.listo_para_venta %}<span class="pill pg">✅ Listo</span>
+            {% else %}<span class="pill pa">{{ e.dias_restantes }} días</span>{% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="9" style="color:var(--txd);text-align:center;">Ningún lote actualmente en Zilpaterol.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <div class="ct">📅 Lotes pendientes de entrar (proyectado)</div>
+  <table class="tbl">
+    <thead><tr>
+      <th>Sem.</th><th>Corral</th><th>Lote</th><th>Tipo</th><th>Cabezas</th>
+      <th>F. Proyectada</th><th>Estatus</th><th></th>
+    </tr></thead>
+    <tbody>
+      {% for p in pendientes %}
+        <tr>
+          <td class="mn">Sem {{ p.semana }}</td>
+          <td>{{ p.lote.corral.clave }}</td>
+          <td><a href="{% url 'lotes:lote_detail' p.lote.pk %}">{{ p.lote.folio }}</a></td>
+          <td>{{ p.lote.tipo_ganado.nombre }}</td>
+          <td class="mn">{{ p.lote.cabezas_iniciales }}</td>
+          <td class="mn">{{ p.fecha_proyectada|date:"Y-m-d" }}</td>
+          <td>
+            {% if p.vencido %}<span class="pill pr">Vencido</span>
+            {% elif p.semana == semana_actual %}<span class="pill pa">Esta sem.</span>
+            {% else %}<span class="pill pb">Próximo</span>{% endif %}
+          </td>
+          <td>
+            {% if perms.operacion.add_entradazilpaterol %}
+              <a href="{% url 'operacion:registrar_zilpaterol' %}?lote={{ p.lote.pk }}" class="btn bp bsm">Registrar</a>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="8" style="color:var(--txd);text-align:center;">Sin lotes pendientes de entrar a Zilpaterol.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
