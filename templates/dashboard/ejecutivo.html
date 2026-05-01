@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Dashboard ejecutivo{% endblock %}
+{% block content %}
+<div class="ph">
+  <div><div class="ptitle">Dashboard ejecutivo</div><div class="psub">Semana {{ kpis.semana_actual }} · {% now "D j M Y" %} · Rancho Chamizal</div></div>
+</div>
+
+<div class="kg k4">
+  <div class="kpi a"><div class="klbl">Venta esta semana</div><div class="kval">{{ kpis.venta_sem_cab }}</div><div class="ksub">{{ kpis.venta_sem_lotes|join:" + "|default:"sin lotes" }}</div></div>
+  <div class="kpi g"><div class="klbl">Kilos proyectados</div><div class="kval">{{ kpis.kilos_sem|floatformat:0 }}</div></div>
+  <div class="kpi b"><div class="klbl">Inventario total rancho</div><div class="kval">{{ kpis.inventario_total }}</div></div>
+  <div class="kpi r"><div class="klbl">Semanas sin salida</div><div class="kval">{{ kpis.sem_sin_salida }}</div><div class="ksub">de las próximas 8</div></div>
+</div>
+
+<div class="g2">
+  <div class="card">
+    <div class="ct">📅 Salidas proyectadas — próximas 13 semanas</div>
+    <div style="display:flex;align-items:flex-end;gap:6px;height:160px;padding:10px 0;">
+      {% for s in salidas %}
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <div style="font-size:10px;font-family:var(--mono);color:var(--txd);">{{ s.cabezas|default:"" }}</div>
+          <div style="width:100%;height:{{ s.pct }}%;min-height:2px;background:{% if s.es_actual %}var(--am){% elif s.cabezas %}var(--gn){% else %}var(--bdr2){% endif %};border-radius:3px 3px 0 0;"></div>
+          <div style="font-size:9px;color:var(--txd);">S{{ s.semana }}</div>
+        </div>
+      {% endfor %}
+    </div>
+    <div class="leg">
+      <div class="li"><div class="ld" style="background:var(--gn)"></div>Con salida</div>
+      <div class="li"><div class="ld" style="background:var(--am)"></div>Semana actual</div>
+      <div class="li"><div class="ld" style="background:var(--bdr2)"></div>Sin salida</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">🗺️ Mapa de corrales</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:6px;">
+      {% for m in mapa_corrales %}
+        <div style="padding:8px;border-radius:6px;text-align:center;font-size:11px;
+          background:{% if m.estado == 'libre' %}var(--bdr2){% elif m.estado == 'sale_sem' %}var(--am){% elif m.estado == 'zilpaterol' %}var(--pud,#7c3aed){% else %}var(--gn){% endif %};
+          color:{% if m.estado == 'libre' %}var(--txd){% else %}#fff{% endif %};">
+          <div style="font-weight:600;font-family:var(--mono);">{{ m.corral.clave }}</div>
+          <div style="font-size:10px;opacity:.85;">
+            {% if m.lote %}{{ m.lote.folio|truncatechars:8 }}{% else %}libre{% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    <div class="leg" style="margin-top:10px;">
+      <div class="li"><div class="ld" style="background:var(--gn)"></div>Ocupado</div>
+      <div class="li"><div class="ld" style="background:var(--am)"></div>Sale sem. actual</div>
+      <div class="li"><div class="ld" style="background:#7c3aed"></div>Zilpaterol</div>
+      <div class="li"><div class="ld" style="background:var(--bdr2)"></div>Libre</div>
+    </div>
+  </div>
+</div>
+
+<div class="g3">
+  <div class="card">
+    <div class="ct">📈 Indicadores operativos</div>
+    <div style="display:flex;flex-direction:column;gap:9px;">
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:3px;"><span style="color:var(--txd)">GDP proyectada (prom.)</span><span class="mn">{{ indicadores.gdp_proy|floatformat:2 }} kg/d</span></div>
+        <div class="pb"><div class="pf" style="width:78%;background:var(--gn);"></div></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:3px;"><span style="color:var(--txd)">GDP real (lotes cerrados)</span><span class="mn">{{ indicadores.gdp_real|floatformat:2 }} kg/d</span></div>
+        <div class="pb"><div class="pf" style="width:72%;background:var(--bl);"></div></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:3px;"><span style="color:var(--txd)">Conversión alimenticia</span><span class="mn">{{ indicadores.conversion|floatformat:2 }}</span></div>
+        <div class="pb"><div class="pf" style="width:60%;background:var(--am);"></div></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:3px;"><span style="color:var(--txd)">Mortalidad acum.</span><span class="mn">{{ indicadores.mortalidad_pct|floatformat:2 }}%</span></div>
+        <div class="pb"><div class="pf" style="width:16%;background:var(--rd);"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="grid-column:span 2;">
+    <div class="ct">⚡ Actividad reciente (últimos 7 días)</div>
+    <table class="tbl">
+      <thead><tr><th>Fecha</th><th>Tipo</th><th>Detalle</th></tr></thead>
+      <tbody>
+        {% for a in actividad %}
+          <tr>
+            <td class="mn">{{ a.fecha|date:"Y-m-d" }}</td>
+            <td>{{ a.icono }} {{ a.tipo }}</td>
+            <td>{{ a.descripcion }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="3" style="color:var(--txd);text-align:center;">Sin actividad en los últimos 7 días.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

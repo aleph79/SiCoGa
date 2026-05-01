@@ -19,6 +19,7 @@ urlpatterns = [
     path("disponibilidad/", include("apps.disponibilidad.urls", namespace="disponibilidad")),
     path("operacion/", include("apps.operacion.urls", namespace="operacion")),
     path("cierre/", include("apps.cierre.urls", namespace="cierre")),
+    path("dashboard/", include("apps.dashboard.urls", namespace="dashboard")),
     path("", HomeView.as_view(), name="dashboard-home-stub"),
 ]
 

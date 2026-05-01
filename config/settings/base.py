@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "apps.disponibilidad",
     "apps.operacion",
     "apps.cierre",
+    "apps.dashboard",
 ]
 
 MIDDLEWARE = [
