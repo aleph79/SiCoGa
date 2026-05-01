@@ -54,4 +54,14 @@ urlpatterns = [
         views.CostoHotelLoteView.as_view(),
         name="costo_hotel_lote",
     ),
+    path(
+        "lotes/<int:pk>/cierre/",
+        views.CierreLoteView.as_view(),
+        name="cierre_lote",
+    ),
+    path(
+        "lotes/<int:pk>/cierre.csv",
+        views.CierreLoteCsvView.as_view(),
+        name="cierre_lote_csv",
+    ),
 ]

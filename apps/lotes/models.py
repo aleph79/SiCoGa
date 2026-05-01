@@ -404,6 +404,120 @@ class Lote(AuditableModel):
 
         return Decimal(self.dias_animal_netos) * self.costo_hotel_dia_animal
 
+    # ----- Cierre consolidado (Spec E.5) -----
+
+    @property
+    def costo_alimentacion_total(self):
+        from decimal import Decimal
+
+        try:
+            return sum(
+                ((a.costo_total or Decimal("0")) for a in self.alimentaciones.filter(activo=True)),
+                start=Decimal("0"),
+            )
+        except Exception:
+            return Decimal("0")
+
+    @property
+    def kg_alimento_total(self):
+        from decimal import Decimal
+
+        try:
+            return sum(
+                (a.kg_consumidos for a in self.alimentaciones.filter(activo=True)),
+                start=Decimal("0"),
+            )
+        except Exception:
+            return Decimal("0")
+
+    @property
+    def costo_medicacion_total(self):
+        from decimal import Decimal
+
+        try:
+            return sum(
+                ((m.costo_total or Decimal("0")) for m in self.medicaciones.filter(activo=True)),
+                start=Decimal("0"),
+            )
+        except Exception:
+            return Decimal("0")
+
+    @property
+    def costo_total(self):
+        """Compra + alimentación + medicación + costo hotel."""
+        from decimal import Decimal
+
+        compra = self.costo_compra or Decimal("0")
+        return (
+            compra
+            + self.costo_alimentacion_total
+            + self.costo_medicacion_total
+            + self.costo_hotel_total
+        )
+
+    @property
+    def kilos_vendidos(self):
+        from decimal import Decimal
+
+        try:
+            return sum(
+                (v.kilos for v in self.ventas.filter(activo=True)),
+                start=Decimal("0"),
+            )
+        except Exception:
+            return Decimal("0")
+
+    @property
+    def kg_ganados(self):
+        """Kilos en venta − kilos al recibo (proxy del peso ganado real)."""
+        from decimal import Decimal
+
+        kilos_vta = self.kilos_vendidos
+        if not kilos_vta:
+            return Decimal("0")
+        kilos_inicio = self.kilos_recibo or (
+            self.peso_inicial_promedio * self.cabezas_iniciales
+        )
+        return kilos_vta - kilos_inicio
+
+    @property
+    def gdp_real(self):
+        """Ganancia diaria real promedio = kg_ganados / días."""
+        from decimal import Decimal
+
+        if not self.dias_calendario:
+            return Decimal("0")
+        kg = self.kg_ganados
+        if kg == 0:
+            return Decimal("0")
+        return kg / Decimal(self.dias_calendario) / Decimal(self.cabezas_iniciales)
+
+    @property
+    def conversion_alimenticia(self):
+        """kg de alimento por kg ganado."""
+        from decimal import Decimal
+
+        kg = self.kg_ganados
+        if not kg or kg == 0:
+            return Decimal("0")
+        alim = self.kg_alimento_total
+        if not alim:
+            return Decimal("0")
+        return alim / kg
+
+    @property
+    def margen_bruto(self):
+        return self.ingreso_total_ventas - self.costo_total
+
+    @property
+    def margen_pct(self):
+        from decimal import Decimal
+
+        ing = self.ingreso_total_ventas
+        if not ing or ing == 0:
+            return Decimal("0")
+        return self.margen_bruto / ing * Decimal("100")
+
     @property
     def etapa(self):
         """Recepción → F1 → Transición → F3 → Zilpaterol → Post-Zilpaterol."""

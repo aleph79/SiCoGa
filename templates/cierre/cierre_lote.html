@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Cierre · {{ obj.folio }}{% endblock %}
+{% block content %}
+<div class="ph">
+  <div><div class="ptitle">Cierre · {{ obj.folio }}</div><div class="psub">Resumen técnico-financiero consolidado</div></div>
+  <div class="bg">
+    <a href="{% url 'cierre:cierre_lote_csv' obj.pk %}" class="btn bo">📥 Exportar CSV</a>
+    <a href="{% url 'lotes:lote_detail' obj.pk %}" class="btn bo">Volver al lote</a>
+  </div>
+</div>
+
+<div class="kg k4">
+  <div class="kpi b"><div class="klbl">GDP real</div><div class="kval">{{ obj.gdp_real|floatformat:3 }}</div><div class="ksub">kg/día/cabeza</div></div>
+  <div class="kpi a"><div class="klbl">Conversión alimenticia</div><div class="kval">{{ obj.conversion_alimenticia|floatformat:2 }}</div><div class="ksub">kg alim / kg ganado</div></div>
+  <div class="kpi r"><div class="klbl">Mortalidad</div><div class="kval">{{ obj.mortalidad_pct|floatformat:2 }}%</div><div class="ksub">{{ obj.cabezas_muertas }} cabezas</div></div>
+  <div class="kpi g"><div class="klbl">Margen</div><div class="kval">{{ obj.margen_pct|floatformat:1 }}%</div><div class="ksub">${{ obj.margen_bruto|floatformat:0 }}</div></div>
+</div>
+
+<div class="g2">
+  <div class="card">
+    <div class="ct">📋 Datos del lote</div>
+    <div class="srow"><span class="sk">Folio</span><span class="sv mn">{{ obj.folio }}</span></div>
+    <div class="srow"><span class="sk">Corral</span><span class="sv mn">{{ obj.corral.clave }}</span></div>
+    <div class="srow"><span class="sk">Tipo de ganado</span><span class="sv">{{ obj.tipo_ganado.nombre }}</span></div>
+    <div class="srow"><span class="sk">Fecha inicio</span><span class="sv mn">{{ obj.fecha_inicio|date:"Y-m-d" }}</span></div>
+    <div class="srow"><span class="sk">Fecha cierre</span><span class="sv mn">{{ obj.fecha_cierre|date:"Y-m-d" }}</span></div>
+    <div class="srow"><span class="sk">Días calendario</span><span class="sv mn">{{ obj.dias_calendario }}</span></div>
+    <div class="srow"><span class="sk">Cabezas iniciales</span><span class="sv mn">{{ obj.cabezas_iniciales }}</span></div>
+    <div class="srow"><span class="sk">Cabezas muertas</span><span class="sv mn" style="color:var(--rd)">{{ obj.cabezas_muertas }}</span></div>
+    <div class="srow"><span class="sk">Cabezas vendidas</span><span class="sv mn">{{ obj.cabezas_vendidas }}</span></div>
+    <div class="srow"><span class="sk">Días-animal netos</span><span class="sv mn" style="color:var(--gn)">{{ obj.dias_animal_netos }}</span></div>
+    <div class="stitle">Pesos</div>
+    <div class="srow"><span class="sk">Peso inicial promedio</span><span class="sv mn">{{ obj.peso_inicial_promedio }} kg</span></div>
+    <div class="srow"><span class="sk">Kilos al recibo</span><span class="sv mn">{{ obj.kilos_recibo|default:"—" }} kg</span></div>
+    <div class="srow"><span class="sk">Kilos vendidos (real)</span><span class="sv mn">{{ obj.kilos_vendidos|floatformat:0 }} kg</span></div>
+    <div class="srow"><span class="sk">Kg ganados</span><span class="sv mn" style="color:var(--gn)">{{ obj.kg_ganados|floatformat:0 }} kg</span></div>
+    <div class="srow"><span class="sk">Kg alimento consumido</span><span class="sv mn">{{ obj.kg_alimento_total|floatformat:0 }}</span></div>
+  </div>
+
+  <div class="card">
+    <div class="ct">💰 Resumen financiero</div>
+    <table class="tbl">
+      <thead><tr><th>Concepto</th><th>Total</th></tr></thead>
+      <tbody>
+        <tr><td>Costo compra</td><td class="mn">${{ obj.costo_compra|default:0|floatformat:2 }}</td></tr>
+        <tr><td>Costo alimentación</td><td class="mn">${{ obj.costo_alimentacion_total|floatformat:2 }}</td></tr>
+        <tr><td>Costo medicación</td><td class="mn">${{ obj.costo_medicacion_total|floatformat:2 }}</td></tr>
+        <tr><td>Costo hotel</td><td class="mn">${{ obj.costo_hotel_total|floatformat:2 }}</td></tr>
+        <tr style="background:var(--s3);font-weight:600;"><td>COSTO TOTAL</td><td class="mn" style="color:var(--am)">${{ obj.costo_total|floatformat:2 }}</td></tr>
+        <tr><td>Ingreso por ventas</td><td class="mn" style="color:var(--gn)">${{ obj.ingreso_total_ventas|floatformat:2 }}</td></tr>
+        <tr style="background:var(--s3);font-weight:700;"><td>MARGEN BRUTO</td><td class="mn" style="color:{% if obj.margen_bruto >= 0 %}var(--gn){% else %}var(--rd){% endif %}">${{ obj.margen_bruto|floatformat:2 }}</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:14px;padding:12px;background:var(--s3);border:1px solid var(--bdr);border-radius:8px;font-size:12px;color:var(--txd);">
+      ℹ️ El margen es bruto: ya considera compra, alimentación, medicación y costo hotel. No incluye impuestos, transporte de salida ni costos administrativos no contemplados en hotel.
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:14px;">
+  <div class="ct">⚖️ Indicadores adicionales</div>
+  <div class="g3">
+    <div><strong>Costo por cabeza inicial:</strong> ${{ obj.costo_por_cabeza|default:"—"|floatformat:2 }}</div>
+    <div><strong>Costo por kilo recibido:</strong> ${{ obj.costo_por_kilo|default:"—"|floatformat:2 }}</div>
+    <div><strong>Merma tránsito:</strong> {{ obj.merma_transito_cabezas|default:"—" }} cab</div>
+  </div>
+</div>
+{% endblock %}

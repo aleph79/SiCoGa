@@ -252,3 +252,58 @@ class CostoHotelLoteView(CatalogoMixin, DetailView):
             "nombre"
         )
         return ctx
+
+
+import csv  # noqa: E402
+
+from django.http import HttpResponse  # noqa: E402
+
+
+class CierreLoteView(CatalogoMixin, DetailView):
+    """Pantalla consolidada de cierre del lote — KPIs + resumen financiero."""
+
+    model = Lote
+    template_name = "cierre/cierre_lote.html"
+    permission_required = "lotes.view_lote"
+    context_object_name = "obj"
+
+
+class CierreLoteCsvView(CatalogoMixin, DetailView):
+    """Export CSV del resumen de cierre del lote."""
+
+    model = Lote
+    permission_required = "lotes.view_lote"
+
+    def get(self, request, *args, **kwargs):
+        lote = self.get_object()
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = (
+            f'attachment; filename="cierre-{lote.folio}.csv"'
+        )
+        w = csv.writer(response)
+        w.writerow(["Concepto", "Valor"])
+        w.writerow(["Folio", lote.folio])
+        w.writerow(["Corral", lote.corral.clave])
+        w.writerow(["Tipo de ganado", lote.tipo_ganado.nombre])
+        w.writerow(["Fecha inicio", lote.fecha_inicio.isoformat()])
+        w.writerow(["Fecha cierre", lote.fecha_cierre.isoformat()])
+        w.writerow(["Días calendario", lote.dias_calendario])
+        w.writerow(["Cabezas iniciales", lote.cabezas_iniciales])
+        w.writerow(["Cabezas muertas", lote.cabezas_muertas])
+        w.writerow(["Cabezas vendidas", lote.cabezas_vendidas])
+        w.writerow(["Mortalidad %", f"{lote.mortalidad_pct:.2f}"])
+        w.writerow(["Días animal netos", lote.dias_animal_netos])
+        w.writerow(["", ""])
+        w.writerow(["GDP real (kg/d/cab)", f"{lote.gdp_real:.3f}"])
+        w.writerow(["Kg alimento total", lote.kg_alimento_total])
+        w.writerow(["Conversión alimenticia", f"{lote.conversion_alimenticia:.2f}"])
+        w.writerow(["", ""])
+        w.writerow(["Costo compra", lote.costo_compra or 0])
+        w.writerow(["Costo alimentación", lote.costo_alimentacion_total])
+        w.writerow(["Costo medicación", lote.costo_medicacion_total])
+        w.writerow(["Costo hotel", lote.costo_hotel_total])
+        w.writerow(["COSTO TOTAL", lote.costo_total])
+        w.writerow(["Ingreso ventas", lote.ingreso_total_ventas])
+        w.writerow(["MARGEN BRUTO", lote.margen_bruto])
+        w.writerow(["Margen %", f"{lote.margen_pct:.2f}"])
+        return response

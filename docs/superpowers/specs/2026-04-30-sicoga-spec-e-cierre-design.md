@@ -1,13 +1,14 @@
 # SiCoGa — Spec E: Cierre del Lote (Diseño)
 
 **Fecha:** 2026-04-30
-**Estado:**
-- 🚧 **DRAFT** general
-- ✅ **E.1 Muertes y Ventas — ENTREGADO 2026-04-30**
-- ✅ **E.2 Compra / Recepción — ENTREGADO 2026-04-30**
-- ✅ **E.3 Alimentación y Medicación — ENTREGADO 2026-04-30**
-- ✅ **E.4 Costo Hotel — ENTREGADO 2026-04-30** (218 tests · componentes configurables + cálculo de días-animal-netos + vista por lote)
-- ⏸ E.5 (Cierre consolidado) pendiente
+**Estado:** ✅ **ENTREGADO — Spec E completo (5 sub-specs)**
+- E.1 Muertes y Ventas (2026-04-30)
+- E.2 Compra / Recepción (2026-04-30)
+- E.3 Alimentación y Medicación (2026-04-30)
+- E.4 Costo Hotel (2026-04-30)
+- E.5 Cierre consolidado (2026-05-01) — pantalla `/cierre/lotes/<pk>/cierre/` con KPIs (GDP real, conversión alimenticia, mortalidad %, margen %), resumen financiero (compra + alim + medi + hotel vs ingresos) y export CSV.
+
+229 tests, cobertura ≥85% en `apps.cierre`.
 **Cliente:** Chamizal Camperos
 **Spec previo:** [D — Submódulos Operativos](./2026-04-30-sicoga-spec-d-submodulos-operativos-design.md) ✅ entregado
 

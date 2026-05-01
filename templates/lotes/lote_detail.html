@@ -7,6 +7,7 @@
     {% if perms.lotes.change_lote %}<a href="{% url 'lotes:lote_update' obj.pk %}" class="btn bp">Editar</a>{% endif %}
     {% if perms.lotes.change_lote %}<a href="{% url 'cierre:compra_lote' obj.pk %}" class="btn bo">🛒 Compra/Recepción</a>{% endif %}
     <a href="{% url 'cierre:costo_hotel_lote' obj.pk %}" class="btn bo">🏨 Costo Hotel</a>
+    <a href="{% url 'cierre:cierre_lote' obj.pk %}" class="btn ba">📊 Cierre del lote</a>
     {% if perms.lotes.add_lotefusion and obj.activo %}<a href="{% url 'lotes:lote_fusionar' obj.pk %}" class="btn bo">Fusionar otro lote en éste</a>{% endif %}
     <a href="{% url 'lotes:lote_list' %}" class="btn bo">Volver</a>
   </div>
