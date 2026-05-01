@@ -1,22 +1,64 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Iniciar sesión{% endblock %}
 {% block content %}
-<div class="ph"><div><div class="ptitle">Iniciar sesión</div></div></div>
-<div class="card" style="max-width:360px;">
-  <form method="post">
-    {% csrf_token %}
-    {% if form.non_field_errors %}
-      <div class="ai err" style="margin-bottom:10px;">{{ form.non_field_errors }}</div>
-    {% endif %}
-    <div style="margin-bottom:12px;">
-      <label class="klbl">Usuario</label>
-      <input class="input" type="text" name="username" required style="width:100%;padding:8px;">
+<div class="auth-card">
+
+  <section class="auth-hero">
+    <img src="{% static 'img/sicoga_logo.png' %}" alt="SiCoGa — Sistema Integral de Gestión Ganadera" class="auth-logo">
+    <div class="auth-title">
+      <span class="accent">Sistema Integral</span><br>de Gestión Ganadera
     </div>
-    <div style="margin-bottom:12px;">
-      <label class="klbl">Contraseña</label>
-      <input class="input" type="password" name="password" required style="width:100%;padding:8px;">
+    <div class="auth-tag">Confianza · Control · Productividad · Crecimiento</div>
+
+    <p class="auth-pitch">
+      Adiós a los Excels dispersos. SiCoGa convierte la operación de tu rancho en
+      <strong>datos vivos en tiempo real</strong>: reimplantes, corrales, cierre de lotes y
+      proyecciones, todo en una sola plataforma.
+    </p>
+
+    <ul class="auth-bullets">
+      <li><strong>Disponibilidad inteligente.</strong> Corrales, lotes y proyecciones siempre al día.</li>
+      <li><strong>Cierre operativo.</strong> Costos, mortandad y ventas consolidadas por lote.</li>
+      <li><strong>Dashboard ejecutivo.</strong> El pulso del rancho en una sola pantalla.</li>
+    </ul>
+
+    <div class="auth-pillars">
+      <span>Confianza</span>
+      <span>Control</span>
+      <span>Productividad</span>
+      <span>Crecimiento</span>
     </div>
-    <button type="submit" class="btn bp">Entrar</button>
-  </form>
+  </section>
+
+  <section class="auth-form">
+    <div class="auth-form-title">Acceso al sistema</div>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="ai err" style="margin-bottom:12px;">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <div class="fg">
+        <label for="id_username">Usuario</label>
+        <input id="id_username" type="text" name="username" autocomplete="username"
+               autofocus required>
+      </div>
+
+      <div class="fg">
+        <label for="id_password">Contraseña</label>
+        <input id="id_password" type="password" name="password" autocomplete="current-password" required>
+      </div>
+
+      <button type="submit" class="btn-submit">Entrar a SiCoGa</button>
+
+      <p class="auth-foot">
+        Plataforma diseñada por <strong>SIWEB</strong> para Chamizal Camperos<br>
+        Folio 321 · Decisiones con datos, no con corazonadas.
+      </p>
+    </form>
+  </section>
+
 </div>
 {% endblock %}

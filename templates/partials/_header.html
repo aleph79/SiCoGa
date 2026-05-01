@@ -1,6 +1,10 @@
 {% load static %}
 <header>
-  <div class="logo">SiCoGa <span>SIWEB</span></div>
+  <a href="/" class="brand-link" aria-label="SiCoGa - Inicio">
+    <img src="{% static 'img/sicoga_isotipo.png' %}" class="brand-iso" alt="">
+    <span class="brand-word">SiCoGa</span>
+    <span class="brand-tag">SIWEB</span>
+  </a>
   <div class="sem">Semana actual: {% now "W" %} / {% now "Y" %}</div>
   <div class="hdr-r">
     {% if user.is_authenticated %}
